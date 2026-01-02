@@ -3,9 +3,11 @@ import 'home_screen.dart';
 import 'list_screen.dart';
 import 'settings_screen.dart';
 import 'items_dictionary_screen.dart';
+import 'welcome_screen.dart';
 import 'place.dart';
 
 class AppRoutes {
+  static const String welcome = '/welcome';
   static const String home = '/';
   static const String list = '/list';
   static const String settings = '/settings';
@@ -13,6 +15,9 @@ class AppRoutes {
 
   static Route<dynamic> generateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
+      case welcome:
+        return MaterialPageRoute(builder: (_) => const WelcomeScreen());
+
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
 
