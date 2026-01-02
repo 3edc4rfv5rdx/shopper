@@ -160,14 +160,26 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     final confirmed = await showConfirmDialog(
       context,
       'Delete Item',
-      'Are you sure you want to delete "${item.name}"? This will not affect existing shopping lists.',
+      'Are you sure you want to delete "${item.name}" from dictionary? Items in shopping lists will be converted to manual entries.',
     );
 
     if (confirmed) {
+      // First, convert all list items using this item to manual entries
+      final database = await db.database;
+      await database.rawUpdate('''
+        UPDATE lists
+        SET
+          name = (SELECT name FROM items WHERE items.id = lists.item_id),
+          unit = (SELECT unit FROM items WHERE items.id = lists.item_id),
+          item_id = NULL
+        WHERE item_id = ?
+      ''', [item.id]);
+
+      // Then delete the item from dictionary
       await db.deleteItem(item.id!);
       loadItems();
       if (mounted) {
-        showMessage(context, 'Item deleted');
+        showMessage(context, 'Item deleted from dictionary');
       }
     }
   }

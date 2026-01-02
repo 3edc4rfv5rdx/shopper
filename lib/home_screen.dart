@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database.dart';
 import 'place.dart';
 import 'globals.dart';
@@ -150,10 +151,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> exitApp() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      'Exit',
+      'Exit the application?',
+    );
+
+    if (confirmed) {
+      await db.vacuum();
+      SystemNavigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: exitApp,
+          tooltip: 'Exit',
+        ),
         title: const Text('Where are we going?'),
         actions: [
           IconButton(
