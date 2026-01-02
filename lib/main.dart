@@ -5,9 +5,29 @@ import 'package:path/path.dart';
 import 'routes.dart';
 import 'home_screen.dart';
 import 'welcome_screen.dart';
+import 'database.dart';
+import 'globals.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load saved language if database exists
+  final dbPath = await getDatabasesPath();
+  final path = join(dbPath, 'shopper.db');
+  final dbExists = await File(path).exists();
+
+  if (dbExists) {
+    try {
+      final db = DatabaseHelper.instance;
+      final savedLang = await db.getSetting('language');
+      if (savedLang != null) {
+        await readLocale(savedLang);
+      }
+    } catch (e) {
+      debugPrint('Error loading language: $e');
+    }
+  }
+
   runApp(const ShopperApp());
 }
 

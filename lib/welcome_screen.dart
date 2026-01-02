@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'database.dart';
 import 'home_screen.dart';
+import 'globals.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -14,22 +15,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   String selectedLanguage = 'en';
   String selectedTheme = 'system';
 
-  final languages = {
-    'en': 'English',
-    'ru': 'Русский',
-    'ua': 'Українська',
-  };
-
-  final themes = {
-    'light': 'Light',
-    'dark': 'Dark',
-    'system': 'System',
+  Map<String, String> get themes => {
+    'light': lw('Light'),
+    'dark': lw('Dark'),
+    'system': lw('System'),
   };
 
   Future<void> saveAndContinue() async {
     await db.setSetting('language', selectedLanguage);
     await db.setSetting('theme', selectedTheme);
     await db.setSetting('onboarding_completed', 'true');
+
+    // Load localizations for selected language
+    await readLocale(selectedLanguage);
 
     if (mounted) {
       Navigator.pushReplacement(
@@ -55,18 +53,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 color: Colors.blue,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Welcome to Shopper',
-                style: TextStyle(
+              Text(
+                lw('Welcome to Shopper'),
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Let\'s set up your preferences',
-                style: TextStyle(
+              Text(
+                lw('Let\'s set up your preferences'),
+                style: const TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
                 ),
@@ -75,15 +73,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const SizedBox(height: 32),
 
               // Language selection
-              const Text(
-                'Language',
-                style: TextStyle(
+              Text(
+                lw('Language'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              ...languages.entries.map((entry) => RadioListTile<String>(
+              ...langNames.entries.map((entry) => RadioListTile<String>(
                     title: Text(entry.value),
                     value: entry.key,
                     groupValue: selectedLanguage,
@@ -106,9 +104,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const SizedBox(height: 24),
 
               // Theme selection
-              const Text(
-                'Theme',
-                style: TextStyle(
+              Text(
+                lw('Theme'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -146,9 +144,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text(
-                  'Get Started',
-                  style: TextStyle(fontSize: 18),
+                child: Text(
+                  lw('Get Started'),
+                  style: const TextStyle(fontSize: 18),
                 ),
               ),
             ],
