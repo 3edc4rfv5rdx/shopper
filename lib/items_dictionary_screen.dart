@@ -59,24 +59,24 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Item'),
+        title: Text(lw('Add Item')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Item name',
-                hintText: 'e.g. Milk, Bread',
+              decoration: InputDecoration(
+                labelText: lw('Item name'),
+                hintText: lw('e.g. Milk, Bread'),
               ),
               autofocus: true,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: unitController,
-              decoration: const InputDecoration(
-                labelText: 'Unit',
-                hintText: 'e.g. kg, pcs, liter',
+              decoration: InputDecoration(
+                labelText: lw('Unit'),
+                hintText: lw('e.g. kg, pcs, liter'),
               ),
             ),
           ],
@@ -84,11 +84,11 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(lw('Cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Add'),
+            child: Text(lw('Add')),
           ),
         ],
       ),
@@ -102,7 +102,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       await db.insertItem(newItem);
       loadItems();
       if (mounted) {
-        showMessage(context, 'Item added to dictionary');
+        showMessage(context, lw('Item added to dictionary'));
       }
     }
   }
@@ -114,30 +114,30 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Item'),
+        title: Text(lw('Edit Item')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Item name'),
+              decoration: InputDecoration(labelText: lw('Item name')),
               autofocus: true,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: unitController,
-              decoration: const InputDecoration(labelText: 'Unit'),
+              decoration: InputDecoration(labelText: lw('Unit')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(lw('Cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Save'),
+            child: Text(lw('Save')),
           ),
         ],
       ),
@@ -151,7 +151,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       await db.updateItem(updatedItem);
       loadItems();
       if (mounted) {
-        showMessage(context, 'Item updated');
+        showMessage(context, lw('Item updated'));
       }
     }
   }
@@ -159,8 +159,8 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
   Future<void> deleteItem(Item item) async {
     final confirmed = await showConfirmDialog(
       context,
-      'Delete Item',
-      'Are you sure you want to delete "${item.name}" from dictionary? Items in shopping lists will be converted to manual entries.',
+      lw('Delete Item'),
+      lw('Are you sure you want to delete "%s" from dictionary? Items in shopping lists will be converted to manual entries.').replaceAll('%s', item.name),
     );
 
     if (confirmed) {
@@ -179,7 +179,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       await db.deleteItem(item.id!);
       loadItems();
       if (mounted) {
-        showMessage(context, 'Item deleted from dictionary');
+        showMessage(context, lw('Item deleted from dictionary'));
       }
     }
   }
@@ -188,7 +188,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Items Dictionary'),
+        title: Text(lw('Items Dictionary')),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -196,7 +196,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: 'Search items...',
+                hintText: lw('Search items...'),
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -215,8 +215,8 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
               ? Center(
                   child: Text(
                     searchController.text.isEmpty
-                        ? 'No items in dictionary yet.\nAdd one using the + button.'
-                        : 'No items found for "${searchController.text}"',
+                        ? lw('No items in dictionary yet.\\nAdd one using the + button.')
+                        : '${lw('No items found for')} "${searchController.text}"',
                     textAlign: TextAlign.center,
                   ),
                 )

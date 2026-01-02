@@ -36,23 +36,23 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Place'),
+        title: Text(lw('Add Place')),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Place name',
-            hintText: 'e.g. Supermarket, Market, etc.',
+          decoration: InputDecoration(
+            labelText: lw('Place name'),
+            hintText: lw('e.g. Supermarket, Market, etc.'),
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(lw('Cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Add'),
+            child: Text(lw('Add')),
           ),
         ],
       ),
@@ -73,20 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Place'),
+        title: Text(lw('Edit Place')),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(labelText: 'Place name'),
+          decoration: InputDecoration(labelText: lw('Place name')),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(lw('Cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Save'),
+            child: Text(lw('Save')),
           ),
         ],
       ),
@@ -102,8 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> deletePlace(Place place) async {
     final confirmed = await showConfirmDialog(
       context,
-      'Delete Place',
-      'Are you sure you want to delete "${place.name}"?',
+      lw('Delete Place'),
+      '${lw('Are you sure you want to delete')} "${place.name}"?',
     );
 
     if (confirmed) {
@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.list),
-            title: const Text('List'),
+            title: Text(lw('List')),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.edit),
-            title: const Text('Edit'),
+            title: Text(lw('Edit')),
             onTap: () {
               Navigator.pop(context);
               editPlace(place);
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.delete),
-            title: const Text('Delete'),
+            title: Text(lw('Delete')),
             onTap: () {
               Navigator.pop(context);
               deletePlace(place);
@@ -154,8 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> exitApp() async {
     final confirmed = await showConfirmDialog(
       context,
-      'Exit',
-      'Exit the application?',
+      lw('Exit'),
+      lw('Exit the application?'),
     );
 
     if (confirmed) {
@@ -171,9 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: exitApp,
-          tooltip: 'Exit',
+          tooltip: lw('Exit'),
         ),
-        title: const Text('Where are we going?'),
+        title: Text(lw('Where are we going?')),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -186,8 +186,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : places.isEmpty
-              ? const Center(
-                  child: Text('No places yet. Add one using the + button.'),
+              ? Center(
+                  child: Text(lw('No places yet. Add one using the + button.')),
                 )
               : ReorderableListView.builder(
                   itemCount: places.length,

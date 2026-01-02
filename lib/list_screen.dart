@@ -55,8 +55,8 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> deleteItem(ListItem item) async {
     final confirmed = await showConfirmDialog(
       context,
-      'Delete Item',
-      'Are you sure you want to delete "${item.displayName}"?',
+      lw('Delete Item'),
+      '${lw('Are you sure you want to delete')} "${item.displayName}"?',
     );
 
     if (confirmed) {
@@ -68,8 +68,8 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> deletePurchased() async {
     final confirmed = await showConfirmDialog(
       context,
-      'Clear Purchased',
-      'Delete all purchased items from this list?',
+      lw('Clear Purchased'),
+      lw('Delete all purchased items from this list?'),
     );
 
     if (confirmed) {
@@ -80,7 +80,7 @@ class _ListScreenState extends State<ListScreen> {
 
   Future<void> addToItemsDictionary(ListItem listItem) async {
     if (listItem.itemId != null) {
-      showMessage(context, 'Item is already in dictionary');
+      showMessage(context, lw('Item is already in dictionary'));
       return;
     }
 
@@ -98,7 +98,7 @@ class _ListScreenState extends State<ListScreen> {
     );
     await db.updateListItem(updated);
     loadListItems();
-    showMessage(context, 'Added to items dictionary');
+    showMessage(context, lw('Added to items dictionary'));
   }
 
   @override
@@ -114,24 +114,24 @@ class _ListScreenState extends State<ListScreen> {
             IconButton(
               icon: const Icon(Icons.delete_sweep),
               onPressed: deletePurchased,
-              tooltip: 'Clear purchased',
+              tooltip: lw('Clear purchased'),
             ),
         ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : listItems.isEmpty
-              ? const Center(
-                  child: Text('No items yet. Add one using the + button.'),
+              ? Center(
+                  child: Text(lw('No items yet. Add one using the + button.')),
                 )
               : ListView(
                   children: [
                     if (unpurchased.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          'To Buy',
-                          style: TextStyle(
+                          lw('To Buy'),
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -170,7 +170,7 @@ class _ListScreenState extends State<ListScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.save_alt),
                                     onPressed: () => addToItemsDictionary(item),
-                                    tooltip: 'Add to dictionary',
+                                    tooltip: lw('Add to dictionary'),
                                   ),
                                 const Icon(Icons.drag_handle),
                               ],
@@ -181,11 +181,11 @@ class _ListScreenState extends State<ListScreen> {
                       ),
                     ],
                     if (purchased.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          'Purchased',
-                          style: TextStyle(
+                          lw('Purchased'),
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -298,7 +298,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Item'),
+      title: Text(lw('Add Item')),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -306,9 +306,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Item name',
-                hintText: 'Search or enter item name',
+              decoration: InputDecoration(
+                labelText: lw('Item name'),
+                hintText: lw('Search or enter item name'),
               ),
               autofocus: true,
               onChanged: searchItems,
@@ -344,9 +344,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   flex: 2,
                   child: TextField(
                     controller: quantityController,
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
-                      hintText: 'e.g. 2',
+                    decoration: InputDecoration(
+                      labelText: lw('Quantity'),
+                      hintText: lw('e.g. 2'),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -356,9 +356,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   flex: 3,
                   child: TextField(
                     controller: unitController,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit',
-                      hintText: 'e.g. kg, pcs',
+                    decoration: InputDecoration(
+                      labelText: lw('Unit'),
+                      hintText: lw('e.g. kg, pcs'),
                     ),
                   ),
                 ),
@@ -370,7 +370,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(lw('Cancel')),
         ),
         TextButton(
           onPressed: () {
@@ -386,7 +386,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
               Navigator.pop(context, newItem);
             }
           },
-          child: const Text('Add'),
+          child: Text(lw('Add')),
         ),
       ],
     );

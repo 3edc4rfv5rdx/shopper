@@ -16,15 +16,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(lw('Settings')),
       ),
       body: ListView(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Language',
-              style: TextStyle(
+              lw('Language'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -32,19 +32,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.language),
-            title: const Text('Language'),
+            title: Text(lw('Language')),
             subtitle: const Text('English'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              showMessage(context, 'Language selection - Coming soon');
+              showMessage(context, lw('Language selection - Coming soon'));
             },
           ),
           const Divider(),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Appearance',
-              style: TextStyle(
+              lw('Appearance'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -52,28 +52,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.palette),
-            title: const Text('Theme'),
-            subtitle: const Text('Light'),
+            title: Text(lw('Theme')),
+            subtitle: Text(lw('Light')),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              showMessage(context, 'Theme selection - Coming soon');
+              showMessage(context, lw('Theme selection - Coming soon'));
             },
           ),
           ListTile(
             leading: const Icon(Icons.color_lens),
-            title: const Text('Color Scheme'),
-            subtitle: const Text('Blue'),
+            title: Text(lw('Color Scheme')),
+            subtitle: Text(lw('Blue')),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              showMessage(context, 'Color scheme - Coming soon');
+              showMessage(context, lw('Color scheme - Coming soon'));
             },
           ),
           const Divider(),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Data',
-              style: TextStyle(
+              lw('Data'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -81,8 +81,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.inventory_2),
-            title: const Text('Items Dictionary'),
-            subtitle: const Text('Manage items catalog'),
+            title: Text(lw('Items Dictionary')),
+            subtitle: Text(lw('Manage items catalog')),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.pushNamed(context, '/items-dictionary');
@@ -90,35 +90,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.backup),
-            title: const Text('Backup Database'),
-            subtitle: const Text('Export all data to file'),
+            title: Text(lw('Backup Database')),
+            subtitle: Text(lw('Export all data to file')),
             onTap: () {
-              showMessage(context, 'Backup - Coming soon');
+              showMessage(context, lw('Backup - Coming soon'));
             },
           ),
           ListTile(
             leading: const Icon(Icons.restore),
-            title: const Text('Restore Database'),
-            subtitle: const Text('Import data from file'),
+            title: Text(lw('Restore Database')),
+            subtitle: Text(lw('Import data from file')),
             onTap: () {
-              showMessage(context, 'Restore - Coming soon');
+              showMessage(context, lw('Restore - Coming soon'));
             },
           ),
           const Divider(),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              'About',
-              style: TextStyle(
+              lw('About'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text('Version'),
-            subtitle: Text('1.0.0'),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text(lw('Version')),
+            subtitle: const Text('1.0.0'),
           ),
         ],
       ),
