@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
+
+const String progVersion = '0.1.260102';
+const int buildNumber = 2;
+const String progAuthor = 'Eugen';
+
 // ========== LOCALIZATION ==========
 
 // Path to locales file
