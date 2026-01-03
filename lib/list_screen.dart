@@ -37,7 +37,10 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> addItem() async {
     final result = await showDialog<ListItem>(
       context: context,
-      builder: (context) => AddItemDialog(placeId: widget.place.id!),
+      builder: (context) => AddItemDialog(
+        placeId: widget.place.id!,
+        existingItems: listItems,
+      ),
     );
 
     if (result != null) {
@@ -231,8 +234,13 @@ class _ListScreenState extends State<ListScreen> {
 
 class AddItemDialog extends StatefulWidget {
   final int placeId;
+  final List<ListItem> existingItems;
 
-  const AddItemDialog({super.key, required this.placeId});
+  const AddItemDialog({
+    super.key,
+    required this.placeId,
+    required this.existingItems,
+  });
 
   @override
   State<AddItemDialog> createState() => _AddItemDialogState();
@@ -375,6 +383,21 @@ class _AddItemDialogState extends State<AddItemDialog> {
         TextButton(
           onPressed: () {
             if (nameController.text.isNotEmpty) {
+              // Check for duplicates (case-insensitive)
+              final itemName = nameController.text.trim();
+              final duplicate = widget.existingItems.any((item) =>
+                  item.displayName.toLowerCase() == itemName.toLowerCase());
+
+              if (duplicate) {
+                if (context.mounted) {
+                  showMessage(
+                    context,
+                    '${lw('Item')} "$itemName" ${lw('already exists in this list')}',
+                  );
+                }
+                return;
+              }
+
               final newItem = ListItem(
                 placeId: widget.placeId,
                 itemId: selectedItem?.id,

@@ -34,7 +34,15 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     final data = await db.getItems();
     setState(() {
       items = data;
-      filteredItems = data;
+      // Apply current search filter after loading
+      if (searchController.text.isEmpty) {
+        filteredItems = data;
+      } else {
+        filteredItems = data
+            .where((item) =>
+                item.name.toLowerCase().contains(searchController.text.toLowerCase()))
+            .toList();
+      }
       isLoading = false;
     });
   }
@@ -95,6 +103,21 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     );
 
     if (result == true && nameController.text.isNotEmpty) {
+      // Check for duplicates (case-insensitive)
+      final itemName = nameController.text.trim();
+      final duplicate = items.any((item) =>
+          item.name.toLowerCase() == itemName.toLowerCase());
+
+      if (duplicate) {
+        if (mounted) {
+          showMessage(
+            context,
+            '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
+          );
+        }
+        return;
+      }
+
       final newItem = Item(
         name: nameController.text,
         unit: unitController.text.isEmpty ? null : unitController.text,
