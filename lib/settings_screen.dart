@@ -15,40 +15,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showAboutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.shopping_cart, color: Colors.blue, size: 32),
-            const SizedBox(width: 12),
-            Text(lw('About')),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Shopper',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+      builder: (context) =>
+          AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.shopping_cart, color: Colors.blue, size: 32),
+                const SizedBox(width: 12),
+                Text(lw('About')),
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildInfoRow(lw('Version'), progVersion),
-            const SizedBox(height: 8),
-            _buildInfoRow(lw('Build'), buildNumber.toString()),
-            const SizedBox(height: 8),
-            _buildInfoRow(lw('Author'), progAuthor),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(lw('OK')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Shopper',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildInfoRow(lw('Version'), progVersion),
+                const SizedBox(height: 8),
+                _buildInfoRow(lw('Build'), buildNumber.toString()),
+                const SizedBox(height: 8),
+                _buildInfoRow(lw('Author'), progAuthor),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(lw('OK')),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -81,36 +82,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _showLanguageDialog() async {
     final selectedLang = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lw('Language')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: langNames.entries.map((entry) {
-            final isSelected = currentLocale == entry.key;
-            return RadioListTile<String>(
-              title: Text(entry.value),
-              value: entry.key,
-              groupValue: currentLocale,
-              onChanged: (value) => Navigator.pop(context, value),
-              activeColor: Colors.blue,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-              visualDensity: VisualDensity.compact,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+      builder: (context) =>
+          AlertDialog(
+            title: Text(lw('Language')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: langNames.entries.map((entry) {
+                final isSelected = currentLocale == entry.key;
+                return RadioListTile<String>(
+                  title: Text(entry.value),
+                  value: entry.key,
+                  groupValue: currentLocale,
+                  onChanged: (value) => Navigator.pop(context, value),
+                  activeColor: Colors.blue,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 0),
+                  visualDensity: VisualDensity.compact,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  tileColor: isSelected
+                      ? Colors.blue.withValues(alpha: 0.1)
+                      : null,
+                );
+              }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(lw('Cancel')),
               ),
-              tileColor: isSelected
-                  ? Colors.blue.withValues(alpha: 0.1)
-                  : null,
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(lw('Cancel')),
+            ],
           ),
-        ],
-      ),
     );
 
     if (selectedLang != null && selectedLang != currentLocale) {
