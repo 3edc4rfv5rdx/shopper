@@ -4,3 +4,4 @@
 - add backup dbase, csv
 - add restore dbase, csv
 - change size between strings
+- add version info and show

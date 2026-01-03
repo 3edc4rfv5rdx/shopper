@@ -98,7 +98,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     tileColor: selectedLanguage == entry.key
-                        ? Colors.blue.withOpacity(0.1)
+                        ? Colors.blue.withValues(alpha: 0.1)
                         : null,
                   )),
 
@@ -129,7 +129,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     tileColor: selectedTheme == entry.key
-                        ? Colors.blue.withOpacity(0.1)
+                        ? Colors.blue.withValues(alpha: 0.1)
                         : null,
                   )),
 

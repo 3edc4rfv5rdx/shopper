@@ -39,7 +39,7 @@ class _ListScreenState extends State<ListScreen> {
       context: context,
       builder: (context) => AddItemDialog(
         placeId: widget.place.id!,
-        existingItems: listItems,
+        existingItems: listItems
       ),
     );
 
@@ -83,7 +83,9 @@ class _ListScreenState extends State<ListScreen> {
 
   Future<void> addToItemsDictionary(ListItem listItem) async {
     if (listItem.itemId != null) {
-      showMessage(context, lw('Item is already in dictionary'));
+      if (mounted) {
+        showMessage(context, lw('Item is already in dictionary'));
+      }
       return;
     }
 
@@ -101,7 +103,9 @@ class _ListScreenState extends State<ListScreen> {
     );
     await db.updateListItem(updated);
     loadListItems();
-    showMessage(context, lw('Added to items dictionary'));
+    if (mounted) {
+      showMessage(context, lw('Added to items dictionary'));
+    }
   }
 
   @override
