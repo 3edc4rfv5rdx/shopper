@@ -11,6 +11,88 @@ const String progAuthor = 'Eugen';
 // Forward declaration for app rebuild function
 void Function()? rebuildApp;
 
+// ========== COLOR THEMES ==========
+
+// Path to colors file
+const String colorsFile = 'assets/colors.json';
+
+// Current theme colors (will be set based on selected theme)
+late Color clText;
+late Color clBgrnd;
+late Color clUpBar;
+late Color clFill;
+late Color clSel;
+late Color clMenu;
+
+// Constant colors
+const Color clRed = Colors.red;
+const Color clWhite = Colors.white;
+
+// Loaded themes from JSON
+Map<String, Map<String, String>> loadedThemes = {};
+
+// Current theme name
+String currentTheme = 'Light';
+
+// Convert hex string to Color
+Color hexToColor(String hex) {
+  hex = hex.replaceAll('#', '');
+  if (hex.length == 6) {
+    hex = 'FF$hex'; // Add alpha if not present
+  }
+  return Color(int.parse(hex, radix: 16));
+}
+
+// Load all themes from colors.json
+Future<void> loadThemes() async {
+  try {
+    final jsonString = await rootBundle.loadString(colorsFile);
+    final Map<String, dynamic> themesData = json.decode(jsonString);
+
+    loadedThemes = {};
+    themesData.forEach((themeName, colors) {
+      if (colors is Map) {
+        loadedThemes[themeName] = Map<String, String>.from(colors);
+      }
+    });
+
+    debugPrint('Loaded ${loadedThemes.length} themes: ${loadedThemes.keys.join(', ')}');
+  } catch (e) {
+    debugPrint('Error loading themes: $e');
+    // Fallback to default theme
+    loadedThemes = {
+      'Light': {
+        'text': '#000000',
+        'background': '#F5EFD5',
+        'appBar': '#E6C94C',
+        'fill': '#F9F3E3',
+        'selected': '#FFCC80',
+        'menu': '#ADD8E6',
+      }
+    };
+  }
+}
+
+// Apply selected theme
+void applyTheme(String themeName) {
+  if (!loadedThemes.containsKey(themeName)) {
+    debugPrint('Theme $themeName not found, using Light');
+    themeName = 'Light';
+  }
+
+  final theme = loadedThemes[themeName]!;
+  currentTheme = themeName;
+
+  clText = hexToColor(theme['text'] ?? '#000000');
+  clBgrnd = hexToColor(theme['background'] ?? '#FFFFFF');
+  clUpBar = hexToColor(theme['appBar'] ?? '#2196F3');
+  clFill = hexToColor(theme['fill'] ?? '#FFFFFF');
+  clSel = hexToColor(theme['selected'] ?? '#90CAF9');
+  clMenu = hexToColor(theme['menu'] ?? '#CFD8DC');
+
+  debugPrint('Applied theme: $themeName');
+}
+
 // ========== LOCALIZATION ==========
 
 // Path to locales file

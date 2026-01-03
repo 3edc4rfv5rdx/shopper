@@ -11,10 +11,13 @@ import 'globals.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Load color themes from colors.json
+  await loadThemes();
+
   // Load language names from locales.json
   await loadLanguageNames();
 
-  // Load saved language if database exists
+  // Load saved settings if database exists
   final dbPath = await getDatabasesPath();
   final path = join(dbPath, 'shopper.db');
   final dbExists = await File(path).exists();
@@ -22,13 +25,27 @@ void main() async {
   if (dbExists) {
     try {
       final db = DatabaseHelper.instance;
+
+      // Load saved language
       final savedLang = await db.getSetting('language');
       if (savedLang != null) {
         await readLocale(savedLang);
       }
+
+      // Load and apply saved theme
+      final savedTheme = await db.getSetting('theme');
+      if (savedTheme != null && loadedThemes.containsKey(savedTheme)) {
+        applyTheme(savedTheme);
+      } else {
+        applyTheme('Light'); // Default theme
+      }
     } catch (e) {
-      debugPrint('Error loading language: $e');
+      debugPrint('Error loading settings: $e');
+      applyTheme('Light'); // Default theme on error
     }
+  } else {
+    // First run - apply default theme
+    applyTheme('Light');
   }
 
   runApp(const ShopperApp());
@@ -87,12 +104,22 @@ class _ShopperAppState extends State<ShopperApp> {
           debugShowCheckedModeBanner: false,
           title: 'Shopper',
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            colorScheme: ColorScheme.light(
+              primary: clUpBar,
+              surface: clBgrnd,
+              onPrimary: clText,
+              onSurface: clText,
+            ),
+            scaffoldBackgroundColor: clBgrnd,
+            appBarTheme: AppBarTheme(
+              backgroundColor: clUpBar,
+              foregroundColor: clText,
+            ),
             useMaterial3: true,
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.black,
+                backgroundColor: clUpBar,
+                foregroundColor: clText,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

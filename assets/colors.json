@@ -1,0 +1,34 @@
+{
+  "Light": {
+    "text": "#000000",
+    "background": "#F5EFD5",
+    "appBar": "#E6C94C",
+    "fill": "#F9F3E3",
+    "selected": "#FFCC80",
+    "menu": "#ADD8E6"
+  },
+  "Dark": {
+    "text": "#FFFFFF",
+    "background": "#212121",
+    "appBar": "#424242",
+    "fill": "#303030",
+    "selected": "#616161",
+    "menu": "#263238"
+  },
+  "Blue": {
+    "text": "#000000",
+    "background": "#E3F2FD",
+    "appBar": "#2196F3",
+    "fill": "#BBDEFB",
+    "selected": "#90CAF9",
+    "menu": "#CFD8DC"
+  },
+  "Green": {
+    "text": "#121E0A",
+    "background": "#F3F7ED",
+    "appBar": "#97BA60",
+    "fill": "#FFFFFF",
+    "selected": "#4D4C6B3D",
+    "menu": "#D4E2C6"
+  }
+}
