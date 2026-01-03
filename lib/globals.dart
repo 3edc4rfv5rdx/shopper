@@ -14,12 +14,8 @@ const String progAuthor = 'Eugen';
 // Path to locales file
 const String localesFile = 'assets/locales.json';
 
-// Supported languages with their names
-Map<String, String> langNames = {
-  'en': 'English',
-  'ru': 'Русский',
-  'ua': 'Українська',
-};
+// Supported languages with their names (loaded dynamically from locales.json)
+Map<String, String> langNames = {};
 
 // Translation cache for current language
 Map<String, String> _uiLocale = {};
@@ -38,6 +34,27 @@ String lw(String text) {
     return text;
   }
   return _uiLocale[text] ?? text;
+}
+
+// Load language names from locales file
+Future<void> loadLanguageNames() async {
+  try {
+    final jsonString = await rootBundle.loadString(localesFile);
+    final Map<String, dynamic> allTranslations = json.decode(jsonString);
+
+    // Get language names from _language_name section
+    if (allTranslations.containsKey('_language_name')) {
+      final languageNamesSection = allTranslations['_language_name'];
+      if (languageNamesSection is Map) {
+        langNames = Map<String, String>.from(languageNamesSection);
+        debugPrint('Loaded ${langNames.length} language names: ${langNames.keys.join(', ')}');
+      }
+    }
+  } catch (e) {
+    debugPrint('Error loading language names: $e');
+    // Fallback to default if loading fails
+    langNames = {'en': 'English'};
+  }
 }
 
 // Read localizations from file

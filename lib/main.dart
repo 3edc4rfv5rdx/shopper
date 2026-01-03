@@ -11,6 +11,9 @@ import 'globals.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Load language names from locales.json
+  await loadLanguageNames();
+
   // Load saved language if database exists
   final dbPath = await getDatabasesPath();
   final path = join(dbPath, 'shopper.db');

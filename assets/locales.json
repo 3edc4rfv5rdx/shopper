@@ -1,4 +1,9 @@
 {
+  "_language_name": {
+    "en": "English",
+    "ru": "Русский",
+    "ua": "Українська"
+  },
   "Welcome to Shopper": {
     "ru": "Добро пожаловать в Shopper",
     "ua": "Ласкаво просимо до Shopper"
