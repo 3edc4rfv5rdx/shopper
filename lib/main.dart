@@ -34,8 +34,24 @@ void main() async {
   runApp(const ShopperApp());
 }
 
-class ShopperApp extends StatelessWidget {
+class ShopperApp extends StatefulWidget {
   const ShopperApp({super.key});
+
+  @override
+  State<ShopperApp> createState() => _ShopperAppState();
+}
+
+class _ShopperAppState extends State<ShopperApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Set global rebuild function
+    rebuildApp = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
+  }
 
   Future<bool> _isDatabaseExists() async {
     try {

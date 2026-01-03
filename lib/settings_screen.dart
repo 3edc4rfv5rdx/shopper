@@ -12,6 +12,53 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final db = DatabaseHelper.instance;
 
+  Future<void> _showLanguageDialog() async {
+    final selectedLang = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lw('Language')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: langNames.entries.map((entry) {
+            final isSelected = currentLocale == entry.key;
+            return RadioListTile<String>(
+              title: Text(entry.value),
+              value: entry.key,
+              groupValue: currentLocale,
+              onChanged: (value) => Navigator.pop(context, value),
+              activeColor: Colors.blue,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              visualDensity: VisualDensity.compact,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              tileColor: isSelected
+                  ? Colors.blue.withValues(alpha: 0.1)
+                  : null,
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(lw('Cancel')),
+          ),
+        ],
+      ),
+    );
+
+    if (selectedLang != null && selectedLang != currentLocale) {
+      // Save to database
+      await db.setSetting('language', selectedLang);
+
+      // Load new locale
+      await readLocale(selectedLang);
+
+      // Rebuild the entire app
+      rebuildApp?.call();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,11 +80,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(lw('Language')),
-            subtitle: const Text('English'),
+            subtitle: Text(langNames[currentLocale] ?? 'English'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              showMessage(context, lw('Language selection - Coming soon'));
-            },
+            onTap: _showLanguageDialog,
           ),
           const Divider(),
           Padding(

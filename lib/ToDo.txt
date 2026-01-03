@@ -1,8 +1,8 @@
 + delete languages list, try compose it
-- add select language
++ add select language
+- add version info and show
 - add color themes
+- change size between strings
 - add font size
 - add backup dbase, csv
 - add restore dbase, csv
-- change size between strings
-- add version info and show
