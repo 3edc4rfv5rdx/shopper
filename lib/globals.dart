@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
-// Forward declaration for app rebuild function
-void Function()? rebuildApp;
-
-
 const String progVersion = '0.1.260102';
 const int buildNumber = 3;
 const String progAuthor = 'Eugen';
+
+// Forward declaration for app rebuild function
+void Function()? rebuildApp;
 
 // ========== LOCALIZATION ==========
 

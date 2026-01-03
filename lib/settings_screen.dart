@@ -12,6 +12,72 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final db = DatabaseHelper.instance;
 
+  void _showAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.shopping_cart, color: Colors.blue, size: 32),
+            const SizedBox(width: 12),
+            Text(lw('About')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Shopper',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(lw('Version'), progVersion),
+            const SizedBox(height: 8),
+            _buildInfoRow(lw('Build'), buildNumber.toString()),
+            const SizedBox(height: 8),
+            _buildInfoRow(lw('Author'), progAuthor),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(lw('OK')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            '$label:',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _showLanguageDialog() async {
     final selectedLang = await showDialog<String>(
       context: context,
@@ -163,7 +229,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.info),
             title: Text(lw('Version')),
-            subtitle: const Text('1.0.0'),
+            subtitle: Text(progVersion),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _showAboutDialog,
           ),
         ],
       ),

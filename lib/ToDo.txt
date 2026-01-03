@@ -1,6 +1,6 @@
 + delete languages list, try compose it
 + add select language
-- add version info and show
++ add version info and show
 - add color themes
 - change size between strings
 - add font size
