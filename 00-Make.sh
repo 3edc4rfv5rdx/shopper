@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-COMMENT="first steps"
+COMMENT="add color themes, locales, fix errors"
 #
-GLOBVERS='0.1'
+GLOBVERS='0.2'
 VER=''
 VER_CODE=''
 #
