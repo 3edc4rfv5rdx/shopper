@@ -126,6 +126,13 @@ class _ShopperAppState extends State<ShopperApp> {
                 ),
               ),
             ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: clFill,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
           home: showWelcome ? const WelcomeScreen() : const HomeScreen(),
           onGenerateRoute: AppRoutes.generateRoute,

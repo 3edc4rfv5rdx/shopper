@@ -94,16 +94,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: entry.key,
                   groupValue: currentLocale,
                   onChanged: (value) => Navigator.pop(context, value),
-                  activeColor: Colors.blue,
+                  activeColor: clUpBar,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 0),
                   visualDensity: VisualDensity.compact,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  tileColor: isSelected
-                      ? Colors.blue.withValues(alpha: 0.1)
-                      : null,
+                  tileColor: isSelected ? clSel : null,
                 );
               }).toList(),
             ),
@@ -122,6 +120,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       // Load new locale
       await readLocale(selectedLang);
+
+      // Rebuild the entire app
+      rebuildApp?.call();
+    }
+  }
+
+  Future<void> _showThemeDialog() async {
+    final selectedTheme = await showDialog<String>(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            title: Text(lw('Color Theme')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: loadedThemes.keys.map((themeName) {
+                final isSelected = currentTheme == themeName;
+                return RadioListTile<String>(
+                  title: Text(lw(themeName)),
+                  value: themeName,
+                  groupValue: currentTheme,
+                  onChanged: (value) => Navigator.pop(context, value),
+                  activeColor: clUpBar,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 0),
+                  visualDensity: VisualDensity.compact,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  tileColor: isSelected ? clSel : null,
+                );
+              }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(lw('Cancel')),
+              ),
+            ],
+          ),
+    );
+
+    if (selectedTheme != null && selectedTheme != currentTheme) {
+      // Save to database
+      await db.setSetting('theme', selectedTheme);
+
+      // Apply new theme
+      applyTheme(selectedTheme);
 
       // Rebuild the entire app
       rebuildApp?.call();
@@ -166,21 +211,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.palette),
-            title: Text(lw('Theme')),
-            subtitle: Text(lw('Light')),
+            title: Text(lw('Color Theme')),
+            subtitle: Text(lw(currentTheme)),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              showMessage(context, lw('Theme selection - Coming soon'));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.color_lens),
-            title: Text(lw('Color Scheme')),
-            subtitle: Text(lw('Blue')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              showMessage(context, lw('Color scheme - Coming soon'));
-            },
+            onTap: _showThemeDialog,
           ),
           const Divider(),
           Padding(

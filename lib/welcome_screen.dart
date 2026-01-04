@@ -91,15 +91,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         selectedLanguage = value!;
                       });
                     },
-                    activeColor: Colors.blue,
+                    activeColor: clUpBar,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                     visualDensity: VisualDensity.compact,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    tileColor: selectedLanguage == entry.key
-                        ? Colors.blue.withValues(alpha: 0.1)
-                        : null,
+                    tileColor: selectedLanguage == entry.key ? clSel : null,
                   )),
 
               const SizedBox(height: 24),
@@ -122,15 +120,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         selectedTheme = value!;
                       });
                     },
-                    activeColor: Colors.blue,
+                    activeColor: clUpBar,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                     visualDensity: VisualDensity.compact,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    tileColor: selectedTheme == entry.key
-                        ? Colors.blue.withValues(alpha: 0.1)
-                        : null,
+                    tileColor: selectedTheme == entry.key ? clSel : null,
                   )),
 
               const SizedBox(height: 32),

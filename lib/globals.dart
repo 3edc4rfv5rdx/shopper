@@ -7,7 +7,6 @@ import 'dart:convert';
 const String progVersion = '0.1.260102';
 const int buildNumber = 3;
 const String progAuthor = 'Eugen';
-
 // Forward declaration for app rebuild function
 void Function()? rebuildApp;
 

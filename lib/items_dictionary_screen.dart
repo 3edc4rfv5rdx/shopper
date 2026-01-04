@@ -221,8 +221,6 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
               decoration: InputDecoration(
                 hintText: lw('Search items...'),
                 prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

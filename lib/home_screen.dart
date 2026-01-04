@@ -115,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void showPlaceContextMenu(Place place) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: clMenu,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
