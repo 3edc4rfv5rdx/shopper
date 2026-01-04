@@ -4,6 +4,8 @@
 + add color themes
 - change size between strings
 + add font size
+- moved strings up/down in lists
+- add menu to place/list on long tap to edit, delete
+- add edit (right) and delete (left) gestures
 - add backup dbase, csv
 - add restore dbase, csv
-- moved strings in lists

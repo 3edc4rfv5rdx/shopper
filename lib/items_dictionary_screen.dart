@@ -3,6 +3,12 @@ import 'database.dart';
 import 'items.dart';
 import 'globals.dart';
 
+// List spacing constants
+const double _searchPadding = 8.0; // padding around search field
+const double _dialogFieldSpacing = 16.0; // spacing between dialog fields
+const double _listItemVerticalPadding = 2.0; // vertical padding for list items
+const double _listItemHorizontalPadding = 16.0; // horizontal padding for list items
+
 class ItemsDictionaryScreen extends StatefulWidget {
   const ItemsDictionaryScreen({super.key});
 
@@ -79,7 +85,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
               ),
               autofocus: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: _dialogFieldSpacing),
             TextField(
               controller: unitController,
               decoration: InputDecoration(
@@ -146,7 +152,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
               decoration: InputDecoration(labelText: lw('Item name')),
               autofocus: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: _dialogFieldSpacing),
             TextField(
               controller: unitController,
               decoration: InputDecoration(labelText: lw('Unit')),
@@ -215,7 +221,12 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(
+              left: _searchPadding,
+              right: _searchPadding,
+              top: _searchPadding,
+              bottom: 4,
+            ),
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
@@ -242,6 +253,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                   ),
                 )
               : ListView.builder(
+                  padding: EdgeInsets.zero,
                   itemCount: filteredItems.length,
                   itemBuilder: (context, index) {
                     final item = filteredItems[index];
@@ -254,6 +266,12 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                         onPressed: () => deleteItem(item),
                       ),
                       onTap: () => editItem(item),
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: _listItemHorizontalPadding,
+                        vertical: _listItemVerticalPadding,
+                      ),
                     );
                   },
                 ),

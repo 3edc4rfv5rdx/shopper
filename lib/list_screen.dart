@@ -5,6 +5,11 @@ import 'list.dart';
 import 'items.dart';
 import 'globals.dart';
 
+// List spacing constants
+const double _sectionPadding = 16.0; // padding around section headers
+const double _itemVerticalSpacing = 8.0; // spacing between dialog fields
+const double _dialogFieldSpacing = 16.0; // spacing between major dialog sections
+
 class ListScreen extends StatefulWidget {
   final Place place;
 
@@ -91,7 +96,7 @@ class _ListScreenState extends State<ListScreen> {
 
     final newItem = Item(
       name: listItem.name!,
-      unit: listItem.unit,
+      unit: (listItem.unit?.trim().isEmpty ?? true) ? null : listItem.unit!.trim(),
     );
     final itemId = await db.insertItem(newItem);
 
@@ -135,7 +140,7 @@ class _ListScreenState extends State<ListScreen> {
                   children: [
                     if (unpurchased.isNotEmpty) ...[
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(_sectionPadding),
                         child: Text(
                           lw('To Buy'),
                           style: const TextStyle(
@@ -189,7 +194,7 @@ class _ListScreenState extends State<ListScreen> {
                     ],
                     if (purchased.isNotEmpty) ...[
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(_sectionPadding),
                         child: Text(
                           lw('Purchased'),
                           style: const TextStyle(
@@ -325,7 +330,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
               autofocus: true,
               onChanged: searchItems,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: _itemVerticalSpacing),
             if (searchResults.isNotEmpty)
               Flexible(
                 child: Container(
@@ -349,7 +354,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   ),
                 ),
               ),
-            const SizedBox(height: 16),
+            const SizedBox(height: _dialogFieldSpacing),
             Row(
               children: [
                 Expanded(
