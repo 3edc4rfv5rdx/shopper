@@ -57,8 +57,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Text(
                 lw('Welcome to Shopper'),
                 style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontSize: fsTitle,
+                  fontWeight: fwBold,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -66,7 +66,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Text(
                 lw('Let\'s set up your preferences'),
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: fsSmall,
                   color: Colors.grey,
                 ),
                 textAlign: TextAlign.center,
@@ -77,8 +77,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Text(
                 lw('Language'),
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontSize: fsNormal,
+                  fontWeight: fwBold,
                 ),
               ),
               const SizedBox(height: 8),
@@ -106,8 +106,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Text(
                 lw('Theme'),
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontSize: fsNormal,
+                  fontWeight: fwBold,
                 ),
               ),
               const SizedBox(height: 8),
@@ -143,7 +143,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 child: Text(
                   lw('Get Started'),
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: fsMedium),
                 ),
               ),
             ],

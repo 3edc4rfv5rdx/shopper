@@ -139,8 +139,8 @@ class _ListScreenState extends State<ListScreen> {
                         child: Text(
                           lw('To Buy'),
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontSize: fsMedium,
+                            fontWeight: fwBold,
                           ),
                         ),
                       ),
@@ -193,8 +193,8 @@ class _ListScreenState extends State<ListScreen> {
                         child: Text(
                           lw('Purchased'),
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontSize: fsMedium,
+                            fontWeight: fwBold,
                           ),
                         ),
                       ),

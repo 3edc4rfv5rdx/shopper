@@ -31,8 +31,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   'Shopper',
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontSize: fsLarge,
+                    fontWeight: fwBold,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -62,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             '$label:',
             style: const TextStyle(
-              fontWeight: FontWeight.w500,
+              fontWeight: fwMedium,
               color: Colors.grey,
             ),
           ),
@@ -71,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             value,
             style: const TextStyle(
-              fontWeight: FontWeight.w400,
+              fontWeight: fwNormal,
             ),
           ),
         ),
@@ -186,8 +186,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               lw('Language'),
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: fsMedium,
+                fontWeight: fwBold,
               ),
             ),
           ),
@@ -204,8 +204,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               lw('Appearance'),
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: fsMedium,
+                fontWeight: fwBold,
               ),
             ),
           ),
@@ -222,8 +222,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               lw('Data'),
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: fsMedium,
+                fontWeight: fwBold,
               ),
             ),
           ),
@@ -258,8 +258,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               lw('About'),
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: fsMedium,
+                fontWeight: fwBold,
               ),
             ),
           ),
