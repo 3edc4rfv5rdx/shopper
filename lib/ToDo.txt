@@ -1,11 +1,16 @@
+===TODO:
 + delete languages list, try compose it
 + add select language
 + add version info and show
 + add color themes
-- change size between strings
++ change size between strings (dict only)
 + add font size
 - moved strings up/down in lists
 - add menu to place/list on long tap to edit, delete
 - add edit (right) and delete (left) gestures
 - add backup dbase, csv
 - add restore dbase, csv
+- if add item to dict, change first char to CAPS
+
+===ERRORS:
++ in dict: if empty, not translated empty message

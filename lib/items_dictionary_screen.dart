@@ -247,7 +247,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
               ? Center(
                   child: Text(
                     searchController.text.isEmpty
-                        ? lw('No items in dictionary yet.\\nAdd one using the + button.')
+                        ? lw('No items in dictionary yet. Add one using the + button.')
                         : '${lw('No items found for')} "${searchController.text}"',
                     textAlign: TextAlign.center,
                   ),
