@@ -137,6 +137,16 @@ class DatabaseHelper {
     await batch.commit(noResult: true);
   }
 
+  Future<int> getUnpurchasedItemsCount(int placeId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT COUNT(*) as count
+      FROM lists
+      WHERE place_id = ? AND is_purchased = 0
+    ''', [placeId]);
+    return result.first['count'] as int;
+  }
+
   // ========== ITEMS CRUD (dictionary) ==========
 
   Future<int> insertItem(Item item) async {

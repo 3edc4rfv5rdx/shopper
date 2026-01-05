@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final db = DatabaseHelper.instance;
   List<Place> places = [];
+  Set<int> placesWithUnpurchased = {};
   bool isLoading = true;
 
   @override
@@ -25,8 +26,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> loadPlaces() async {
     setState(() => isLoading = true);
     final data = await db.getPlaces();
+
+    // Load unpurchased counts for all places
+    final Set<int> hasUnpurchased = {};
+    for (final place in data) {
+      final count = await db.getUnpurchasedItemsCount(place.id!);
+      if (count > 0) {
+        hasUnpurchased.add(place.id!);
+      }
+    }
+
     setState(() {
       places = data;
+      placesWithUnpurchased = hasUnpurchased;
       isLoading = false;
     });
   }
@@ -122,13 +134,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: const Icon(Icons.list),
             title: Text(lw('List')),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.pushNamed(
+              await Navigator.pushNamed(
                 context,
                 '/list',
                 arguments: place,
               );
+              loadPlaces();
             },
           ),
           ListTile(
@@ -205,20 +218,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   itemBuilder: (context, index) {
                     final place = places[index];
+                    final hasUnpurchased = placesWithUnpurchased.contains(place.id);
                     return ListTile(
                       key: ValueKey(place.id),
-                      title: Text(place.name),
+                      title: Text(
+                        place.name,
+                        style: TextStyle(
+                          fontWeight: hasUnpurchased ? fwBold : fwNormal,
+                          fontSize: hasUnpurchased ? fsMedium : fsNormal,
+                        ),
+                      ),
                       leading: const Icon(Icons.store),
                       trailing: ReorderableDragStartListener(
                         index: index,
                         child: const Icon(Icons.drag_handle),
                       ),
-                      onTap: () {
-                        Navigator.pushNamed(
+                      onTap: () async {
+                        await Navigator.pushNamed(
                           context,
                           '/list',
                           arguments: place,
                         );
+                        loadPlaces();
                       },
                       onLongPress: () => showPlaceContextMenu(place),
                     );
