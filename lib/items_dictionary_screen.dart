@@ -125,7 +125,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       }
 
       final newItem = Item(
-        name: nameController.text,
+        name: capitalizeFirst(nameController.text.trim()),
         unit: unitController.text.isEmpty ? null : unitController.text,
       );
       await db.insertItem(newItem);

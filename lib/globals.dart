@@ -229,3 +229,9 @@ Future<bool> showConfirmDialog(
   );
   return result ?? false;
 }
+
+// Capitalize first letter of string
+String capitalizeFirst(String text) {
+  if (text.isEmpty) return text;
+  return text[0].toUpperCase() + text.substring(1);
+}

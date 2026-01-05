@@ -95,7 +95,7 @@ class _ListScreenState extends State<ListScreen> {
     }
 
     final newItem = Item(
-      name: listItem.name!,
+      name: capitalizeFirst(listItem.name!.trim()),
       unit: (listItem.unit?.trim().isEmpty ?? true) ? null : listItem.unit!.trim(),
     );
     final itemId = await db.insertItem(newItem);
