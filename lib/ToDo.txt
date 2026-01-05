@@ -8,7 +8,7 @@
 + moved strings up/down in lists
 + moved strings up/down in place/list
 + add menu to place/list on long tap to edit, delete
-- add menu to dict on long tap to edit, delete, remove trash icon
++ add menu to dict on long tap to edit, delete, remove trash icon
 - add edit (right) and delete (left) gestures
 - add backup dbase, csv
 - add restore dbase, csv

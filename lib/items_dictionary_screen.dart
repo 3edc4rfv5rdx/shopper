@@ -214,11 +214,58 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     }
   }
 
+  void showItemContextMenu(Item item) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: clMenu,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: Text(lw('Edit')),
+            onTap: () {
+              Navigator.pop(context);
+              editItem(item);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: Text(lw('Delete')),
+            onTap: () {
+              Navigator.pop(context);
+              deleteItem(item);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> sortAlphabetically() async {
+    setState(() {
+      items.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      filteredItems.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    });
+    await db.updateItemsOrder(items);
+    if (mounted) {
+      showMessage(context, lw('Items sorted alphabetically'));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(lw('Items Dictionary')),
+        actions: [
+          if (items.isNotEmpty && searchController.text.isEmpty)
+            IconButton(
+              icon: const Icon(Icons.sort_by_alpha),
+              onPressed: sortAlphabetically,
+              tooltip: lw('Sort alphabetically'),
+            ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -263,11 +310,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                           leading: const Icon(Icons.inventory_2),
                           title: Text(item.name),
                           subtitle: item.unit != null ? Text(item.unit!) : null,
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => deleteItem(item),
-                          ),
-                          onTap: () => editItem(item),
+                          onLongPress: () => showItemContextMenu(item),
                           dense: true,
                           visualDensity: VisualDensity.compact,
                           contentPadding: EdgeInsets.symmetric(
@@ -300,20 +343,11 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                           leading: const Icon(Icons.inventory_2),
                           title: Text(item.name),
                           subtitle: item.unit != null ? Text(item.unit!) : null,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => deleteItem(item),
-                              ),
-                              ReorderableDragStartListener(
-                                index: index,
-                                child: const Icon(Icons.drag_handle),
-                              ),
-                            ],
+                          trailing: ReorderableDragStartListener(
+                            index: index,
+                            child: const Icon(Icons.drag_handle),
                           ),
-                          onTap: () => editItem(item),
+                          onLongPress: () => showItemContextMenu(item),
                           dense: true,
                           visualDensity: VisualDensity.compact,
                           contentPadding: EdgeInsets.symmetric(
