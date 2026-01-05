@@ -60,6 +60,21 @@ class _ListScreenState extends State<ListScreen> {
     loadListItems();
   }
 
+  Future<void> editItem(ListItem item) async {
+    final result = await showDialog<ListItem>(
+      context: context,
+      builder: (context) => EditItemDialog(
+        item: item,
+        existingItems: listItems,
+      ),
+    );
+
+    if (result != null) {
+      await db.updateListItem(result);
+      loadListItems();
+    }
+  }
+
   Future<void> deleteItem(ListItem item) async {
     final confirmed = await showConfirmDialog(
       context,
@@ -71,6 +86,34 @@ class _ListScreenState extends State<ListScreen> {
       await db.deleteListItem(item.id!);
       loadListItems();
     }
+  }
+
+  void showItemContextMenu(ListItem item) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: clMenu,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: Text(lw('Edit')),
+            onTap: () {
+              Navigator.pop(context);
+              editItem(item);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: Text(lw('Delete')),
+            onTap: () {
+              Navigator.pop(context);
+              deleteItem(item);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> deletePurchased() async {
@@ -165,6 +208,8 @@ class _ListScreenState extends State<ListScreen> {
                             }
                             final item = unpurchased.removeAt(oldIndex);
                             unpurchased.insert(newIndex, item);
+                            // Update main listItems to keep them in sync
+                            listItems = [...unpurchased, ...purchased];
                           });
                           await db.updateListItemsOrder(unpurchased);
                         },
@@ -195,7 +240,7 @@ class _ListScreenState extends State<ListScreen> {
                                 ),
                               ],
                             ),
-                            onLongPress: () => deleteItem(item),
+                            onLongPress: () => showItemContextMenu(item),
                           );
                         },
                       ),
@@ -427,6 +472,198 @@ class _AddItemDialogState extends State<AddItemDialog> {
             }
           },
           child: Text(lw('Add')),
+        ),
+      ],
+    );
+  }
+}
+
+class EditItemDialog extends StatefulWidget {
+  final ListItem item;
+  final List<ListItem> existingItems;
+
+  const EditItemDialog({
+    super.key,
+    required this.item,
+    required this.existingItems,
+  });
+
+  @override
+  State<EditItemDialog> createState() => _EditItemDialogState();
+}
+
+class _EditItemDialogState extends State<EditItemDialog> {
+  final db = DatabaseHelper.instance;
+  final nameController = TextEditingController();
+  final quantityController = TextEditingController();
+  final unitController = TextEditingController();
+  Item? selectedItem;
+  List<Item> searchResults = [];
+  bool isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-populate fields with current values
+    nameController.text = widget.item.displayName;
+    quantityController.text = widget.item.quantity ?? '';
+    unitController.text = widget.item.displayUnit;
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    quantityController.dispose();
+    unitController.dispose();
+    super.dispose();
+  }
+
+  Future<void> searchItems(String query) async {
+    if (query.length > 1) {
+      if (!mounted) return;
+      setState(() => isSearching = true);
+
+      try {
+        final results = await db.searchItems(query);
+        if (mounted) {
+          setState(() {
+            searchResults = results;
+            isSearching = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            searchResults = [];
+            isSearching = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          searchResults = [];
+          isSearching = false;
+        });
+      }
+    }
+  }
+
+  void selectItem(Item item) {
+    setState(() {
+      selectedItem = item;
+      nameController.text = item.name;
+      unitController.text = item.unit ?? '';
+      searchResults = [];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(lw('Edit Item')),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: lw('Item name'),
+                hintText: lw('Search or enter item name'),
+              ),
+              autofocus: true,
+              onChanged: searchItems,
+            ),
+            const SizedBox(height: _itemVerticalSpacing),
+            if (searchResults.isNotEmpty)
+              Flexible(
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 150),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: searchResults.length,
+                    itemBuilder: (context, index) {
+                      final item = searchResults[index];
+                      return ListTile(
+                        title: Text(item.name),
+                        subtitle: item.unit != null ? Text(item.unit!) : null,
+                        dense: true,
+                        onTap: () => selectItem(item),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            const SizedBox(height: _dialogFieldSpacing),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: quantityController,
+                    decoration: InputDecoration(
+                      labelText: lw('Quantity'),
+                      hintText: lw('e.g. 2'),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: unitController,
+                    decoration: InputDecoration(
+                      labelText: lw('Unit'),
+                      hintText: lw('e.g. kg, pcs'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(lw('Cancel')),
+        ),
+        TextButton(
+          onPressed: () {
+            if (nameController.text.isNotEmpty) {
+              // Check for duplicates (excluding current item)
+              final itemName = nameController.text.trim();
+              final duplicate = widget.existingItems.any((item) =>
+                  item.id != widget.item.id &&
+                  item.displayName.toLowerCase() == itemName.toLowerCase());
+
+              if (duplicate) {
+                if (context.mounted) {
+                  showMessage(
+                    context,
+                    '${lw('Item')} "$itemName" ${lw('already exists in this list')}',
+                  );
+                }
+                return;
+              }
+
+              final updatedItem = widget.item.copyWith(
+                itemId: selectedItem?.id,
+                name: selectedItem == null ? nameController.text : null,
+                unit: selectedItem == null ? unitController.text : null,
+                quantity: quantityController.text,
+              );
+              Navigator.pop(context, updatedItem);
+            }
+          },
+          child: Text(lw('Save')),
         ),
       ],
     );

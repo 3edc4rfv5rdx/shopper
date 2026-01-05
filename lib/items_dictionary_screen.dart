@@ -288,6 +288,8 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                           }
                           final item = filteredItems.removeAt(oldIndex);
                           filteredItems.insert(newIndex, item);
+                          // Update items list as well to keep them in sync
+                          items = List.from(filteredItems);
                         });
                         await db.updateItemsOrder(filteredItems);
                       },
