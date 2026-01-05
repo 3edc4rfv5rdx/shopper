@@ -235,3 +235,39 @@ String capitalizeFirst(String text) {
   if (text.isEmpty) return text;
   return text[0].toUpperCase() + text.substring(1);
 }
+
+// Show top menu (replaces bottom sheet with top-aligned menu)
+Future<T?> showTopMenu<T>({
+  required BuildContext context,
+  required List<Widget> items,
+}) async {
+  return showDialog<T>(
+    context: context,
+    builder: (context) {
+      final screenHeight = MediaQuery.of(context).size.height;
+      final maxHeight = screenHeight * 0.67; // 2/3 of screen height
+
+      return Align(
+        alignment: Alignment.topCenter,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            margin: const EdgeInsets.only(top: 80), // Below app bar
+            constraints: BoxConstraints(
+              maxHeight: maxHeight,
+              maxWidth: 400,
+            ),
+            decoration: BoxDecoration(
+              color: clMenu,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: items,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}

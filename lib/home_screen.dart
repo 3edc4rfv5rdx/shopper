@@ -125,43 +125,39 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void showPlaceContextMenu(Place place) {
-    showModalBottomSheet(
+    showTopMenu(
       context: context,
-      backgroundColor: clMenu,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.list),
-            title: Text(lw('List')),
-            onTap: () async {
-              Navigator.pop(context);
-              await Navigator.pushNamed(
-                context,
-                '/list',
-                arguments: place,
-              );
-              loadPlaces();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: Text(lw('Edit')),
-            onTap: () {
-              Navigator.pop(context);
-              editPlace(place);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete),
-            title: Text(lw('Delete')),
-            onTap: () {
-              Navigator.pop(context);
-              deletePlace(place);
-            },
-          ),
-        ],
-      ),
+      items: [
+        ListTile(
+          leading: const Icon(Icons.list),
+          title: Text(lw('List')),
+          onTap: () async {
+            Navigator.pop(context);
+            await Navigator.pushNamed(
+              context,
+              '/list',
+              arguments: place,
+            );
+            loadPlaces();
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.edit),
+          title: Text(lw('Edit')),
+          onTap: () {
+            Navigator.pop(context);
+            editPlace(place);
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.delete),
+          title: Text(lw('Delete')),
+          onTap: () {
+            Navigator.pop(context);
+            deletePlace(place);
+          },
+        ),
+      ],
     );
   }
 

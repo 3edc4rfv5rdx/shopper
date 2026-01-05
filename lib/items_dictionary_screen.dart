@@ -217,30 +217,26 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
   }
 
   void showItemContextMenu(Item item) {
-    showModalBottomSheet(
+    showTopMenu(
       context: context,
-      backgroundColor: clMenu,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: Text(lw('Edit')),
-            onTap: () {
-              Navigator.pop(context);
-              editItem(item);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete),
-            title: Text(lw('Delete')),
-            onTap: () {
-              Navigator.pop(context);
-              deleteItem(item);
-            },
-          ),
-        ],
-      ),
+      items: [
+        ListTile(
+          leading: const Icon(Icons.edit),
+          title: Text(lw('Edit')),
+          onTap: () {
+            Navigator.pop(context);
+            editItem(item);
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.delete),
+          title: Text(lw('Delete')),
+          onTap: () {
+            Navigator.pop(context);
+            deleteItem(item);
+          },
+        ),
+      ],
     );
   }
 

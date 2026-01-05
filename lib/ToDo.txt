@@ -15,7 +15,7 @@
 + if add item to dict, change first char to CAPS
 + mark if there are unpurchased items in the list
 + add setting - confirm exit
-o change menu display location
++ change menu display location
 o add icon
 o add key
 
