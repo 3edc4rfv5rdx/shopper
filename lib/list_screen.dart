@@ -94,9 +94,13 @@ class _ListScreenState extends State<ListScreen> {
       return;
     }
 
+    // Get current items count for sortOrder
+    final allItems = await db.getItems();
+
     final newItem = Item(
       name: capitalizeFirst(listItem.name!.trim()),
       unit: (listItem.unit?.trim().isEmpty ?? true) ? null : listItem.unit!.trim(),
+      sortOrder: allItems.length,
     );
     final itemId = await db.insertItem(newItem);
 

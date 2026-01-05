@@ -127,6 +127,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       final newItem = Item(
         name: capitalizeFirst(nameController.text.trim()),
         unit: unitController.text.isEmpty ? null : unitController.text,
+        sortOrder: items.length,
       );
       await db.insertItem(newItem);
       loadItems();
@@ -252,29 +253,70 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                     textAlign: TextAlign.center,
                   ),
                 )
-              : ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = filteredItems[index];
-                    return ListTile(
-                      leading: const Icon(Icons.inventory_2),
-                      title: Text(item.name),
-                      subtitle: item.unit != null ? Text(item.unit!) : null,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => deleteItem(item),
-                      ),
-                      onTap: () => editItem(item),
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: _listItemHorizontalPadding,
-                        vertical: _listItemVerticalPadding,
-                      ),
-                    );
-                  },
-                ),
+              : searchController.text.isNotEmpty
+                  ? ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        return ListTile(
+                          leading: const Icon(Icons.inventory_2),
+                          title: Text(item.name),
+                          subtitle: item.unit != null ? Text(item.unit!) : null,
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => deleteItem(item),
+                          ),
+                          onTap: () => editItem(item),
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: _listItemHorizontalPadding,
+                            vertical: _listItemVerticalPadding,
+                          ),
+                        );
+                      },
+                    )
+                  : ReorderableListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: filteredItems.length,
+                      onReorder: (oldIndex, newIndex) async {
+                        setState(() {
+                          if (newIndex > oldIndex) {
+                            newIndex -= 1;
+                          }
+                          final item = filteredItems.removeAt(oldIndex);
+                          filteredItems.insert(newIndex, item);
+                        });
+                        await db.updateItemsOrder(filteredItems);
+                      },
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        return ListTile(
+                          key: ValueKey(item.id),
+                          leading: const Icon(Icons.inventory_2),
+                          title: Text(item.name),
+                          subtitle: item.unit != null ? Text(item.unit!) : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => deleteItem(item),
+                              ),
+                              const Icon(Icons.drag_handle),
+                            ],
+                          ),
+                          onTap: () => editItem(item),
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: _listItemHorizontalPadding,
+                            vertical: _listItemVerticalPadding,
+                          ),
+                        );
+                      },
+                    ),
       floatingActionButton: FloatingActionButton(
         onPressed: addItem,
         child: const Icon(Icons.add),

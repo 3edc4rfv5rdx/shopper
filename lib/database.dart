@@ -22,8 +22,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -42,7 +43,8 @@ class DatabaseHelper {
       CREATE TABLE items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        unit TEXT
+        unit TEXT,
+        sort_order INTEGER
       )
     ''');
 
@@ -69,6 +71,13 @@ class DatabaseHelper {
         value TEXT
       )
     ''');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add sort_order column to items table
+      await db.execute('ALTER TABLE items ADD COLUMN sort_order INTEGER');
+    }
   }
 
   // ========== PLACES CRUD ==========
@@ -137,7 +146,7 @@ class DatabaseHelper {
 
   Future<List<Item>> getItems() async {
     final db = await database;
-    final result = await db.query('items', orderBy: 'name ASC');
+    final result = await db.query('items', orderBy: 'sort_order ASC, name ASC');
     return result.map((map) => Item.fromMap(map)).toList();
   }
 
@@ -181,6 +190,20 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<void> updateItemsOrder(List<Item> items) async {
+    final db = await database;
+    final batch = db.batch();
+    for (int i = 0; i < items.length; i++) {
+      batch.update(
+        'items',
+        {'sort_order': i},
+        where: 'id = ?',
+        whereArgs: [items[i].id],
+      );
+    }
+    await batch.commit(noResult: true);
   }
 
   // ========== LISTS CRUD ==========
