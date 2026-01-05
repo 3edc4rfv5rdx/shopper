@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
-const String progVersion = '0.2.260104';
-const int buildNumber = 4;
+const String progVersion = '0.3.260105';
+const int buildNumber = 5;
 const String progAuthor = 'Eugen';
-
+bool xvDebug = true;
 
 // Forward declaration for app rebuild function
 void Function()? rebuildApp;

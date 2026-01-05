@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-COMMENT="add color themes, locales, fix errors"
+COMMENT="fix lists, add menu, other"
 #
-GLOBVERS='0.2'
+GLOBVERS='0.3'
 VER=''
 VER_CODE=''
 #
