@@ -161,3 +161,4 @@ app.*.symbols
 /android/shopper_android.iml
 /shopper.iml
 /analysis_options.yaml
+/Shopper-*.apkx
