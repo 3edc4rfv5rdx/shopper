@@ -14,7 +14,7 @@
 - add restore dbase, csv
 + if add item to dict, change first char to CAPS
 + mark if there are unpurchased items in the list
-- add setting - confirm exit
++ add setting - confirm exit
 
 ===ERRORS:
 + in dict: if empty, not translated empty message

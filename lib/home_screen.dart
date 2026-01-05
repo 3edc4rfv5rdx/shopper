@@ -166,11 +166,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> exitApp() async {
-    final confirmed = await showConfirmDialog(
-      context,
-      lw('Exit'),
-      lw('Exit the application?'),
-    );
+    // Check if confirmation is required
+    final confirmExitSetting = await db.getSetting('confirm_exit');
+    final requireConfirmation = confirmExitSetting != 'false';
+
+    bool confirmed = true;
+    if (requireConfirmation) {
+      confirmed = await showConfirmDialog(
+        context,
+        lw('Exit'),
+        lw('Exit the application?'),
+      );
+    }
 
     if (confirmed) {
       await db.vacuum();

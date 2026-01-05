@@ -11,6 +11,27 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final db = DatabaseHelper.instance;
+  bool confirmExit = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final value = await db.getSetting('confirm_exit');
+    setState(() {
+      confirmExit = value != 'false'; // Default to true if not set
+    });
+  }
+
+  Future<void> _toggleConfirmExit(bool value) async {
+    await db.setSetting('confirm_exit', value.toString());
+    setState(() {
+      confirmExit = value;
+    });
+  }
 
   void _showAboutDialog() {
     showDialog(
@@ -181,33 +202,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              lw('Language'),
-              style: const TextStyle(
-                fontSize: fsMedium,
-                fontWeight: fwBold,
-              ),
-            ),
-          ),
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(lw('Language')),
             subtitle: Text(langNames[currentLocale] ?? 'English'),
             trailing: const Icon(Icons.chevron_right),
             onTap: _showLanguageDialog,
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              lw('Appearance'),
-              style: const TextStyle(
-                fontSize: fsMedium,
-                fontWeight: fwBold,
-              ),
-            ),
           ),
           ListTile(
             leading: const Icon(Icons.palette),
@@ -216,16 +216,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: _showThemeDialog,
           ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              lw('Data'),
-              style: const TextStyle(
-                fontSize: fsMedium,
-                fontWeight: fwBold,
+          ListTile(
+            leading: const Icon(Icons.exit_to_app),
+            title: Text(lw('Confirm on exit')),
+            subtitle: Text(confirmExit ? lw('Ask before exit') : lw('Exit immediately')),
+            trailing: Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                value: confirmExit,
+                onChanged: _toggleConfirmExit,
               ),
             ),
+            onTap: () => _toggleConfirmExit(!confirmExit),
           ),
           ListTile(
             leading: const Icon(Icons.inventory_2),
@@ -251,17 +253,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               showMessage(context, lw('Restore - Coming soon'));
             },
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              lw('About'),
-              style: const TextStyle(
-                fontSize: fsMedium,
-                fontWeight: fwBold,
-              ),
-            ),
           ),
           ListTile(
             leading: const Icon(Icons.info),
