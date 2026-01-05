@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-COMMENT="fix lists, add menu, other"
+COMMENT="backup and restore"
 #
-GLOBVERS='0.3'
+GLOBVERS='0.4'
 VER=''
 VER_CODE=''
 #
