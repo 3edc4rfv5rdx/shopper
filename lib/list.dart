@@ -26,10 +26,16 @@ class ListItem {
   });
 
   // Get display name (from item or manual entry)
-  String get displayName => itemName ?? name ?? '';
+  String get displayName {
+    final displayValue = itemName ?? name ?? '';
+    return displayValue == 'null' ? '' : displayValue;
+  }
 
   // Get display unit (from item or manual entry)
-  String get displayUnit => itemUnit ?? unit ?? '';
+  String get displayUnit {
+    final displayValue = itemUnit ?? unit ?? '';
+    return displayValue == 'null' ? '' : displayValue;
+  }
 
   Map<String, dynamic> toMap() {
     return {

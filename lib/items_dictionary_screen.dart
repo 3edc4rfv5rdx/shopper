@@ -126,7 +126,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
 
       final newItem = Item(
         name: capitalizeFirst(nameController.text.trim()),
-        unit: unitController.text.isEmpty ? null : unitController.text,
+        unit: unitController.text.trim().isEmpty ? null : unitController.text.trim(),
         sortOrder: items.length,
       );
       await db.insertItem(newItem);
@@ -174,9 +174,11 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     );
 
     if (result == true && nameController.text.isNotEmpty) {
-      final updatedItem = item.copyWith(
-        name: nameController.text,
-        unit: unitController.text.isEmpty ? null : unitController.text,
+      final updatedItem = Item(
+        id: item.id,
+        name: nameController.text.trim(),
+        unit: unitController.text.trim().isEmpty ? null : unitController.text.trim(),
+        sortOrder: item.sortOrder,
       );
       await db.updateItem(updatedItem);
       loadItems();

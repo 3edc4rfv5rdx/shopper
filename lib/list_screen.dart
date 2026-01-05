@@ -464,8 +464,12 @@ class _AddItemDialogState extends State<AddItemDialog> {
                 placeId: widget.placeId,
                 itemId: selectedItem?.id,
                 name: selectedItem == null ? nameController.text : null,
-                unit: selectedItem == null ? unitController.text : null,
-                quantity: quantityController.text,
+                unit: selectedItem == null && unitController.text.trim().isNotEmpty
+                    ? unitController.text.trim()
+                    : null,
+                quantity: quantityController.text.trim().isNotEmpty
+                    ? quantityController.text.trim()
+                    : null,
                 sortOrder: 0,
               );
               Navigator.pop(context, newItem);
@@ -654,11 +658,19 @@ class _EditItemDialogState extends State<EditItemDialog> {
                 return;
               }
 
-              final updatedItem = widget.item.copyWith(
+              final updatedItem = ListItem(
+                id: widget.item.id,
+                placeId: widget.item.placeId,
                 itemId: selectedItem?.id,
-                name: selectedItem == null ? nameController.text : null,
-                unit: selectedItem == null ? unitController.text : null,
-                quantity: quantityController.text,
+                name: selectedItem == null ? nameController.text.trim() : null,
+                unit: selectedItem == null && unitController.text.trim().isNotEmpty
+                    ? unitController.text.trim()
+                    : null,
+                quantity: quantityController.text.trim().isNotEmpty
+                    ? quantityController.text.trim()
+                    : null,
+                isPurchased: widget.item.isPurchased,
+                sortOrder: widget.item.sortOrder,
               );
               Navigator.pop(context, updatedItem);
             }

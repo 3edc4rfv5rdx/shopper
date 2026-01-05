@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'database.dart';
 import 'globals.dart';
 
@@ -31,6 +32,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       confirmExit = value;
     });
+  }
+
+  Future<void> _backupDatabase() async {
+    try {
+      final zipPath = await db.backupToCSV();
+      if (mounted) {
+        showMessage(context, '${lw('Backup created')}: $zipPath');
+      }
+    } catch (e) {
+      if (mounted) {
+        showMessage(context, '${lw('Backup failed')}: $e');
+      }
+    }
+  }
+
+  Future<void> _restoreDatabase() async {
+    // Show file picker
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+    );
+
+    if (result == null || result.files.single.path == null) {
+      return;
+    }
+
+    // Confirm restore
+    final confirmed = await showConfirmDialog(
+      context,
+      lw('Restore Database'),
+      lw('This will replace all current data. Continue?'),
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await db.restoreFromCSV(result.files.single.path!);
+      if (mounted) {
+        showMessage(context, lw('Database restored successfully'));
+        // Rebuild app to refresh all data
+        rebuildApp?.call();
+      }
+    } catch (e) {
+      if (mounted) {
+        showMessage(context, '${lw('Restore failed')}: $e');
+      }
+    }
   }
 
   void _showAboutDialog() {
@@ -242,17 +290,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.backup),
             title: Text(lw('Backup Database')),
             subtitle: Text(lw('Export all data to file')),
-            onTap: () {
-              showMessage(context, lw('Backup - Coming soon'));
-            },
+            onTap: _backupDatabase,
           ),
           ListTile(
             leading: const Icon(Icons.restore),
             title: Text(lw('Restore Database')),
             subtitle: Text(lw('Import data from file')),
-            onTap: () {
-              showMessage(context, lw('Restore - Coming soon'));
-            },
+            onTap: _restoreDatabase,
           ),
           ListTile(
             leading: const Icon(Icons.info),

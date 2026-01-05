@@ -1,5 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:io';
+import 'package:archive/archive_io.dart';
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
 import 'place.dart';
 import 'items.dart';
 import 'list.dart';
@@ -333,6 +337,194 @@ class DatabaseHelper {
   Future<void> vacuum() async {
     final db = await database;
     await db.execute('VACUUM');
+  }
+
+  // ========== BACKUP/RESTORE ==========
+
+  Future<String> backupToCSV() async {
+    final db = await database;
+
+    // Get Documents directory
+    final Directory? appDocDir = await getExternalStorageDirectory();
+    if (appDocDir == null) throw Exception('Cannot access storage');
+
+    // Create folder structure: Documents/Shopper/sh-YYYYMMDD/
+    final now = DateTime.now();
+    final dateFolder = 'sh-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final backupRootDir = Directory('${appDocDir.parent.parent.parent.parent.path}/Documents/Shopper');
+    final backupDir = Directory('${backupRootDir.path}/$dateFolder');
+
+    if (!await backupRootDir.exists()) {
+      await backupRootDir.create(recursive: true);
+    }
+    if (!await backupDir.exists()) {
+      await backupDir.create(recursive: true);
+    }
+
+    // Create timestamp for filename
+    final timeStr = '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
+    final zipFileName = 'backup-$timeStr.zip';
+    final zipPath = '${backupDir.path}/$zipFileName';
+
+    // Create temporary directory for CSV files
+    final tempDir = await Directory.systemTemp.createTemp('shopper_backup_');
+
+    try {
+      // Export places
+      final places = await db.query('places', orderBy: 'sort_order ASC');
+      final placesCSV = const ListToCsvConverter().convert([
+        ['id', 'name', 'sort_order'],
+        ...places.map((row) => [row['id'], row['name'], row['sort_order'] ?? ''])
+      ]);
+      await File('${tempDir.path}/places.csv').writeAsString(placesCSV);
+
+      // Export items
+      final items = await db.query('items', orderBy: 'sort_order ASC');
+      final itemsCSV = const ListToCsvConverter().convert([
+        ['id', 'name', 'unit', 'sort_order'],
+        ...items.map((row) => [row['id'], row['name'], row['unit'] ?? '', row['sort_order'] ?? ''])
+      ]);
+      await File('${tempDir.path}/items.csv').writeAsString(itemsCSV);
+
+      // Export lists
+      final lists = await db.query('lists', orderBy: 'place_id ASC, sort_order ASC');
+      final listsCSV = const ListToCsvConverter().convert([
+        ['id', 'place_id', 'item_id', 'name', 'unit', 'quantity', 'is_purchased', 'sort_order'],
+        ...lists.map((row) => [
+          row['id'], row['place_id'], row['item_id'] ?? '', row['name'] ?? '',
+          row['unit'] ?? '', row['quantity'] ?? '', row['is_purchased'], row['sort_order'] ?? ''
+        ])
+      ]);
+      await File('${tempDir.path}/lists.csv').writeAsString(listsCSV);
+
+      // Export settings
+      final settings = await db.query('settings');
+      final settingsCSV = const ListToCsvConverter().convert([
+        ['key', 'value'],
+        ...settings.map((row) => [row['key'], row['value'] ?? ''])
+      ]);
+      await File('${tempDir.path}/settings.csv').writeAsString(settingsCSV);
+
+      // Create ZIP archive
+      final encoder = ZipFileEncoder();
+      encoder.create(zipPath);
+      encoder.addFile(File('${tempDir.path}/places.csv'), 'places.csv');
+      encoder.addFile(File('${tempDir.path}/items.csv'), 'items.csv');
+      encoder.addFile(File('${tempDir.path}/lists.csv'), 'lists.csv');
+      encoder.addFile(File('${tempDir.path}/settings.csv'), 'settings.csv');
+      encoder.close();
+
+      return zipPath;
+    } finally {
+      // Clean up temporary directory
+      await tempDir.delete(recursive: true);
+    }
+  }
+
+  Future<void> restoreFromCSV(String zipPath) async {
+    final db = await database;
+
+    // Create temporary directory for extraction
+    final tempDir = await Directory.systemTemp.createTemp('shopper_restore_');
+
+    try {
+      // Extract ZIP
+      final bytes = await File(zipPath).readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      for (final file in archive) {
+        if (file.isFile) {
+          final data = file.content as List<int>;
+          // Use basename to get just the filename without path
+          final filename = basename(file.name);
+          final outFile = File('${tempDir.path}/$filename');
+          await outFile.create(recursive: true);
+          await outFile.writeAsBytes(data);
+        }
+      }
+
+      // Clear existing data (except settings)
+      await db.delete('lists');
+      await db.delete('items');
+      await db.delete('places');
+
+      // Helper function to parse integer from CSV
+      int? parseIntOrNull(dynamic value) {
+        if (value == null) return null;
+        if (value is int) return value;
+        final str = value.toString().trim();
+        if (str.isEmpty || str == 'null') return null;
+        return int.tryParse(str);
+      }
+
+      // Helper function to parse string from CSV
+      String? parseStringOrNull(dynamic value) {
+        if (value == null) return null;
+        final str = value.toString().trim();
+        if (str.isEmpty || str == 'null') return null;
+        return str;
+      }
+
+      // Import places
+      if (await File('${tempDir.path}/places.csv').exists()) {
+        final placesCSV = await File('${tempDir.path}/places.csv').readAsString();
+        final placesList = const CsvToListConverter().convert(placesCSV);
+        if (placesList.length > 1) {
+          for (int i = 1; i < placesList.length; i++) {
+            final row = placesList[i];
+            await db.insert('places', {
+              'id': parseIntOrNull(row[0])!,
+              'name': row[1].toString(),
+              'sort_order': parseIntOrNull(row[2]) ?? 0,
+            });
+          }
+        }
+      }
+
+      // Import items
+      if (await File('${tempDir.path}/items.csv').exists()) {
+        final itemsCSV = await File('${tempDir.path}/items.csv').readAsString();
+        final itemsList = const CsvToListConverter().convert(itemsCSV);
+        if (itemsList.length > 1) {
+          for (int i = 1; i < itemsList.length; i++) {
+            final row = itemsList[i];
+            await db.insert('items', {
+              'id': parseIntOrNull(row[0])!,
+              'name': row[1].toString(),
+              'unit': parseStringOrNull(row[2]),
+              'sort_order': parseIntOrNull(row[3]) ?? 0,
+            });
+          }
+        }
+      }
+
+      // Import lists
+      if (await File('${tempDir.path}/lists.csv').exists()) {
+        final listsCSV = await File('${tempDir.path}/lists.csv').readAsString();
+        final listsList = const CsvToListConverter().convert(listsCSV);
+        if (listsList.length > 1) {
+          for (int i = 1; i < listsList.length; i++) {
+            final row = listsList[i];
+            await db.insert('lists', {
+              'id': parseIntOrNull(row[0])!,
+              'place_id': parseIntOrNull(row[1])!,
+              'item_id': parseIntOrNull(row[2]),
+              'name': parseStringOrNull(row[3]),
+              'unit': parseStringOrNull(row[4]),
+              'quantity': parseStringOrNull(row[5]),
+              'is_purchased': parseIntOrNull(row[6]) ?? 0,
+              'sort_order': parseIntOrNull(row[7]) ?? 0,
+            });
+          }
+        }
+      }
+
+      // Note: We don't restore settings to preserve user preferences
+
+    } finally {
+      // Clean up temporary directory
+      await tempDir.delete(recursive: true);
+    }
   }
 
   Future<void> close() async {
