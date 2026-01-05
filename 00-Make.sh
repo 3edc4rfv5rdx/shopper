@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-COMMENT="backup and restore"
+COMMENT="swipes, menu to top"
 #
-GLOBVERS='0.4'
+GLOBVERS='0.6'
 VER=''
 VER_CODE=''
 #
