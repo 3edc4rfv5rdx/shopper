@@ -191,6 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(lw('No places yet. Add one using the + button.')),
                 )
               : ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
                   itemCount: places.length,
                   onReorder: (oldIndex, newIndex) async {
                     setState(() {
@@ -208,7 +209,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       key: ValueKey(place.id),
                       title: Text(place.name),
                       leading: const Icon(Icons.store),
-                      trailing: const Icon(Icons.drag_handle),
+                      trailing: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
                       onTap: () {
                         Navigator.pushNamed(
                           context,

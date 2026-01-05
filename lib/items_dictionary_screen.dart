@@ -278,6 +278,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                       },
                     )
                   : ReorderableListView.builder(
+                      buildDefaultDragHandles: false,
                       padding: EdgeInsets.zero,
                       itemCount: filteredItems.length,
                       onReorder: (oldIndex, newIndex) async {
@@ -304,7 +305,10 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                                 icon: const Icon(Icons.delete),
                                 onPressed: () => deleteItem(item),
                               ),
-                              const Icon(Icons.drag_handle),
+                              ReorderableDragStartListener(
+                                index: index,
+                                child: const Icon(Icons.drag_handle),
+                              ),
                             ],
                           ),
                           onTap: () => editItem(item),
