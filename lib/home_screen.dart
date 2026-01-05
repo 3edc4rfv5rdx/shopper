@@ -168,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> exitApp() async {
     // Check if confirmation is required
     final confirmExitSetting = await db.getSetting('confirm_exit');
+    if (!mounted) return;
     final requireConfirmation = confirmExitSetting != 'false';
 
     bool confirmed = true;
@@ -226,29 +227,63 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final place = places[index];
                     final hasUnpurchased = placesWithUnpurchased.contains(place.id);
-                    return ListTile(
+                    return Dismissible(
                       key: ValueKey(place.id),
-                      title: Text(
-                        place.name,
-                        style: TextStyle(
-                          fontWeight: hasUnpurchased ? fwBold : fwNormal,
-                          fontSize: hasUnpurchased ? fsMedium : fsNormal,
-                        ),
+                      background: Container(
+                        color: Colors.blue,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.only(left: 20),
+                        child: const Icon(Icons.edit, color: Colors.white),
                       ),
-                      leading: const Icon(Icons.store),
-                      trailing: ReorderableDragStartListener(
-                        index: index,
-                        child: const Icon(Icons.drag_handle),
+                      secondaryBackground: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
                       ),
-                      onTap: () async {
-                        await Navigator.pushNamed(
-                          context,
-                          '/list',
-                          arguments: place,
-                        );
+                      confirmDismiss: (direction) async {
+                        if (direction == DismissDirection.startToEnd) {
+                          // Swipe right - edit
+                          editPlace(place);
+                          return false;
+                        } else {
+                          // Swipe left - delete with confirmation
+                          return await showConfirmDialog(
+                            context,
+                            lw('Delete Place'),
+                            '${lw('Are you sure you want to delete')} "${place.name}"?',
+                          );
+                        }
+                      },
+                      onDismissed: (direction) {
+                        // Only called if confirmDismiss returns true (delete confirmed)
+                        db.deletePlace(place.id!);
                         loadPlaces();
                       },
-                      onLongPress: () => showPlaceContextMenu(place),
+                      child: ListTile(
+                        key: ValueKey('tile_${place.id}'),
+                        title: Text(
+                          place.name,
+                          style: TextStyle(
+                            fontWeight: hasUnpurchased ? fwBold : fwNormal,
+                            fontSize: hasUnpurchased ? fsMedium : fsNormal,
+                          ),
+                        ),
+                        leading: const Icon(Icons.store),
+                        trailing: ReorderableDragStartListener(
+                          index: index,
+                          child: const Icon(Icons.drag_handle),
+                        ),
+                        onTap: () async {
+                          await Navigator.pushNamed(
+                            context,
+                            '/list',
+                            arguments: place,
+                          );
+                          loadPlaces();
+                        },
+                        onLongPress: () => showPlaceContextMenu(place),
+                      ),
                     );
                   },
                 ),

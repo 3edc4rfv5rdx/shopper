@@ -9,12 +9,15 @@
 + moved strings up/down in place/list
 + add menu to place/list on long tap to edit, delete
 + add menu to dict on long tap to edit, delete, remove trash icon
-- add edit (right) and delete (left) gestures
++ add edit (right) and delete (left) gestures
 + add backup dbase, csv
 + add restore dbase, csv
 + if add item to dict, change first char to CAPS
 + mark if there are unpurchased items in the list
 + add setting - confirm exit
+o change menu display location
+o add icon
+o add key
 
 ===ERRORS:
 + in dict: if empty, not translated empty message

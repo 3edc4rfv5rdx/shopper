@@ -308,16 +308,63 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                       itemCount: filteredItems.length,
                       itemBuilder: (context, index) {
                         final item = filteredItems[index];
-                        return ListTile(
-                          leading: const Icon(Icons.inventory_2),
-                          title: Text(item.name),
-                          subtitle: item.unit != null ? Text(item.unit!) : null,
-                          onLongPress: () => showItemContextMenu(item),
-                          dense: true,
-                          visualDensity: VisualDensity.compact,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: _listItemHorizontalPadding,
-                            vertical: _listItemVerticalPadding,
+                        return Dismissible(
+                          key: ValueKey(item.id),
+                          background: Container(
+                            color: Colors.blue,
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20),
+                            child: const Icon(Icons.edit, color: Colors.white),
+                          ),
+                          secondaryBackground: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          confirmDismiss: (direction) async {
+                            if (direction == DismissDirection.startToEnd) {
+                              // Swipe right - edit
+                              editItem(item);
+                              return false;
+                            } else {
+                              // Swipe left - delete with confirmation
+                              return await showConfirmDialog(
+                                context,
+                                lw('Delete Item'),
+                                lw('Are you sure you want to delete "%s" from dictionary? Items in shopping lists will be converted to manual entries.').replaceAll('%s', item.name),
+                              );
+                            }
+                          },
+                          onDismissed: (direction) async {
+                            // Only called if confirmDismiss returns true (delete confirmed)
+                            final database = await db.database;
+                            await database.rawUpdate('''
+                              UPDATE lists
+                              SET
+                                name = (SELECT name FROM items WHERE items.id = lists.item_id),
+                                unit = (SELECT unit FROM items WHERE items.id = lists.item_id),
+                                item_id = NULL
+                              WHERE item_id = ?
+                            ''', [item.id]);
+                            await db.deleteItem(item.id!);
+                            loadItems();
+                            if (context.mounted) {
+                              showMessage(context, lw('Item deleted from dictionary'));
+                            }
+                          },
+                          child: ListTile(
+                            key: ValueKey('tile_${item.id}'),
+                            leading: const Icon(Icons.inventory_2),
+                            title: Text(item.name),
+                            subtitle: item.unit != null ? Text(item.unit!) : null,
+                            onLongPress: () => showItemContextMenu(item),
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: _listItemHorizontalPadding,
+                              vertical: _listItemVerticalPadding,
+                            ),
                           ),
                         );
                       },
@@ -340,21 +387,67 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                       },
                       itemBuilder: (context, index) {
                         final item = filteredItems[index];
-                        return ListTile(
+                        return Dismissible(
                           key: ValueKey(item.id),
-                          leading: const Icon(Icons.inventory_2),
-                          title: Text(item.name),
-                          subtitle: item.unit != null ? Text(item.unit!) : null,
-                          trailing: ReorderableDragStartListener(
-                            index: index,
-                            child: const Icon(Icons.drag_handle),
+                          background: Container(
+                            color: Colors.blue,
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20),
+                            child: const Icon(Icons.edit, color: Colors.white),
                           ),
-                          onLongPress: () => showItemContextMenu(item),
-                          dense: true,
-                          visualDensity: VisualDensity.compact,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: _listItemHorizontalPadding,
-                            vertical: _listItemVerticalPadding,
+                          secondaryBackground: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          confirmDismiss: (direction) async {
+                            if (direction == DismissDirection.startToEnd) {
+                              // Swipe right - edit
+                              editItem(item);
+                              return false;
+                            } else {
+                              // Swipe left - delete with confirmation
+                              return await showConfirmDialog(
+                                context,
+                                lw('Delete Item'),
+                                lw('Are you sure you want to delete "%s" from dictionary? Items in shopping lists will be converted to manual entries.').replaceAll('%s', item.name),
+                              );
+                            }
+                          },
+                          onDismissed: (direction) async {
+                            // Only called if confirmDismiss returns true (delete confirmed)
+                            final database = await db.database;
+                            await database.rawUpdate('''
+                              UPDATE lists
+                              SET
+                                name = (SELECT name FROM items WHERE items.id = lists.item_id),
+                                unit = (SELECT unit FROM items WHERE items.id = lists.item_id),
+                                item_id = NULL
+                              WHERE item_id = ?
+                            ''', [item.id]);
+                            await db.deleteItem(item.id!);
+                            loadItems();
+                            if (context.mounted) {
+                              showMessage(context, lw('Item deleted from dictionary'));
+                            }
+                          },
+                          child: ListTile(
+                            key: ValueKey('tile_${item.id}'),
+                            leading: const Icon(Icons.inventory_2),
+                            title: Text(item.name),
+                            subtitle: item.unit != null ? Text(item.unit!) : null,
+                            trailing: ReorderableDragStartListener(
+                              index: index,
+                              child: const Icon(Icons.drag_handle),
+                            ),
+                            onLongPress: () => showItemContextMenu(item),
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: _listItemHorizontalPadding,
+                              vertical: _listItemVerticalPadding,
+                            ),
                           ),
                         );
                       },

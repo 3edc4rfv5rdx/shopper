@@ -58,6 +58,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
+    if (!mounted) return;
+
     // Confirm restore
     final confirmed = await showConfirmDialog(
       context,

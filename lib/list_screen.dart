@@ -215,32 +215,66 @@ class _ListScreenState extends State<ListScreen> {
                         },
                         itemBuilder: (context, index) {
                           final item = unpurchased[index];
-                          return ListTile(
+                          return Dismissible(
                             key: ValueKey(item.id),
-                            leading: Checkbox(
-                              value: item.isPurchased,
-                              onChanged: (_) => togglePurchased(item),
+                            background: Container(
+                              color: Colors.blue,
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.only(left: 20),
+                              child: const Icon(Icons.edit, color: Colors.white),
                             ),
-                            title: Text(item.displayName),
-                            subtitle: Text(
-                              '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                            secondaryBackground: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              child: const Icon(Icons.delete, color: Colors.white),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (item.itemId == null)
-                                  IconButton(
-                                    icon: const Icon(Icons.save_alt),
-                                    onPressed: () => addToItemsDictionary(item),
-                                    tooltip: lw('Add to dictionary'),
+                            confirmDismiss: (direction) async {
+                              if (direction == DismissDirection.startToEnd) {
+                                // Swipe right - edit
+                                editItem(item);
+                                return false;
+                              } else {
+                                // Swipe left - delete with confirmation
+                                return await showConfirmDialog(
+                                  context,
+                                  lw('Delete Item'),
+                                  '${lw('Are you sure you want to delete')} "${item.displayName}"?',
+                                );
+                              }
+                            },
+                            onDismissed: (direction) {
+                              // Only called if confirmDismiss returns true (delete confirmed)
+                              db.deleteListItem(item.id!);
+                              loadListItems();
+                            },
+                            child: ListTile(
+                              key: ValueKey('tile_${item.id}'),
+                              leading: Checkbox(
+                                value: item.isPurchased,
+                                onChanged: (_) => togglePurchased(item),
+                              ),
+                              title: Text(item.displayName),
+                              subtitle: Text(
+                                '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (item.itemId == null)
+                                    IconButton(
+                                      icon: const Icon(Icons.save_alt),
+                                      onPressed: () => addToItemsDictionary(item),
+                                      tooltip: lw('Add to dictionary'),
+                                    ),
+                                  ReorderableDragStartListener(
+                                    index: index,
+                                    child: const Icon(Icons.drag_handle),
                                   ),
-                                ReorderableDragStartListener(
-                                  index: index,
-                                  child: const Icon(Icons.drag_handle),
-                                ),
-                              ],
+                                ],
+                              ),
+                              onLongPress: () => showItemContextMenu(item),
                             ),
-                            onLongPress: () => showItemContextMenu(item),
                           );
                         },
                       ),
@@ -262,23 +296,58 @@ class _ListScreenState extends State<ListScreen> {
                         itemCount: purchased.length,
                         itemBuilder: (context, index) {
                           final item = purchased[index];
-                          return ListTile(
-                            leading: Checkbox(
-                              value: item.isPurchased,
-                              onChanged: (_) => togglePurchased(item),
+                          return Dismissible(
+                            key: ValueKey(item.id),
+                            background: Container(
+                              color: Colors.blue,
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.only(left: 20),
+                              child: const Icon(Icons.edit, color: Colors.white),
                             ),
-                            title: Text(
-                              item.displayName,
-                              style: const TextStyle(
-                                decoration: TextDecoration.lineThrough,
+                            secondaryBackground: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              child: const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            confirmDismiss: (direction) async {
+                              if (direction == DismissDirection.startToEnd) {
+                                // Swipe right - edit
+                                editItem(item);
+                                return false;
+                              } else {
+                                // Swipe left - delete with confirmation
+                                return await showConfirmDialog(
+                                  context,
+                                  lw('Delete Item'),
+                                  '${lw('Are you sure you want to delete')} "${item.displayName}"?',
+                                );
+                              }
+                            },
+                            onDismissed: (direction) {
+                              // Only called if confirmDismiss returns true (delete confirmed)
+                              db.deleteListItem(item.id!);
+                              loadListItems();
+                            },
+                            child: ListTile(
+                              key: ValueKey('tile_${item.id}'),
+                              leading: Checkbox(
+                                value: item.isPurchased,
+                                onChanged: (_) => togglePurchased(item),
                               ),
-                            ),
-                            subtitle: Text(
-                              '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => deleteItem(item),
+                              title: Text(
+                                item.displayName,
+                                style: const TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => deleteItem(item),
+                              ),
                             ),
                           );
                         },
