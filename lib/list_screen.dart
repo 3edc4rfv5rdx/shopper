@@ -154,6 +154,7 @@ class _ListScreenState extends State<ListScreen> {
                         ),
                       ),
                       ReorderableListView.builder(
+                        buildDefaultDragHandles: false,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: unpurchased.length,
@@ -188,7 +189,10 @@ class _ListScreenState extends State<ListScreen> {
                                     onPressed: () => addToItemsDictionary(item),
                                     tooltip: lw('Add to dictionary'),
                                   ),
-                                const Icon(Icons.drag_handle),
+                                ReorderableDragStartListener(
+                                  index: index,
+                                  child: const Icon(Icons.drag_handle),
+                                ),
                               ],
                             ),
                             onLongPress: () => deleteItem(item),
