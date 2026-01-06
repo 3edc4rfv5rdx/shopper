@@ -7,9 +7,6 @@
 .buildlog/
 .history
 
-**/android/key.properties
-**/android/app/my-release-key.jks
-
 # Flutter repo-specific
 /bin/cache/
 /bin/internal/bootstrap.bat
