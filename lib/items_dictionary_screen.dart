@@ -70,7 +70,6 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     final nameController = TextEditingController();
     final unitController = TextEditingController();
     List<Item> searchResults = [];
-    bool isSearching = false;
 
     final result = await showDialog<bool>(
       context: context,
@@ -78,24 +77,19 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
         builder: (context, setState) {
           Future<void> searchItems(String query) async {
             if (query.length > 1) {
-              setState(() => isSearching = true);
-
               try {
                 final results = await db.searchItems(query);
                 setState(() {
                   searchResults = results;
-                  isSearching = false;
                 });
               } catch (e) {
                 setState(() {
                   searchResults = [];
-                  isSearching = false;
                 });
               }
             } else {
               setState(() {
                 searchResults = [];
-                isSearching = false;
               });
             }
           }
@@ -451,8 +445,16 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                           child: ListTile(
                             key: ValueKey('tile_${item.id}'),
                             leading: const Icon(Icons.inventory_2),
-                            title: Text(item.name),
-                            subtitle: item.unit != null ? Text(item.unit!) : null,
+                            title: Text(
+                              item.name,
+                              style: const TextStyle(fontSize: fsLarge),
+                            ),
+                            subtitle: item.unit != null
+                                ? Text(
+                                    item.unit!,
+                                    style: const TextStyle(fontSize: fsNormal),
+                                  )
+                                : null,
                             onLongPress: () => showItemContextMenu(item),
                             dense: true,
                             visualDensity: VisualDensity.compact,
@@ -530,8 +532,16 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                           child: ListTile(
                             key: ValueKey('tile_${item.id}'),
                             leading: const Icon(Icons.inventory_2),
-                            title: Text(item.name),
-                            subtitle: item.unit != null ? Text(item.unit!) : null,
+                            title: Text(
+                              item.name,
+                              style: const TextStyle(fontSize: fsLarge),
+                            ),
+                            subtitle: item.unit != null
+                                ? Text(
+                                    item.unit!,
+                                    style: const TextStyle(fontSize: fsNormal),
+                                  )
+                                : null,
                             trailing: ReorderableDragStartListener(
                               index: index,
                               child: const Icon(Icons.drag_handle),

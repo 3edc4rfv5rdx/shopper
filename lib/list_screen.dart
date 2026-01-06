@@ -349,9 +349,13 @@ class _ListScreenState extends State<ListScreen> {
                                 value: item.isPurchased,
                                 onChanged: (_) => togglePurchased(item),
                               ),
-                              title: Text(item.displayName),
+                              title: Text(
+                                item.displayName,
+                                style: const TextStyle(fontSize: fsLarge),
+                              ),
                               subtitle: Text(
                                 '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                                style: const TextStyle(fontSize: fsNormal),
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -433,11 +437,13 @@ class _ListScreenState extends State<ListScreen> {
                               title: Text(
                                 item.displayName,
                                 style: const TextStyle(
+                                  fontSize: fsLarge,
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
                               subtitle: Text(
                                 '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                                style: const TextStyle(fontSize: fsNormal),
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete),

@@ -1,7 +1,7 @@
 ===TODO:
 o make error messages at bottom red and success messages green
 + add clear button to search field in dictionary (<=x)
-o increase font size in lists (dictionary, shopping lists)
++ increase font size in lists (dictionary, shopping lists)
 + change dialog button text to "OK"
 o "receipts" (complex items, separate list, example - salads with ingredients)
 + send list to sms,viber etc
