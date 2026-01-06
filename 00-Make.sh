@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="app icon"
+COMMENT="add release key"
 #
 GLOBVERS='0.7'
 VER=''
