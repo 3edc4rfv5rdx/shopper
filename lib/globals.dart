@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 
 const String progVersion = '0.7.260106';
-const int buildNumber = 11;
+const int buildNumber = 12;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 

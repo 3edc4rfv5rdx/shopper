@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="add lists share "
+COMMENT="fix errors"
 #
 GLOBVERS='0.7'
 VER=''
