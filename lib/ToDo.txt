@@ -1,4 +1,5 @@
 ===TODO:
+o send list to sms,viber etc
 + delete languages list, try compose it
 + add select language
 + add version info and show
@@ -16,8 +17,8 @@
 + mark if there are unpurchased items in the list
 + add setting - confirm exit
 + change menu display location
-o add icon
-o add key
++ add icon
++ add key
 
 ===ERRORS:
 + in dict: if empty, not translated empty message

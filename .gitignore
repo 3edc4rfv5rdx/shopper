@@ -7,7 +7,8 @@
 .buildlog/
 .history
 
-
+**/android/key.properties
+**/android/app/my-release-key.jks
 
 # Flutter repo-specific
 /bin/cache/
@@ -162,3 +163,15 @@ app.*.symbols
 /shopper.iml
 /analysis_options.yaml
 /Shopper-*.apkx
+/android/app/src/main/res/drawable-hdpi/ic_launcher_foreground.png
+/android/app/src/main/res/drawable-mdpi/ic_launcher_foreground.png
+/android/app/src/main/res/drawable-xhdpi/ic_launcher_foreground.png
+/android/app/src/main/res/drawable-xxhdpi/ic_launcher_foreground.png
+/android/app/src/main/res/drawable-xxxhdpi/ic_launcher_foreground.png
+/android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml
+/android/app/src/main/res/mipmap-hdpi/launcher_icon.png
+/android/app/src/main/res/mipmap-mdpi/launcher_icon.png
+/android/app/src/main/res/mipmap-xhdpi/launcher_icon.png
+/android/app/src/main/res/mipmap-xxhdpi/launcher_icon.png
+/android/app/src/main/res/mipmap-xxxhdpi/launcher_icon.png
+/android/app/src/main/res/values/colors.xml
