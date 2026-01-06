@@ -59,13 +59,18 @@ class ShopperApp extends StatefulWidget {
 }
 
 class _ShopperAppState extends State<ShopperApp> {
+  Key _homeKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
     // Set global rebuild function
     rebuildApp = () {
       if (mounted) {
-        setState(() {});
+        setState(() {
+          // Create new key to force HomeScreen rebuild
+          _homeKey = UniqueKey();
+        });
       }
     };
   }
@@ -134,7 +139,7 @@ class _ShopperAppState extends State<ShopperApp> {
               ),
             ),
           ),
-          home: showWelcome ? const WelcomeScreen() : const HomeScreen(),
+          home: showWelcome ? const WelcomeScreen() : HomeScreen(key: _homeKey),
           onGenerateRoute: AppRoutes.generateRoute,
         );
       },

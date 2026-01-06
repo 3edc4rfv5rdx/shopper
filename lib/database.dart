@@ -168,7 +168,7 @@ class DatabaseHelper {
     final db = await database;
     final result = await db.query(
       'items',
-      where: 'name LIKE ?',
+      where: 'LOWER(name) LIKE LOWER(?)',
       whereArgs: ['%$query%'],
       orderBy: 'name ASC',
       limit: 20,
@@ -485,15 +485,27 @@ class DatabaseHelper {
       if (await File('${tempDir.path}/items.csv').exists()) {
         final itemsCSV = await File('${tempDir.path}/items.csv').readAsString();
         final itemsList = const CsvToListConverter().convert(itemsCSV);
+        final importedNames = <String>{}; // Track imported names (case-insensitive)
+
         if (itemsList.length > 1) {
           for (int i = 1; i < itemsList.length; i++) {
             final row = itemsList[i];
+            final itemName = row[1].toString();
+            final itemNameLower = itemName.toLowerCase();
+
+            // Skip duplicates (case-insensitive)
+            if (importedNames.contains(itemNameLower)) {
+              continue;
+            }
+
             await db.insert('items', {
               'id': parseIntOrNull(row[0])!,
-              'name': row[1].toString(),
+              'name': itemName,
               'unit': parseStringOrNull(row[2]),
               'sort_order': parseIntOrNull(row[3]) ?? 0,
             });
+
+            importedNames.add(itemNameLower);
           }
         }
       }

@@ -69,42 +69,114 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
   Future<void> addItem() async {
     final nameController = TextEditingController();
     final unitController = TextEditingController();
+    List<Item> searchResults = [];
+    bool isSearching = false;
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lw('Add Item')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: lw('Item name'),
-                hintText: lw('e.g. Milk, Bread'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          Future<void> searchItems(String query) async {
+            if (query.length > 1) {
+              setState(() => isSearching = true);
+
+              try {
+                final results = await db.searchItems(query);
+                setState(() {
+                  searchResults = results;
+                  isSearching = false;
+                });
+              } catch (e) {
+                setState(() {
+                  searchResults = [];
+                  isSearching = false;
+                });
+              }
+            } else {
+              setState(() {
+                searchResults = [];
+                isSearching = false;
+              });
+            }
+          }
+
+          return AlertDialog(
+            title: Text(lw('Add Item')),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: lw('Item name'),
+                      hintText: lw('e.g. Milk, Bread'),
+                      suffixIcon: nameController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                setState(() {
+                                  nameController.clear();
+                                  searchResults = [];
+                                });
+                              },
+                            )
+                          : null,
+                    ),
+                    autofocus: true,
+                    onChanged: (value) {
+                      setState(() {});
+                      searchItems(value);
+                    },
+                  ),
+                  const SizedBox(height: _dialogFieldSpacing),
+                  if (searchResults.isNotEmpty)
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 150),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: searchResults.length,
+                        itemBuilder: (context, index) {
+                          final item = searchResults[index];
+                          return ListTile(
+                            title: Text(item.name),
+                            subtitle: item.unit != null ? Text(item.unit!) : null,
+                            dense: true,
+                            tileColor: Colors.orange.shade50,
+                            leading: const Icon(Icons.warning, color: Colors.orange, size: 20),
+                          );
+                        },
+                      ),
+                    ),
+                  if (searchResults.isNotEmpty)
+                    const SizedBox(height: _dialogFieldSpacing),
+                  TextField(
+                    controller: unitController,
+                    decoration: InputDecoration(
+                      labelText: lw('Unit'),
+                      hintText: lw('e.g. kg, pcs, liter'),
+                    ),
+                  ),
+                ],
               ),
-              autofocus: true,
             ),
-            const SizedBox(height: _dialogFieldSpacing),
-            TextField(
-              controller: unitController,
-              decoration: InputDecoration(
-                labelText: lw('Unit'),
-                hintText: lw('e.g. kg, pcs, liter'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(lw('Cancel')),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(lw('Cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(lw('Add')),
-          ),
-        ],
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(lw('Add')),
+              ),
+            ],
+          );
+        },
       ),
     );
 
@@ -174,9 +246,25 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     );
 
     if (result == true && nameController.text.isNotEmpty) {
+      // Check for duplicates (case-insensitive), excluding current item
+      final itemName = nameController.text.trim();
+      final duplicate = items.any((existingItem) =>
+          existingItem.id != item.id &&
+          existingItem.name.toLowerCase() == itemName.toLowerCase());
+
+      if (duplicate) {
+        if (mounted) {
+          showMessage(
+            context,
+            '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
+          );
+        }
+        return;
+      }
+
       final updatedItem = Item(
         id: item.id,
-        name: nameController.text.trim(),
+        name: itemName,
         unit: unitController.text.trim().isEmpty ? null : unitController.text.trim(),
         sortOrder: item.sortOrder,
       );
@@ -278,6 +366,17 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
               decoration: InputDecoration(
                 hintText: lw('Search items...'),
                 prefixIcon: const Icon(Icons.search),
+                suffixIcon: searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            searchController.clear();
+                            filterItems('');
+                          });
+                        },
+                      )
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

@@ -1,6 +1,9 @@
 ===TODO:
-o изменить в диалогах текст кнопок на "OK"
-o "receipts"
+o сделать ошибочние сообщения внизу экрана красным а успешные зеленым
++ add clear button to search field in dictionary (<=x)
+o increase font size in lists (dictionary, shopping lists)
+o change dialog button text to "OK"
+o "receipts" (complex items, separate list, example - salads with ingredients)
 + send list to sms,viber etc
 + delete languages list, try compose it
 + add select language
@@ -23,5 +26,7 @@ o "receipts"
 + add key
 
 ===ERRORS:
-o не отображаются записи после restore, rebuild?
++ search doesn't work when entering items
++ duplicates are added to dictionary
++ records don't display after restore, rebuild?
 + in dict: if empty, not translated empty message

@@ -137,8 +137,23 @@ class _ListScreenState extends State<ListScreen> {
     // Get current items count for sortOrder
     final allItems = await db.getItems();
 
+    // Check for duplicates (case-insensitive)
+    final itemName = capitalizeFirst(listItem.name!.trim());
+    final duplicate = allItems.any((item) =>
+        item.name.toLowerCase() == itemName.toLowerCase());
+
+    if (duplicate) {
+      if (mounted) {
+        showMessage(
+          context,
+          '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
+        );
+      }
+      return;
+    }
+
     final newItem = Item(
-      name: capitalizeFirst(listItem.name!.trim()),
+      name: itemName,
       unit: (listItem.unit?.trim().isEmpty ?? true) ? null : listItem.unit!.trim(),
       sortOrder: allItems.length,
     );
