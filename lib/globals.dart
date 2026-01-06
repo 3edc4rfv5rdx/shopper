@@ -230,6 +230,61 @@ Future<bool> showConfirmDialog(
   return result ?? false;
 }
 
+// Show share options dialog
+Future<String?> showShareOptionsDialog(BuildContext context) async {
+  String selectedOption = 'unpurchased'; // Default selection
+
+  return await showDialog<String>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text(lw('Share List')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: Text(lw('Only unpurchased items')),
+              value: 'unpurchased',
+              groupValue: selectedOption,
+              onChanged: (value) => setState(() => selectedOption = value!),
+              activeColor: clUpBar,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              visualDensity: VisualDensity.compact,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              tileColor: selectedOption == 'unpurchased' ? clSel : null,
+            ),
+            RadioListTile<String>(
+              title: Text(lw('All items')),
+              value: 'all',
+              groupValue: selectedOption,
+              onChanged: (value) => setState(() => selectedOption = value!),
+              activeColor: clUpBar,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              visualDensity: VisualDensity.compact,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              tileColor: selectedOption == 'all' ? clSel : null,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(lw('Cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, selectedOption),
+            child: Text(lw('OK')),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 // Capitalize first letter of string
 String capitalizeFirst(String text) {
   if (text.isEmpty) return text;

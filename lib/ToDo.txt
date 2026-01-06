@@ -1,5 +1,7 @@
 ===TODO:
-o send list to sms,viber etc
+o изменить в диалогах текст кнопок на "OK"
+o "receipts"
++ send list to sms,viber etc
 + delete languages list, try compose it
 + add select language
 + add version info and show
@@ -21,4 +23,5 @@ o send list to sms,viber etc
 + add key
 
 ===ERRORS:
+o не отображаются записи после restore, rebuild?
 + in dict: if empty, not translated empty message

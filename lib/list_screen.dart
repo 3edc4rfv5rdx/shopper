@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'database.dart';
 import 'place.dart';
 import 'list.dart';
@@ -156,6 +157,83 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> shareList() async {
+    // Show dialog to choose what to share
+    final choice = await showShareOptionsDialog(context);
+
+    if (choice == null) return; // User canceled
+
+    // Separate items by purchase status
+    final unpurchased = listItems.where((item) => !item.isPurchased).toList();
+    final purchased = listItems.where((item) => item.isPurchased).toList();
+
+    // Format the list as plain text
+    final StringBuffer buffer = StringBuffer();
+
+    // Add place name as header
+    buffer.writeln('${widget.place.name}:');
+
+    // Add "To Buy" section
+    if (unpurchased.isNotEmpty) {
+      buffer.writeln(); // Empty line before section
+      buffer.writeln('* ${lw('To Buy')}');
+      for (final item in unpurchased) {
+        buffer.write('- ${item.displayName}');
+
+        // Add quantity if present
+        if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
+          buffer.write(' - ${item.quantity}');
+
+          // Add unit if present
+          if (item.displayUnit.isNotEmpty) {
+            buffer.write(' ${item.displayUnit}');
+          }
+        } else if (item.displayUnit.isNotEmpty) {
+          // Only unit, no quantity
+          buffer.write(' - ${item.displayUnit}');
+        }
+
+        buffer.writeln();
+      }
+    }
+
+    // Add "Purchased" section only if sharing all items
+    if (choice == 'all' && purchased.isNotEmpty) {
+      buffer.writeln(); // Empty line before section
+      buffer.writeln('* ${lw('Purchased')}');
+      for (final item in purchased) {
+        buffer.write('- ${item.displayName}');
+
+        // Add quantity if present
+        if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
+          buffer.write(' - ${item.quantity}');
+
+          // Add unit if present
+          if (item.displayUnit.isNotEmpty) {
+            buffer.write(' ${item.displayUnit}');
+          }
+        } else if (item.displayUnit.isNotEmpty) {
+          // Only unit, no quantity
+          buffer.write(' - ${item.displayUnit}');
+        }
+
+        buffer.writeln();
+      }
+    }
+
+    // Check if there are items to share
+    final text = buffer.toString().trim();
+    if (text == '${widget.place.name}:') {
+      if (mounted) {
+        showMessage(context, lw('No items to share'));
+      }
+      return;
+    }
+
+    // Share the text
+    await Share.share(text, subject: widget.place.name);
+  }
+
   @override
   Widget build(BuildContext context) {
     final unpurchased = listItems.where((item) => !item.isPurchased).toList();
@@ -165,6 +243,12 @@ class _ListScreenState extends State<ListScreen> {
       appBar: AppBar(
         title: Text(widget.place.name),
         actions: [
+          if (listItems.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: shareList,
+              tooltip: lw('Share List'),
+            ),
           if (purchased.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_sweep),

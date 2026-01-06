@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="add release key"
+COMMENT="add lists share "
 #
 GLOBVERS='0.7'
 VER=''
