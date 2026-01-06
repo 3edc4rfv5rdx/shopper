@@ -1,5 +1,5 @@
 ===TODO:
-o сделать ошибочние сообщения внизу экрана красным а успешные зеленым
+o make error messages at bottom red and success messages green
 + add clear button to search field in dictionary (<=x)
 o increase font size in lists (dictionary, shopping lists)
 o change dialog button text to "OK"

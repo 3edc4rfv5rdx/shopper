@@ -59,6 +59,7 @@ class ShopperApp extends StatefulWidget {
 }
 
 class _ShopperAppState extends State<ShopperApp> {
+  // ignore: unused_field
   Key _homeKey = UniqueKey();
 
   @override
