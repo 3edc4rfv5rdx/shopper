@@ -639,7 +639,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
               Navigator.pop(context, newItem);
             }
           },
-          child: Text(lw('Add')),
+          child: Text(lw('OK')),
         ),
       ],
     );
@@ -839,7 +839,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
               Navigator.pop(context, updatedItem);
             }
           },
-          child: Text(lw('Save')),
+          child: Text(lw('OK')),
         ),
       ],
     );

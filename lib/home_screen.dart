@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(lw('Add')),
+            child: Text(lw('OK')),
           ),
         ],
       ),
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(lw('Save')),
+            child: Text(lw('OK')),
           ),
         ],
       ),
