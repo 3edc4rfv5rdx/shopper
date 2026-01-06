@@ -38,11 +38,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final zipPath = await db.backupToCSV();
       if (mounted) {
-        showMessage(context, '${lw('Backup created')}: $zipPath');
+        showMessage(context, '${lw('Backup created')}: $zipPath', type: MessageType.success);
       }
     } catch (e) {
       if (mounted) {
-        showMessage(context, '${lw('Backup failed')}: $e');
+        showMessage(context, '${lw('Backup failed')}: $e', type: MessageType.error);
       }
     }
   }
@@ -72,13 +72,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await db.restoreFromCSV(result.files.single.path!);
       if (mounted) {
-        showMessage(context, lw('Database restored successfully'));
+        showMessage(context, lw('Database restored successfully'), type: MessageType.success);
         // Rebuild app to refresh all data
         rebuildApp?.call();
       }
     } catch (e) {
       if (mounted) {
-        showMessage(context, '${lw('Restore failed')}: $e');
+        showMessage(context, '${lw('Restore failed')}: $e', type: MessageType.error);
       }
     }
   }

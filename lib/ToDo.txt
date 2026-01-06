@@ -1,5 +1,5 @@
 ===TODO:
-o make error messages at bottom red and success messages green
++ make error messages at bottom red and success messages green
 + add clear button to search field in dictionary (<=x)
 + increase font size in lists (dictionary, shopping lists)
 + change dialog button text to "OK"

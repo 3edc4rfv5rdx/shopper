@@ -197,10 +197,43 @@ Future<void> readLocale(String locale) async {
 // Global database instance (will be initialized in main.dart)
 // DatabaseHelper? db;
 
-// Show snackbar message
-void showMessage(BuildContext context, String message) {
+// Message types for colored notifications
+enum MessageType {
+  success,  // Green
+  warning,  // Orange
+  error,    // Red
+  info,     // Blue
+}
+
+// Show snackbar message with color based on type
+void showMessage(
+  BuildContext context,
+  String message, {
+  MessageType type = MessageType.info,
+}) {
+  Color backgroundColor;
+  Color textColor = Colors.white;
+
+  switch (type) {
+    case MessageType.success:
+      backgroundColor = Colors.green.shade600;
+      break;
+    case MessageType.warning:
+      backgroundColor = Colors.orange.shade600;
+      break;
+    case MessageType.error:
+      backgroundColor = Colors.red.shade600;
+      break;
+    case MessageType.info:
+      backgroundColor = Colors.blue.shade600;
+      break;
+  }
+
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
+    SnackBar(
+      content: Text(message, style: TextStyle(color: textColor)),
+      backgroundColor: backgroundColor,
+    ),
   );
 }
 

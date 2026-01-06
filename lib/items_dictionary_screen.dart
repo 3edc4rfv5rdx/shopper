@@ -185,6 +185,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
           showMessage(
             context,
             '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
+            type: MessageType.warning,
           );
         }
         return;
@@ -198,7 +199,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       await db.insertItem(newItem);
       loadItems();
       if (mounted) {
-        showMessage(context, lw('Item added to dictionary'));
+        showMessage(context, lw('Item added to dictionary'), type: MessageType.success);
       }
     }
   }
@@ -251,6 +252,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
           showMessage(
             context,
             '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
+            type: MessageType.warning,
           );
         }
         return;
@@ -265,7 +267,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       await db.updateItem(updatedItem);
       loadItems();
       if (mounted) {
-        showMessage(context, lw('Item updated'));
+        showMessage(context, lw('Item updated'), type: MessageType.success);
       }
     }
   }
@@ -293,7 +295,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
       await db.deleteItem(item.id!);
       loadItems();
       if (mounted) {
-        showMessage(context, lw('Item deleted from dictionary'));
+        showMessage(context, lw('Item deleted from dictionary'), type: MessageType.success);
       }
     }
   }
@@ -329,7 +331,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     });
     await db.updateItemsOrder(items);
     if (mounted) {
-      showMessage(context, lw('Items sorted alphabetically'));
+      showMessage(context, lw('Items sorted alphabetically'), type: MessageType.success);
     }
   }
 
@@ -439,7 +441,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                             await db.deleteItem(item.id!);
                             loadItems();
                             if (context.mounted) {
-                              showMessage(context, lw('Item deleted from dictionary'));
+                              showMessage(context, lw('Item deleted from dictionary'), type: MessageType.success);
                             }
                           },
                           child: ListTile(
@@ -526,7 +528,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                             await db.deleteItem(item.id!);
                             loadItems();
                             if (context.mounted) {
-                              showMessage(context, lw('Item deleted from dictionary'));
+                              showMessage(context, lw('Item deleted from dictionary'), type: MessageType.success);
                             }
                           },
                           child: ListTile(

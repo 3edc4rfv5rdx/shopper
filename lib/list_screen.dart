@@ -129,7 +129,7 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> addToItemsDictionary(ListItem listItem) async {
     if (listItem.itemId != null) {
       if (mounted) {
-        showMessage(context, lw('Item is already in dictionary'));
+        showMessage(context, lw('Item is already in dictionary'), type: MessageType.warning);
       }
       return;
     }
@@ -147,6 +147,7 @@ class _ListScreenState extends State<ListScreen> {
         showMessage(
           context,
           '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
+          type: MessageType.warning,
         );
       }
       return;
@@ -168,7 +169,7 @@ class _ListScreenState extends State<ListScreen> {
     await db.updateListItem(updated);
     loadListItems();
     if (mounted) {
-      showMessage(context, lw('Added to items dictionary'));
+      showMessage(context, lw('Added to items dictionary'), type: MessageType.success);
     }
   }
 
@@ -240,7 +241,7 @@ class _ListScreenState extends State<ListScreen> {
     final text = buffer.toString().trim();
     if (text == '${widget.place.name}:') {
       if (mounted) {
-        showMessage(context, lw('No items to share'));
+        showMessage(context, lw('No items to share'), type: MessageType.warning);
       }
       return;
     }
@@ -625,6 +626,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   showMessage(
                     context,
                     '${lw('Item')} "$itemName" ${lw('already exists in this list')}',
+                    type: MessageType.warning,
                   );
                 }
                 return;
@@ -823,6 +825,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
                   showMessage(
                     context,
                     '${lw('Item')} "$itemName" ${lw('already exists in this list')}',
+                    type: MessageType.warning,
                   );
                 }
                 return;
