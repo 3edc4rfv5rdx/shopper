@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-COMMENT="swipes, menu to top"
+COMMENT="app icon"
 #
-GLOBVERS='0.6'
+GLOBVERS='0.7'
 VER=''
 VER_CODE=''
 #
