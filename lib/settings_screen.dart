@@ -253,6 +253,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           ListTile(
+            leading: const Icon(Icons.inventory_2),
+            title: Text(lw('Items Dictionary')),
+            subtitle: Text(lw('Manage items catalog')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.pushNamed(context, '/items-dictionary');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.language),
             title: Text(lw('Language')),
             subtitle: Text(langNames[currentLocale] ?? 'English'),
@@ -278,15 +287,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             onTap: () => _toggleConfirmExit(!confirmExit),
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory_2),
-            title: Text(lw('Items Dictionary')),
-            subtitle: Text(lw('Manage items catalog')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.pushNamed(context, '/items-dictionary');
-            },
           ),
           ListTile(
             leading: const Icon(Icons.backup),
