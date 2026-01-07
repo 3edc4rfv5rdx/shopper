@@ -211,37 +211,33 @@ class _ListScreenState extends State<ListScreen> {
 
     // Add place name as header
     buffer.writeln('${widget.place.name}:');
+    buffer.writeln(); // Empty line after header
 
-    // Add "To Buy" section
-    if (unpurchased.isNotEmpty) {
-      buffer.writeln(); // Empty line before section
-      buffer.writeln('* ${lw('To Buy')}');
-      for (final item in unpurchased) {
-        buffer.write('- ${item.displayName}');
+    // Add active items
+    for (final item in unpurchased) {
+      buffer.write('> ${item.displayName}');
 
-        // Add quantity if present
-        if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
-          buffer.write(' - ${item.quantity}');
+      // Add quantity if present
+      if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
+        buffer.write(' - ${item.quantity}');
 
-          // Add unit if present
-          if (item.displayUnit.isNotEmpty) {
-            buffer.write(' ${item.displayUnit}');
-          }
-        } else if (item.displayUnit.isNotEmpty) {
-          // Only unit, no quantity
-          buffer.write(' - ${item.displayUnit}');
+        // Add unit if present
+        if (item.displayUnit.isNotEmpty) {
+          buffer.write(' ${item.displayUnit}');
         }
-
-        buffer.writeln();
+      } else if (item.displayUnit.isNotEmpty) {
+        // Only unit, no quantity
+        buffer.write(' - ${item.displayUnit}');
       }
+
+      buffer.writeln();
     }
 
-    // Add "Purchased" section only if sharing all items
+    // Add completed items only if sharing all items
     if (choice == 'all' && purchased.isNotEmpty) {
-      buffer.writeln(); // Empty line before section
-      buffer.writeln('* ${lw('Purchased')}');
+      buffer.writeln('-------'); // Divider between sections
       for (final item in purchased) {
-        buffer.write('- ${item.displayName}');
+        buffer.write('x ${item.displayName}');
 
         // Add quantity if present
         if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
@@ -311,16 +307,6 @@ class _ListScreenState extends State<ListScreen> {
               : ListView(
                   children: [
                     if (unpurchased.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(_sectionPadding),
-                        child: Text(
-                          lw('To Buy'),
-                          style: const TextStyle(
-                            fontSize: fsMedium,
-                            fontWeight: fwBold,
-                          ),
-                        ),
-                      ),
                       ReorderableListView.builder(
                         buildDefaultDragHandles: false,
                         shrinkWrap: true,
@@ -411,17 +397,9 @@ class _ListScreenState extends State<ListScreen> {
                         },
                       ),
                     ],
+                    if (unpurchased.isNotEmpty && purchased.isNotEmpty)
+                      const Divider(thickness: 1, color: Colors.black),
                     if (purchased.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(_sectionPadding),
-                        child: Text(
-                          lw('Purchased'),
-                          style: const TextStyle(
-                            fontSize: fsMedium,
-                            fontWeight: fwBold,
-                          ),
-                        ),
-                      ),
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
