@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="new copy/move screen"
+COMMENT="test"
 #
 GLOBVERS='0.7'
 VER=''
