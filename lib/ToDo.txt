@@ -1,4 +1,5 @@
 ===TODO:
++ move/copy items between places (lists)
 + make error messages at bottom red and success messages green
 + add clear button to search field in dictionary (<=x)
 + increase font size in lists (dictionary, shopping lists)

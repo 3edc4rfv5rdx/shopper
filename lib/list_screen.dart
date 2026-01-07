@@ -5,6 +5,7 @@ import 'place.dart';
 import 'list.dart';
 import 'items.dart';
 import 'globals.dart';
+import 'move_items_screen.dart';
 
 // List spacing constants
 const double _sectionPadding = 16.0; // padding around section headers
@@ -122,6 +123,28 @@ class _ListScreenState extends State<ListScreen> {
 
     if (confirmed) {
       await db.deletePurchasedItems(widget.place.id!);
+      loadListItems();
+    }
+  }
+
+  Future<void> openMoveItems() async {
+    if (listItems.isEmpty) {
+      showMessage(context, lw('No items yet. Add one using the + button.'), type: MessageType.warning);
+      return;
+    }
+
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MoveItemsScreen(
+          currentPlace: widget.place,
+          items: listItems,
+        ),
+      ),
+    );
+
+    // Reload list if items were moved/copied
+    if (result == true && mounted) {
       loadListItems();
     }
   }
@@ -259,6 +282,12 @@ class _ListScreenState extends State<ListScreen> {
       appBar: AppBar(
         title: Text(widget.place.name),
         actions: [
+          if (listItems.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.keyboard_double_arrow_right),
+              onPressed: openMoveItems,
+              tooltip: lw('Move items'),
+            ),
           if (listItems.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.share),

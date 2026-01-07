@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: exitApp,
           tooltip: lw('Exit'),
         ),
-        title: Text(lw('Where are we going?')),
+        title: Text(lw('Lists')),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
