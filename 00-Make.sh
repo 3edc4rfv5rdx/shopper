@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="test"
+COMMENT="little redesign copy/move screen and list items"
 #
 GLOBVERS='0.7'
 VER=''
