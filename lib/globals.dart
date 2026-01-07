@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
-const String progVersion = '0.7.260106';
-const int buildNumber = 12;
+const String progVersion = '0.7.260107';
+const int buildNumber = 13;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 
