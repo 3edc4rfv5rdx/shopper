@@ -141,7 +141,7 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(lw('Move items')),
+        title: Text(isMoveMode ? lw('Move items') : lw('Copy items')),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -183,6 +183,7 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
                             }
                           });
                         },
+                        visualDensity: VisualDensity.compact,
                         title: Text(
                           item.displayName,
                           style: TextStyle(
@@ -190,10 +191,12 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
                             decoration: item.isPurchased ? TextDecoration.lineThrough : null,
                           ),
                         ),
-                        subtitle: Text(
-                          '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
-                          style: const TextStyle(fontSize: fsNormal),
-                        ),
+                        subtitle: '${item.quantity ?? ''} ${item.displayUnit}'.trim().isNotEmpty
+                            ? Text(
+                                '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                                style: const TextStyle(fontSize: fsNormal),
+                              )
+                            : null,
                         activeColor: clUpBar,
                       );
                     },
@@ -205,28 +208,17 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
                   offset: const Offset(0, -16),
                   child: Column(
                     children: [
-                      // Move/Copy radio buttons
+                      // Copy mode checkbox
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Radio<bool>(
-                              value: true,
-                              groupValue: isMoveMode,
-                              onChanged: (value) => setState(() => isMoveMode = value!),
-                              activeColor: clUpBar,
-                            ),
-                            Text(lw('Move'), style: const TextStyle(fontSize: fsLarge)),
-                            const SizedBox(width: 32),
-                            Radio<bool>(
-                              value: false,
-                              groupValue: isMoveMode,
-                              onChanged: (value) => setState(() => isMoveMode = value!),
-                              activeColor: clUpBar,
-                            ),
-                            Text(lw('Copy'), style: const TextStyle(fontSize: fsLarge)),
-                          ],
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0),
+                        child: CheckboxListTile(
+                          value: !isMoveMode,
+                          onChanged: (value) => setState(() => isMoveMode = !value!),
+                          title: Text(lw('Copy'), style: const TextStyle(fontSize: fsLarge)),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          activeColor: clUpBar,
                         ),
                       ),
 
@@ -239,12 +231,14 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
                             DropdownButtonFormField<Place>(
                               value: destinationPlace,
                               style: const TextStyle(fontSize: fsLarge, color: Colors.black),
+                              isDense: true,
                               decoration: InputDecoration(
                                 labelText: lw('Select destination'),
                                 labelStyle: const TextStyle(fontSize: fsLarge),
                                 border: const OutlineInputBorder(),
                                 filled: true,
                                 fillColor: clFill,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               ),
                               items: availablePlaces.map((place) {
                                 return DropdownMenuItem<Place>(
