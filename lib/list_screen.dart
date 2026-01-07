@@ -375,6 +375,7 @@ class _ListScreenState extends State<ListScreen> {
                             },
                             child: ListTile(
                               key: ValueKey('tile_${item.id}'),
+                              visualDensity: VisualDensity.compact,
                               leading: Checkbox(
                                 value: item.isPurchased,
                                 onChanged: (_) => togglePurchased(item),
@@ -383,10 +384,12 @@ class _ListScreenState extends State<ListScreen> {
                                 item.displayName,
                                 style: const TextStyle(fontSize: fsLarge),
                               ),
-                              subtitle: Text(
-                                '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
-                                style: const TextStyle(fontSize: fsNormal),
-                              ),
+                              subtitle: '${item.quantity ?? ''} ${item.displayUnit}'.trim().isNotEmpty
+                                  ? Text(
+                                      '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                                      style: const TextStyle(fontSize: fsNormal),
+                                    )
+                                  : null,
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -460,6 +463,7 @@ class _ListScreenState extends State<ListScreen> {
                             },
                             child: ListTile(
                               key: ValueKey('tile_${item.id}'),
+                              visualDensity: VisualDensity.compact,
                               leading: Checkbox(
                                 value: item.isPurchased,
                                 onChanged: (_) => togglePurchased(item),
@@ -471,10 +475,12 @@ class _ListScreenState extends State<ListScreen> {
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
-                              subtitle: Text(
-                                '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
-                                style: const TextStyle(fontSize: fsNormal),
-                              ),
+                              subtitle: '${item.quantity ?? ''} ${item.displayUnit}'.trim().isNotEmpty
+                                  ? Text(
+                                      '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
+                                      style: const TextStyle(fontSize: fsNormal),
+                                    )
+                                  : null,
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () => deleteItem(item),
@@ -571,23 +577,23 @@ class _AddItemDialogState extends State<AddItemDialog> {
       title: Text(lw('Add Item')),
       content: SizedBox(
         width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: lw('Item name'),
-                hintText: lw('Search or enter item name'),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: lw('Item name'),
+                  hintText: lw('Search or enter item name'),
+                ),
+                autofocus: true,
+                onChanged: searchItems,
               ),
-              autofocus: true,
-              onChanged: searchItems,
-            ),
-            const SizedBox(height: _itemVerticalSpacing),
-            if (searchResults.isNotEmpty)
-              Flexible(
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 150),
+              const SizedBox(height: _itemVerticalSpacing),
+              if (searchResults.isNotEmpty)
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(4),
@@ -606,35 +612,35 @@ class _AddItemDialogState extends State<AddItemDialog> {
                     },
                   ),
                 ),
+              const SizedBox(height: _dialogFieldSpacing),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: quantityController,
+                      decoration: InputDecoration(
+                        labelText: lw('Quantity'),
+                        hintText: lw('e.g. 2'),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      controller: unitController,
+                      decoration: InputDecoration(
+                        labelText: lw('Unit'),
+                        hintText: lw('e.g. kg, pcs'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            const SizedBox(height: _dialogFieldSpacing),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: quantityController,
-                    decoration: InputDecoration(
-                      labelText: lw('Quantity'),
-                      hintText: lw('e.g. 2'),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: unitController,
-                    decoration: InputDecoration(
-                      labelText: lw('Unit'),
-                      hintText: lw('e.g. kg, pcs'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
@@ -769,23 +775,23 @@ class _EditItemDialogState extends State<EditItemDialog> {
       title: Text(lw('Edit Item')),
       content: SizedBox(
         width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: lw('Item name'),
-                hintText: lw('Search or enter item name'),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: lw('Item name'),
+                  hintText: lw('Search or enter item name'),
+                ),
+                autofocus: true,
+                onChanged: searchItems,
               ),
-              autofocus: true,
-              onChanged: searchItems,
-            ),
-            const SizedBox(height: _itemVerticalSpacing),
-            if (searchResults.isNotEmpty)
-              Flexible(
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 150),
+              const SizedBox(height: _itemVerticalSpacing),
+              if (searchResults.isNotEmpty)
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(4),
@@ -804,35 +810,35 @@ class _EditItemDialogState extends State<EditItemDialog> {
                     },
                   ),
                 ),
+              const SizedBox(height: _dialogFieldSpacing),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: quantityController,
+                      decoration: InputDecoration(
+                        labelText: lw('Quantity'),
+                        hintText: lw('e.g. 2'),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      controller: unitController,
+                      decoration: InputDecoration(
+                        labelText: lw('Unit'),
+                        hintText: lw('e.g. kg, pcs'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            const SizedBox(height: _dialogFieldSpacing),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: quantityController,
-                    decoration: InputDecoration(
-                      labelText: lw('Quantity'),
-                      hintText: lw('e.g. 2'),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: unitController,
-                    decoration: InputDecoration(
-                      labelText: lw('Unit'),
-                      hintText: lw('e.g. kg, pcs'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
