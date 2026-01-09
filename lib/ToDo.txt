@@ -1,5 +1,6 @@
 ===TODO:
 + one universal add/edit list/dict dialog
++ place links (reference to other lists using quantity="-1" and unit="-{placeId}")
 ? "receipts" (complex items, separate list, example - salads with ingredients)
 + move/copy items between places (lists)
 + make error messages at bottom red and success messages green
@@ -37,6 +38,10 @@
 + purchased items cannot be edited?
 
 ===ERRORS:
+o дублирование списков (ccc=xx1+xx2+aaa+bbb+aaa ?)
+o в AddItem при добавлении списка не показывать отрицательные значения (можно заполнять * ?) и
+  сделать "disable" этим полям - запретить редактирование.
+o в список нельзя добавлять "родителя" (если доступно)
 + search doesn't work when entering items
 + duplicates are added to dictionary
 + records don't display after restore, rebuild?

@@ -147,6 +147,57 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> navigateToLinkedPlace(ListItem linkItem) async {
+    if (linkItem.quantity != '-1') return;
+
+    // Extract Place ID from unit (format: "-5")
+    if (linkItem.unit == null || !linkItem.unit!.startsWith('-')) {
+      if (mounted) {
+        showMessage(
+          context,
+          lw('Invalid place link'),
+          type: MessageType.error,
+        );
+      }
+      return;
+    }
+
+    final placeId = int.tryParse(linkItem.unit!.substring(1)); // Remove minus
+    if (placeId == null) {
+      if (mounted) {
+        showMessage(
+          context,
+          lw('Invalid place link'),
+          type: MessageType.error,
+        );
+      }
+      return;
+    }
+
+    // Find Place by ID
+    final linkedPlace = await db.getPlace(placeId);
+
+    if (linkedPlace == null) {
+      if (mounted) {
+        showMessage(
+          context,
+          lw('Linked place not found or has been deleted'),
+          type: MessageType.warning,
+        );
+      }
+      return;
+    }
+
+    if (mounted) {
+      await Navigator.pushNamed(
+        context,
+        '/list',
+        arguments: linkedPlace,
+      );
+      loadListItems();
+    }
+  }
+
   Future<void> addToItemsDictionary(ListItem listItem) async {
     if (listItem.itemId != null) {
       if (mounted) {
@@ -213,19 +264,26 @@ class _ListScreenState extends State<ListScreen> {
 
     // Add active items
     for (final item in unpurchased) {
-      buffer.write('> ${item.displayName}');
+      final isPlaceLink = item.quantity == '-1';
 
-      // Add quantity if present
-      if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
-        buffer.write(' - ${item.quantity}');
+      if (isPlaceLink) {
+        buffer.write('> 📋 ${item.displayName}');
+      } else {
+        buffer.write('> ${item.displayName}');
 
-        // Add unit if present
-        if (item.displayUnit.isNotEmpty) {
-          buffer.write(' ${item.displayUnit}');
+        // Quantity only if not negative
+        if (item.quantity != null &&
+            item.quantity!.trim().isNotEmpty &&
+            !item.quantity!.startsWith('-')) {
+          buffer.write(' - ${item.quantity}');
+
+          // Unit only if not negative
+          if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+            buffer.write(item.displayUnit);
+          }
+        } else if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+          buffer.write(' - ${item.displayUnit}');
         }
-      } else if (item.displayUnit.isNotEmpty) {
-        // Only unit, no quantity
-        buffer.write(' - ${item.displayUnit}');
       }
 
       buffer.writeln();
@@ -235,19 +293,26 @@ class _ListScreenState extends State<ListScreen> {
     if (choice == 'all' && purchased.isNotEmpty) {
       buffer.writeln('-------'); // Divider between sections
       for (final item in purchased) {
-        buffer.write('x ${item.displayName}');
+        final isPlaceLink = item.quantity == '-1';
 
-        // Add quantity if present
-        if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
-          buffer.write(' - ${item.quantity}');
+        if (isPlaceLink) {
+          buffer.write('x 📋 ${item.displayName}');
+        } else {
+          buffer.write('x ${item.displayName}');
 
-          // Add unit if present
-          if (item.displayUnit.isNotEmpty) {
-            buffer.write(' ${item.displayUnit}');
+          // Quantity only if not negative
+          if (item.quantity != null &&
+              item.quantity!.trim().isNotEmpty &&
+              !item.quantity!.startsWith('-')) {
+            buffer.write(' - ${item.quantity}');
+
+            // Unit only if not negative
+            if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+              buffer.write(item.displayUnit);
+            }
+          } else if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+            buffer.write(' - ${item.displayUnit}');
           }
-        } else if (item.displayUnit.isNotEmpty) {
-          // Only unit, no quantity
-          buffer.write(' - ${item.displayUnit}');
         }
 
         buffer.writeln();
@@ -357,43 +422,67 @@ class _ListScreenState extends State<ListScreen> {
                               db.deleteListItem(item.id!);
                               loadListItems();
                             },
-                            child: ListTile(
-                              key: ValueKey('tile_${item.id}'),
-                              visualDensity: VisualDensity.compact,
-                              leading: Checkbox(
-                                value: item.isPurchased,
-                                onChanged: (_) => togglePurchased(item),
-                              ),
-                              title: Text(
-                                () {
-                                  final parts = <String>[item.displayName];
-                                  if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
-                                    // Add quantity with unit (no space between them)
-                                    final qtyUnit = item.quantity!.trim() +
-                                        (item.displayUnit.isNotEmpty ? item.displayUnit : '');
-                                    parts.add(qtyUnit);
-                                  }
-                                  return parts.join(' ');
-                                }(),
-                                style: const TextStyle(fontSize: fsLarge),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (item.itemId == null)
-                                    IconButton(
-                                      icon: const Icon(Icons.save_alt),
-                                      onPressed: () => addToItemsDictionary(item),
-                                      tooltip: lw('Add to dictionary'),
+                            child: () {
+                              final isPlaceLink = item.quantity == '-1';
+                              return ListTile(
+                                key: ValueKey('tile_${item.id}'),
+                                visualDensity: VisualDensity.compact,
+                                leading: isPlaceLink
+                                    ? const Icon(Icons.folder, color: Colors.blue)
+                                    : Checkbox(
+                                        value: item.isPurchased,
+                                        onChanged: (_) => togglePurchased(item),
+                                      ),
+                                title: Row(
+                                  children: [
+                                    if (isPlaceLink)
+                                      const Icon(Icons.subdirectory_arrow_right, size: 16),
+                                    Expanded(
+                                      child: Text(
+                                        () {
+                                          final parts = <String>[item.displayName];
+                                          if (item.quantity != null &&
+                                              item.quantity!.trim().isNotEmpty &&
+                                              !item.quantity!.startsWith('-')) {
+                                            // Add quantity with unit (no space, skip negatives)
+                                            final qtyUnit = item.quantity!.trim() +
+                                                (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')
+                                                    ? item.displayUnit : '');
+                                            parts.add(qtyUnit);
+                                          }
+                                          return parts.join(' ');
+                                        }(),
+                                        style: TextStyle(
+                                          fontSize: fsLarge,
+                                          fontWeight: isPlaceLink ? FontWeight.bold : FontWeight.normal,
+                                        ),
+                                      ),
                                     ),
-                                  ReorderableDragStartListener(
-                                    index: index,
-                                    child: const Icon(Icons.drag_handle),
-                                  ),
-                                ],
-                              ),
-                              onLongPress: () => showItemContextMenu(item),
-                            ),
+                                  ],
+                                ),
+                                subtitle: isPlaceLink
+                                    ? Text(lw('Linked list'),
+                                        style: const TextStyle(fontSize: fsNormal, fontStyle: FontStyle.italic))
+                                    : null,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (item.itemId == null && !isPlaceLink)
+                                      IconButton(
+                                        icon: const Icon(Icons.save_alt),
+                                        onPressed: () => addToItemsDictionary(item),
+                                        tooltip: lw('Add to dictionary'),
+                                      ),
+                                    ReorderableDragStartListener(
+                                      index: index,
+                                      child: const Icon(Icons.drag_handle),
+                                    ),
+                                  ],
+                                ),
+                                onTap: isPlaceLink ? () => navigateToLinkedPlace(item) : null,
+                                onLongPress: () => showItemContextMenu(item),
+                              );
+                            }(),
                           );
                         },
                       ),

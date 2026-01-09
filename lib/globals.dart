@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'database.dart';
 import 'list.dart';
 import 'items.dart';
+import 'place.dart';
 
 const String progVersion = '0.7.260107';
 const int buildNumber = 15;
@@ -508,6 +509,59 @@ class _ItemDialogState extends State<ItemDialog> {
     });
   }
 
+  Future<void> selectPlaceAsLink() async {
+    final db = DatabaseHelper.instance;
+    final places = await db.getPlaces();
+
+    // Exclude current Place
+    final availablePlaces = places.where((p) => p.id != widget.placeId).toList();
+
+    if (availablePlaces.isEmpty) {
+      if (mounted) {
+        showMessage(context, lw('No other places available'), type: MessageType.warning);
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    final selectedPlace = await showDialog<Place>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lw('Select Place')),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: availablePlaces.length,
+            itemBuilder: (context, index) {
+              final place = availablePlaces[index];
+              return ListTile(
+                title: Text(place.name),
+                onTap: () => Navigator.pop(context, place),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(lw('Cancel')),
+          ),
+        ],
+      ),
+    );
+
+    if (selectedPlace != null && mounted) {
+      setState(() {
+        nameController.text = selectedPlace.name;
+        quantityController.text = '-1'; // Link marker
+        unitController.text = '-${selectedPlace.id}'; // Place ID with minus
+        searchResults = [];
+      });
+    }
+  }
+
   bool _isDuplicate(String itemName) {
     if (widget.dialogContext == ItemDialogContext.list) {
       final listItems = widget.existingItems.cast<ListItem>();
@@ -706,6 +760,12 @@ class _ItemDialogState extends State<ItemDialog> {
             ),
           ),
         ),
+        if (widget.mode == ItemDialogMode.add)
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: selectPlaceAsLink,
+            tooltip: lw('Select Place'),
+          ),
       ],
     );
   }

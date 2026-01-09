@@ -77,8 +77,17 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
     // Check for duplicates
     int skippedCount = 0;
     for (var item in selectedItems) {
+      final isPlaceLink = item.quantity == '-1';
+
       // Check if item already exists in destination
-      final isDuplicate = destItems.any((destItem) => destItem.itemId == item.itemId);
+      final isDuplicate = destItems.any((destItem) {
+        // For place links, check by unit (Place ID)
+        if (isPlaceLink && destItem.quantity == '-1') {
+          return destItem.unit == item.unit;
+        }
+        // For regular items, check by itemId
+        return destItem.itemId == item.itemId;
+      });
 
       if (isDuplicate) {
         // Skip duplicates for both Move and Copy
