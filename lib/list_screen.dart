@@ -365,15 +365,18 @@ class _ListScreenState extends State<ListScreen> {
                                 onChanged: (_) => togglePurchased(item),
                               ),
                               title: Text(
-                                item.displayName,
+                                () {
+                                  final parts = <String>[item.displayName];
+                                  if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
+                                    // Add quantity with unit (no space between them)
+                                    final qtyUnit = item.quantity!.trim() +
+                                        (item.displayUnit.isNotEmpty ? item.displayUnit : '');
+                                    parts.add(qtyUnit);
+                                  }
+                                  return parts.join(' ');
+                                }(),
                                 style: const TextStyle(fontSize: fsLarge),
                               ),
-                              subtitle: '${item.quantity ?? ''} ${item.displayUnit}'.trim().isNotEmpty
-                                  ? Text(
-                                      '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
-                                      style: const TextStyle(fontSize: fsNormal),
-                                    )
-                                  : null,
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -396,7 +399,7 @@ class _ListScreenState extends State<ListScreen> {
                       ),
                     ],
                     if (unpurchased.isNotEmpty && purchased.isNotEmpty)
-                      const Divider(thickness: 1, color: Colors.black),
+                      const Divider(thickness: 2, height: 24, color: Colors.black),
                     if (purchased.isNotEmpty) ...[
                       ListView.builder(
                         shrinkWrap: true,
@@ -445,22 +448,22 @@ class _ListScreenState extends State<ListScreen> {
                                 onChanged: (_) => togglePurchased(item),
                               ),
                               title: Text(
-                                item.displayName,
+                                () {
+                                  final parts = <String>[item.displayName];
+                                  if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
+                                    // Add quantity with unit (no space between them)
+                                    final qtyUnit = item.quantity!.trim() +
+                                        (item.displayUnit.isNotEmpty ? item.displayUnit : '');
+                                    parts.add(qtyUnit);
+                                  }
+                                  return parts.join(' ');
+                                }(),
                                 style: const TextStyle(
                                   fontSize: fsLarge,
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
-                              subtitle: '${item.quantity ?? ''} ${item.displayUnit}'.trim().isNotEmpty
-                                  ? Text(
-                                      '${item.quantity ?? ''} ${item.displayUnit}'.trim(),
-                                      style: const TextStyle(fontSize: fsNormal),
-                                    )
-                                  : null,
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => deleteItem(item),
-                              ),
+                              onLongPress: () => showItemContextMenu(item),
                             ),
                           );
                         },

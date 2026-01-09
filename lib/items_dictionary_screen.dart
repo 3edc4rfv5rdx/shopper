@@ -272,15 +272,11 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                             key: ValueKey('tile_${item.id}'),
                             leading: const Icon(Icons.inventory_2),
                             title: Text(
-                              item.name,
+                              item.unit != null && item.unit!.isNotEmpty
+                                  ? '${item.name} /${item.unit!}'
+                                  : item.name,
                               style: const TextStyle(fontSize: fsLarge),
                             ),
-                            subtitle: item.unit != null
-                                ? Text(
-                                    item.unit!,
-                                    style: const TextStyle(fontSize: fsNormal),
-                                  )
-                                : null,
                             onLongPress: () => showItemContextMenu(item),
                             dense: true,
                             visualDensity: VisualDensity.compact,
@@ -359,15 +355,11 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                             key: ValueKey('tile_${item.id}'),
                             leading: const Icon(Icons.inventory_2),
                             title: Text(
-                              item.name,
+                              item.unit != null && item.unit!.isNotEmpty
+                                  ? '${item.name} /${item.unit!}'
+                                  : item.name,
                               style: const TextStyle(fontSize: fsLarge),
                             ),
-                            subtitle: item.unit != null
-                                ? Text(
-                                    item.unit!,
-                                    style: const TextStyle(fontSize: fsNormal),
-                                  )
-                                : null,
                             trailing: ReorderableDragStartListener(
                               index: index,
                               child: const Icon(Icons.drag_handle),

@@ -1,5 +1,5 @@
 ===TODO:
-o one universal add/edit list/dict dialog
++ one universal add/edit list/dict dialog
 ? "receipts" (complex items, separate list, example - salads with ingredients)
 + move/copy items between places (lists)
 + make error messages at bottom red and success messages green
@@ -28,8 +28,13 @@ o one universal add/edit list/dict dialog
 + add key
 
 ===ToFIX:
-o сделать полосу между "куплено/не куплено" в списках более заметной, расширить
-o купленные товары не редактируются?
++ display items in one line in dictionary too ("Milk /L")
++ remove space between quantity and unit (Milk 5L) in lists
++ don't show unit if quantity is not set ("Milk L" -> just "Milk")
++ remove trash icon (delete button) from purchased items
++ display all info in one line in lists: "Milk 5L" instead of title/subtitle
++ make divider between "purchased/unpurchased" in lists more visible, wider
++ purchased items cannot be edited?
 
 ===ERRORS:
 + search doesn't work when entering items
