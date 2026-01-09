@@ -29,6 +29,7 @@
 + add key
 
 ===ToFIX:
++ when sharing lists - expand place links recursively (show nested list contents)
 + display items in one line in dictionary too ("Milk /L")
 + remove space between quantity and unit (Milk 5L) in lists
 + don't show unit if quantity is not set ("Milk L" -> just "Milk")
@@ -38,10 +39,10 @@
 + purchased items cannot be edited?
 
 ===ERRORS:
-o дублирование списков (ccc=xx1+xx2+aaa+bbb+aaa ?)
-o в AddItem при добавлении списка не показывать отрицательные значения (можно заполнять * ?) и
-  сделать "disable" этим полям - запретить редактирование.
-o в список нельзя добавлять "родителя" (если доступно)
++ place link duplication (ccc=xx1+xx2+aaa+bbb+aaa ?)
++ in AddItem when adding place link - don't show negative values (can fill with * ?) and
+  disable these fields - prevent editing
++ don't allow adding parent list as link (prevent circular references)
 + search doesn't work when entering items
 + duplicates are added to dictionary
 + records don't display after restore, rebuild?

@@ -245,6 +245,97 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> _expandPlaceLink(
+    StringBuffer buffer,
+    ListItem linkItem,
+    String indent,
+    Set<int> visitedPlaces,
+    String choice,
+  ) async {
+    // Extract Place ID from unit
+    if (linkItem.unit == null || !linkItem.unit!.startsWith('-')) return;
+
+    final placeId = int.tryParse(linkItem.unit!.substring(1));
+    if (placeId == null) return;
+
+    // Prevent circular references
+    if (visitedPlaces.contains(placeId)) {
+      buffer.writeln('$indent* =${linkItem.displayName} [circular reference]');
+      return;
+    }
+
+    visitedPlaces.add(placeId);
+
+    // Get linked place
+    final linkedPlace = await db.getPlace(placeId);
+    if (linkedPlace == null) {
+      buffer.writeln('$indent* =${linkItem.displayName} [not found]');
+      return;
+    }
+
+    // Get items from linked place
+    final linkedItems = await db.getListItems(placeId);
+    final unpurchased = linkedItems.where((item) => !item.isPurchased).toList();
+    final purchased = linkedItems.where((item) => item.isPurchased).toList();
+
+    // Write place name
+    buffer.writeln('$indent* =${linkedPlace.name}:');
+
+    // Write unpurchased items
+    for (final item in unpurchased) {
+      final isNestedLink = item.quantity == '-1';
+
+      if (isNestedLink) {
+        // Recursively expand nested link
+        await _expandPlaceLink(buffer, item, '$indent  ', visitedPlaces, choice);
+      } else {
+        buffer.write('$indent  > ${item.displayName}');
+
+        // Add quantity/unit
+        if (item.quantity != null &&
+            item.quantity!.trim().isNotEmpty &&
+            !item.quantity!.startsWith('-')) {
+          buffer.write(' ${item.quantity}');
+          if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+            buffer.write(item.displayUnit);
+          }
+        } else if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+          buffer.write(' ${item.displayUnit}');
+        }
+
+        buffer.writeln();
+      }
+    }
+
+    // Write purchased items if choice is 'all'
+    if (choice == 'all' && purchased.isNotEmpty) {
+      for (final item in purchased) {
+        final isNestedLink = item.quantity == '-1';
+
+        if (isNestedLink) {
+          await _expandPlaceLink(buffer, item, '$indent  ', visitedPlaces, choice);
+        } else {
+          buffer.write('$indent  x ${item.displayName}');
+
+          if (item.quantity != null &&
+              item.quantity!.trim().isNotEmpty &&
+              !item.quantity!.startsWith('-')) {
+            buffer.write(' ${item.quantity}');
+            if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+              buffer.write(item.displayUnit);
+            }
+          } else if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
+            buffer.write(' ${item.displayUnit}');
+          }
+
+          buffer.writeln();
+        }
+      }
+    }
+
+    visitedPlaces.remove(placeId);
+  }
+
   Future<void> shareList() async {
     // Show dialog to choose what to share
     final choice = await showShareOptionsDialog(context);
@@ -259,15 +350,22 @@ class _ListScreenState extends State<ListScreen> {
     final StringBuffer buffer = StringBuffer();
 
     // Add place name as header
-    buffer.writeln('${widget.place.name}:');
+    buffer.writeln('* =${widget.place.name}:');
     buffer.writeln(); // Empty line after header
+
+    // Track visited places to prevent infinite loops
+    final visitedPlaces = <int>{};
+    if (widget.place.id != null) {
+      visitedPlaces.add(widget.place.id!);
+    }
 
     // Add active items
     for (final item in unpurchased) {
       final isPlaceLink = item.quantity == '-1';
 
       if (isPlaceLink) {
-        buffer.write('> 📋 ${item.displayName}');
+        // Expand place link recursively
+        await _expandPlaceLink(buffer, item, '', visitedPlaces, choice);
       } else {
         buffer.write('> ${item.displayName}');
 
@@ -275,18 +373,18 @@ class _ListScreenState extends State<ListScreen> {
         if (item.quantity != null &&
             item.quantity!.trim().isNotEmpty &&
             !item.quantity!.startsWith('-')) {
-          buffer.write(' - ${item.quantity}');
+          buffer.write(' ${item.quantity}');
 
           // Unit only if not negative
           if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
             buffer.write(item.displayUnit);
           }
         } else if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
-          buffer.write(' - ${item.displayUnit}');
+          buffer.write(' ${item.displayUnit}');
         }
-      }
 
-      buffer.writeln();
+        buffer.writeln();
+      }
     }
 
     // Add completed items only if sharing all items
@@ -296,7 +394,8 @@ class _ListScreenState extends State<ListScreen> {
         final isPlaceLink = item.quantity == '-1';
 
         if (isPlaceLink) {
-          buffer.write('x 📋 ${item.displayName}');
+          // Expand place link recursively (with x prefix)
+          await _expandPlaceLink(buffer, item, '', visitedPlaces, choice);
         } else {
           buffer.write('x ${item.displayName}');
 
@@ -304,24 +403,24 @@ class _ListScreenState extends State<ListScreen> {
           if (item.quantity != null &&
               item.quantity!.trim().isNotEmpty &&
               !item.quantity!.startsWith('-')) {
-            buffer.write(' - ${item.quantity}');
+            buffer.write(' ${item.quantity}');
 
             // Unit only if not negative
             if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
               buffer.write(item.displayUnit);
             }
           } else if (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')) {
-            buffer.write(' - ${item.displayUnit}');
+            buffer.write(' ${item.displayUnit}');
           }
-        }
 
-        buffer.writeln();
+          buffer.writeln();
+        }
       }
     }
 
     // Check if there are items to share
     final text = buffer.toString().trim();
-    if (text == '${widget.place.name}:') {
+    if (text == '* =${widget.place.name}:') {
       if (mounted) {
         showMessage(context, lw('No items to share'), type: MessageType.warning);
       }

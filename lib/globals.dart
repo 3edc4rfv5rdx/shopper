@@ -418,6 +418,9 @@ class _ItemDialogState extends State<ItemDialog> {
   List<dynamic> searchResults = [];
   bool isSearching = false;
   bool isPlaceLink = false;
+  bool isPlaceLinkSelected = false; // Track if place link is selected
+  String? savedQuantity; // Store real quantity value for place links
+  String? savedUnit; // Store real unit value for place links
 
   @override
   void initState() {
@@ -509,12 +512,46 @@ class _ItemDialogState extends State<ItemDialog> {
     });
   }
 
+  Future<Set<int>> _getPlacesLinkingTo(int targetPlaceId) async {
+    final db = DatabaseHelper.instance;
+    final linkingPlaces = <int>{};
+    final toCheck = <int>[targetPlaceId];
+    final checked = <int>{};
+
+    while (toCheck.isNotEmpty) {
+      final currentPlaceId = toCheck.removeLast();
+      if (checked.contains(currentPlaceId)) continue;
+      checked.add(currentPlaceId);
+
+      // Get all places
+      final allPlaces = await db.getPlaces();
+
+      for (final place in allPlaces) {
+        if (place.id == null || checked.contains(place.id)) continue;
+
+        // Check if this place has a link to currentPlaceId
+        final items = await db.getListItems(place.id!);
+        final hasLink = items.any((item) =>
+            item.quantity == '-1' && item.unit == '-$currentPlaceId');
+
+        if (hasLink) {
+          linkingPlaces.add(place.id!);
+          toCheck.add(place.id!);
+        }
+      }
+    }
+
+    return linkingPlaces;
+  }
+
   Future<void> selectPlaceAsLink() async {
     final db = DatabaseHelper.instance;
     final places = await db.getPlaces();
 
-    // Exclude current Place
-    final availablePlaces = places.where((p) => p.id != widget.placeId).toList();
+    // Exclude current Place and places that link to it (prevent circular refs)
+    final placesLinkingToCurrent = await _getPlacesLinkingTo(widget.placeId!);
+    final availablePlaces = places.where((p) =>
+        p.id != widget.placeId && !placesLinkingToCurrent.contains(p.id)).toList();
 
     if (availablePlaces.isEmpty) {
       if (mounted) {
@@ -555,9 +592,14 @@ class _ItemDialogState extends State<ItemDialog> {
     if (selectedPlace != null && mounted) {
       setState(() {
         nameController.text = selectedPlace.name;
-        quantityController.text = '-1'; // Link marker
-        unitController.text = '-${selectedPlace.id}'; // Place ID with minus
+        // Save real values
+        savedQuantity = '-1'; // Link marker
+        savedUnit = '-${selectedPlace.id}'; // Place ID with minus
+        // Show stars in fields
+        quantityController.text = '*';
+        unitController.text = '*';
         searchResults = [];
+        isPlaceLinkSelected = true; // Mark as place link
       });
     }
   }
@@ -589,15 +631,50 @@ class _ItemDialogState extends State<ItemDialog> {
       return false;
     }
 
-    // Check for duplicates (skip for place links)
-    final isPlaceLinkNew = quantityController.text.trim() == '-1';
-    if (!isPlaceLinkNew) {
+    final isPlaceLinkNew = isPlaceLinkSelected || quantityController.text.trim() == '-1';
+
+    // Check for duplicates
+    if (widget.dialogContext == ItemDialogContext.list) {
+      final listItems = widget.existingItems.cast<ListItem>();
+
+      if (isPlaceLinkNew) {
+        // For place links, check by unit (Place ID) - use saved value
+        final placeUnit = savedUnit ?? unitController.text.trim();
+        final duplicate = listItems.any((item) {
+          if (widget.mode == ItemDialogMode.edit) {
+            final currentItem = widget.existingItem as ListItem;
+            if (item.id == currentItem.id) return false;
+          }
+          return item.quantity == '-1' && item.unit == placeUnit;
+        });
+
+        if (duplicate) {
+          if (context.mounted) {
+            showMessage(
+              context,
+              lw('This place link already exists in this list'),
+              type: MessageType.warning,
+            );
+          }
+          return false;
+        }
+      } else {
+        // For regular items, check by name
+        final itemName = nameController.text.trim();
+        if (_isDuplicate(itemName)) {
+          if (context.mounted) {
+            final message = '${lw('Item')} "$itemName" ${lw('already exists in this list')}';
+            showMessage(context, message, type: MessageType.warning);
+          }
+          return false;
+        }
+      }
+    } else {
+      // Dictionary context - check by name
       final itemName = nameController.text.trim();
       if (_isDuplicate(itemName)) {
         if (context.mounted) {
-          final message = widget.dialogContext == ItemDialogContext.list
-              ? '${lw('Item')} "$itemName" ${lw('already exists in this list')}'
-              : '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}';
+          final message = '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}';
           showMessage(context, message, type: MessageType.warning);
         }
         return false;
@@ -644,16 +721,25 @@ class _ItemDialogState extends State<ItemDialog> {
           ? 0
           : existingItems.map((i) => i.sortOrder).reduce((a, b) => a > b ? a : b);
 
+      // Use saved values for place links, otherwise use controller values
+      final quantityValue = isPlaceLinkSelected
+          ? savedQuantity
+          : (quantityController.text.trim().isNotEmpty
+              ? quantityController.text.trim()
+              : null);
+
+      final unitValue = isPlaceLinkSelected
+          ? savedUnit
+          : (selectedItem == null && unitController.text.trim().isNotEmpty
+              ? unitController.text.trim()
+              : null);
+
       final newItem = ListItem(
         placeId: widget.placeId!,
         itemId: selectedItem?.id,
         name: selectedItem == null ? nameController.text.trim() : null,
-        unit: selectedItem == null && unitController.text.trim().isNotEmpty
-            ? unitController.text.trim()
-            : null,
-        quantity: quantityController.text.trim().isNotEmpty
-            ? quantityController.text.trim()
-            : null,
+        unit: unitValue,
+        quantity: quantityValue,
         sortOrder: maxOrder + 1,
       );
 
@@ -744,9 +830,10 @@ class _ItemDialogState extends State<ItemDialog> {
             controller: quantityController,
             decoration: InputDecoration(
               labelText: lw('Quantity'),
-              hintText: lw('e.g. 2'),
+              hintText: isPlaceLinkSelected ? '*' : lw('e.g. 2'),
             ),
             keyboardType: TextInputType.number,
+            enabled: !isPlaceLinkSelected,
           ),
         ),
         const SizedBox(width: 8),
@@ -756,8 +843,9 @@ class _ItemDialogState extends State<ItemDialog> {
             controller: unitController,
             decoration: InputDecoration(
               labelText: lw('Unit'),
-              hintText: lw('e.g. kg, pcs'),
+              hintText: isPlaceLinkSelected ? '*' : lw('e.g. kg, pcs'),
             ),
+            enabled: !isPlaceLinkSelected,
           ),
         ),
         if (widget.mode == ItemDialogMode.add)
