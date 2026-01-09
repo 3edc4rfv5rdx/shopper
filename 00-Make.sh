@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="little redesign copy/move screen and list items"
+COMMENT="list in list and one add/edit editor"
 #
 GLOBVERS='0.7'
 VER=''

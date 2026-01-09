@@ -8,8 +8,8 @@ import 'list.dart';
 import 'items.dart';
 import 'place.dart';
 
-const String progVersion = '0.7.260107';
-const int buildNumber = 15;
+const String progVersion = '0.7.260109';
+const int buildNumber = 16;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 
