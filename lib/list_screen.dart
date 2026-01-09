@@ -7,11 +7,6 @@ import 'items.dart';
 import 'globals.dart';
 import 'move_items_screen.dart';
 
-// List spacing constants
-const double _sectionPadding = 16.0; // padding around section headers
-const double _itemVerticalSpacing = 8.0; // spacing between dialog fields
-const double _dialogFieldSpacing = 16.0; // spacing between major dialog sections
-
 class ListScreen extends StatefulWidget {
   final Place place;
 
@@ -42,16 +37,17 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> addItem() async {
-    final result = await showDialog<ListItem>(
+    final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AddItemDialog(
+      builder: (context) => ItemDialog(
+        mode: ItemDialogMode.add,
+        dialogContext: ItemDialogContext.list,
         placeId: widget.place.id!,
-        existingItems: listItems
+        existingItems: listItems,
       ),
     );
 
-    if (result != null) {
-      await db.insertListItem(result);
+    if (result == true) {
       loadListItems();
     }
   }
@@ -63,16 +59,18 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> editItem(ListItem item) async {
-    final result = await showDialog<ListItem>(
+    final result = await showDialog<bool>(
       context: context,
-      builder: (context) => EditItemDialog(
-        item: item,
+      builder: (context) => ItemDialog(
+        mode: ItemDialogMode.edit,
+        dialogContext: ItemDialogContext.list,
+        placeId: widget.place.id!,
         existingItems: listItems,
+        existingItem: item,
       ),
     );
 
-    if (result != null) {
-      await db.updateListItem(result);
+    if (result == true) {
       loadListItems();
     }
   }
@@ -474,396 +472,6 @@ class _ListScreenState extends State<ListScreen> {
         onPressed: addItem,
         child: const Icon(Icons.add),
       ),
-    );
-  }
-}
-
-class AddItemDialog extends StatefulWidget {
-  final int placeId;
-  final List<ListItem> existingItems;
-
-  const AddItemDialog({
-    super.key,
-    required this.placeId,
-    required this.existingItems,
-  });
-
-  @override
-  State<AddItemDialog> createState() => _AddItemDialogState();
-}
-
-class _AddItemDialogState extends State<AddItemDialog> {
-  final db = DatabaseHelper.instance;
-  final nameController = TextEditingController();
-  final quantityController = TextEditingController();
-  final unitController = TextEditingController();
-  Item? selectedItem;
-  List<Item> searchResults = [];
-  bool isSearching = false;
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    quantityController.dispose();
-    unitController.dispose();
-    super.dispose();
-  }
-
-  Future<void> searchItems(String query) async {
-    if (query.length > 1) {
-      if (!mounted) return;
-      setState(() => isSearching = true);
-
-      try {
-        final results = await db.searchItems(query);
-        if (mounted) {
-          setState(() {
-            searchResults = results;
-            isSearching = false;
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            searchResults = [];
-            isSearching = false;
-          });
-        }
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          searchResults = [];
-          isSearching = false;
-        });
-      }
-    }
-  }
-
-  void selectItem(Item item) {
-    setState(() {
-      selectedItem = item;
-      nameController.text = item.name;
-      unitController.text = item.unit ?? '';
-      searchResults = [];
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(lw('Add Item')),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: lw('Item name'),
-                  hintText: lw('Search or enter item name'),
-                ),
-                autofocus: true,
-                onChanged: searchItems,
-              ),
-              const SizedBox(height: _itemVerticalSpacing),
-              if (searchResults.isNotEmpty)
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: searchResults.length,
-                    itemBuilder: (context, index) {
-                      final item = searchResults[index];
-                      return ListTile(
-                        title: Text(item.name),
-                        subtitle: item.unit != null ? Text(item.unit!) : null,
-                        dense: true,
-                        onTap: () => selectItem(item),
-                      );
-                    },
-                  ),
-                ),
-              const SizedBox(height: _dialogFieldSpacing),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      controller: quantityController,
-                      decoration: InputDecoration(
-                        labelText: lw('Quantity'),
-                        hintText: lw('e.g. 2'),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: unitController,
-                      decoration: InputDecoration(
-                        labelText: lw('Unit'),
-                        hintText: lw('e.g. kg, pcs'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(lw('Cancel')),
-        ),
-        TextButton(
-          onPressed: () {
-            if (nameController.text.isNotEmpty) {
-              // Check for duplicates (case-insensitive)
-              final itemName = nameController.text.trim();
-              final duplicate = widget.existingItems.any((item) =>
-                  item.displayName.toLowerCase() == itemName.toLowerCase());
-
-              if (duplicate) {
-                if (context.mounted) {
-                  showMessage(
-                    context,
-                    '${lw('Item')} "$itemName" ${lw('already exists in this list')}',
-                    type: MessageType.warning,
-                  );
-                }
-                return;
-              }
-
-              final newItem = ListItem(
-                placeId: widget.placeId,
-                itemId: selectedItem?.id,
-                name: selectedItem == null ? nameController.text : null,
-                unit: selectedItem == null && unitController.text.trim().isNotEmpty
-                    ? unitController.text.trim()
-                    : null,
-                quantity: quantityController.text.trim().isNotEmpty
-                    ? quantityController.text.trim()
-                    : null,
-                sortOrder: 0,
-              );
-              Navigator.pop(context, newItem);
-            }
-          },
-          child: Text(lw('OK')),
-        ),
-      ],
-    );
-  }
-}
-
-class EditItemDialog extends StatefulWidget {
-  final ListItem item;
-  final List<ListItem> existingItems;
-
-  const EditItemDialog({
-    super.key,
-    required this.item,
-    required this.existingItems,
-  });
-
-  @override
-  State<EditItemDialog> createState() => _EditItemDialogState();
-}
-
-class _EditItemDialogState extends State<EditItemDialog> {
-  final db = DatabaseHelper.instance;
-  final nameController = TextEditingController();
-  final quantityController = TextEditingController();
-  final unitController = TextEditingController();
-  Item? selectedItem;
-  List<Item> searchResults = [];
-  bool isSearching = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Pre-populate fields with current values
-    nameController.text = widget.item.displayName;
-    quantityController.text = widget.item.quantity ?? '';
-    unitController.text = widget.item.displayUnit;
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    quantityController.dispose();
-    unitController.dispose();
-    super.dispose();
-  }
-
-  Future<void> searchItems(String query) async {
-    if (query.length > 1) {
-      if (!mounted) return;
-      setState(() => isSearching = true);
-
-      try {
-        final results = await db.searchItems(query);
-        if (mounted) {
-          setState(() {
-            searchResults = results;
-            isSearching = false;
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            searchResults = [];
-            isSearching = false;
-          });
-        }
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          searchResults = [];
-          isSearching = false;
-        });
-      }
-    }
-  }
-
-  void selectItem(Item item) {
-    setState(() {
-      selectedItem = item;
-      nameController.text = item.name;
-      unitController.text = item.unit ?? '';
-      searchResults = [];
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(lw('Edit Item')),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: lw('Item name'),
-                  hintText: lw('Search or enter item name'),
-                ),
-                autofocus: true,
-                onChanged: searchItems,
-              ),
-              const SizedBox(height: _itemVerticalSpacing),
-              if (searchResults.isNotEmpty)
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: searchResults.length,
-                    itemBuilder: (context, index) {
-                      final item = searchResults[index];
-                      return ListTile(
-                        title: Text(item.name),
-                        subtitle: item.unit != null ? Text(item.unit!) : null,
-                        dense: true,
-                        onTap: () => selectItem(item),
-                      );
-                    },
-                  ),
-                ),
-              const SizedBox(height: _dialogFieldSpacing),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      controller: quantityController,
-                      decoration: InputDecoration(
-                        labelText: lw('Quantity'),
-                        hintText: lw('e.g. 2'),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: unitController,
-                      decoration: InputDecoration(
-                        labelText: lw('Unit'),
-                        hintText: lw('e.g. kg, pcs'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(lw('Cancel')),
-        ),
-        TextButton(
-          onPressed: () {
-            if (nameController.text.isNotEmpty) {
-              // Check for duplicates (excluding current item)
-              final itemName = nameController.text.trim();
-              final duplicate = widget.existingItems.any((item) =>
-                  item.id != widget.item.id &&
-                  item.displayName.toLowerCase() == itemName.toLowerCase());
-
-              if (duplicate) {
-                if (context.mounted) {
-                  showMessage(
-                    context,
-                    '${lw('Item')} "$itemName" ${lw('already exists in this list')}',
-                    type: MessageType.warning,
-                  );
-                }
-                return;
-              }
-
-              final updatedItem = ListItem(
-                id: widget.item.id,
-                placeId: widget.item.placeId,
-                itemId: selectedItem?.id,
-                name: selectedItem == null ? nameController.text.trim() : null,
-                unit: selectedItem == null && unitController.text.trim().isNotEmpty
-                    ? unitController.text.trim()
-                    : null,
-                quantity: quantityController.text.trim().isNotEmpty
-                    ? quantityController.text.trim()
-                    : null,
-                isPurchased: widget.item.isPurchased,
-                sortOrder: widget.item.sortOrder,
-              );
-              Navigator.pop(context, updatedItem);
-            }
-          },
-          child: Text(lw('OK')),
-        ),
-      ],
     );
   }
 }

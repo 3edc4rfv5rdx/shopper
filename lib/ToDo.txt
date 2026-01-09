@@ -1,4 +1,4 @@
-===TODO:
+===ToDo:
 o one universal add/edit list/dict dialog
 ? "receipts" (complex items, separate list, example - salads with ingredients)
 + move/copy items between places (lists)
@@ -26,6 +26,10 @@ o one universal add/edit list/dict dialog
 + change menu display location
 + add icon
 + add key
+
+===ToFIX:
+o сделать полосу между "куплено/не куплено" в списках более заметной, расширить
+o купленные товары не редактируются?
 
 ===ERRORS:
 + search doesn't work when entering items

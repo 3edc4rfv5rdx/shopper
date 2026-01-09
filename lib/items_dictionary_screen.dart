@@ -5,7 +5,6 @@ import 'globals.dart';
 
 // List spacing constants
 const double _searchPadding = 8.0; // padding around search field
-const double _dialogFieldSpacing = 16.0; // spacing between dialog fields
 const double _listItemVerticalPadding = 2.0; // vertical padding for list items
 const double _listItemHorizontalPadding = 16.0; // horizontal padding for list items
 
@@ -67,208 +66,33 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
   }
 
   Future<void> addItem() async {
-    final nameController = TextEditingController();
-    final unitController = TextEditingController();
-    List<Item> searchResults = [];
-
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          Future<void> searchItems(String query) async {
-            if (query.length > 1) {
-              try {
-                final results = await db.searchItems(query);
-                setState(() {
-                  searchResults = results;
-                });
-              } catch (e) {
-                setState(() {
-                  searchResults = [];
-                });
-              }
-            } else {
-              setState(() {
-                searchResults = [];
-              });
-            }
-          }
-
-          return AlertDialog(
-            title: Text(lw('Add Item')),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: lw('Item name'),
-                      hintText: lw('e.g. Milk, Bread'),
-                      suffixIcon: nameController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                setState(() {
-                                  nameController.clear();
-                                  searchResults = [];
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                    autofocus: true,
-                    onChanged: (value) {
-                      setState(() {});
-                      searchItems(value);
-                    },
-                  ),
-                  const SizedBox(height: _dialogFieldSpacing),
-                  if (searchResults.isNotEmpty)
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 150),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: searchResults.length,
-                        itemBuilder: (context, index) {
-                          final item = searchResults[index];
-                          return ListTile(
-                            title: Text(item.name),
-                            subtitle: item.unit != null ? Text(item.unit!) : null,
-                            dense: true,
-                            tileColor: Colors.orange.shade50,
-                            leading: const Icon(Icons.warning, color: Colors.orange, size: 20),
-                          );
-                        },
-                      ),
-                    ),
-                  if (searchResults.isNotEmpty)
-                    const SizedBox(height: _dialogFieldSpacing),
-                  TextField(
-                    controller: unitController,
-                    decoration: InputDecoration(
-                      labelText: lw('Unit'),
-                      hintText: lw('e.g. kg, pcs, liter'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(lw('Cancel')),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(lw('OK')),
-              ),
-            ],
-          );
-        },
+      builder: (context) => ItemDialog(
+        mode: ItemDialogMode.add,
+        dialogContext: ItemDialogContext.dictionary,
+        existingItems: items,
       ),
     );
 
-    if (result == true && nameController.text.isNotEmpty) {
-      // Check for duplicates (case-insensitive)
-      final itemName = nameController.text.trim();
-      final duplicate = items.any((item) =>
-          item.name.toLowerCase() == itemName.toLowerCase());
-
-      if (duplicate) {
-        if (mounted) {
-          showMessage(
-            context,
-            '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
-            type: MessageType.warning,
-          );
-        }
-        return;
-      }
-
-      final newItem = Item(
-        name: capitalizeFirst(nameController.text.trim()),
-        unit: unitController.text.trim().isEmpty ? null : unitController.text.trim(),
-        sortOrder: items.length,
-      );
-      await db.insertItem(newItem);
+    if (result == true) {
       loadItems();
-      if (mounted) {
-        showMessage(context, lw('Item added to dictionary'), type: MessageType.success);
-      }
     }
   }
 
   Future<void> editItem(Item item) async {
-    final nameController = TextEditingController(text: item.name);
-    final unitController = TextEditingController(text: item.unit ?? '');
-
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lw('Edit Item')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: lw('Item name')),
-              autofocus: true,
-            ),
-            const SizedBox(height: _dialogFieldSpacing),
-            TextField(
-              controller: unitController,
-              decoration: InputDecoration(labelText: lw('Unit')),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(lw('Cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(lw('OK')),
-          ),
-        ],
+      builder: (context) => ItemDialog(
+        mode: ItemDialogMode.edit,
+        dialogContext: ItemDialogContext.dictionary,
+        existingItems: items,
+        existingItem: item,
       ),
     );
 
-    if (result == true && nameController.text.isNotEmpty) {
-      // Check for duplicates (case-insensitive), excluding current item
-      final itemName = nameController.text.trim();
-      final duplicate = items.any((existingItem) =>
-          existingItem.id != item.id &&
-          existingItem.name.toLowerCase() == itemName.toLowerCase());
-
-      if (duplicate) {
-        if (mounted) {
-          showMessage(
-            context,
-            '${lw('Item')} "$itemName" ${lw('already exists in dictionary')}',
-            type: MessageType.warning,
-          );
-        }
-        return;
-      }
-
-      final updatedItem = Item(
-        id: item.id,
-        name: itemName,
-        unit: unitController.text.trim().isEmpty ? null : unitController.text.trim(),
-        sortOrder: item.sortOrder,
-      );
-      await db.updateItem(updatedItem);
+    if (result == true) {
       loadItems();
-      if (mounted) {
-        showMessage(context, lw('Item updated'), type: MessageType.success);
-      }
     }
   }
 
