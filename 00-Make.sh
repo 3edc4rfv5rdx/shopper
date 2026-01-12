@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="fix lists in list"
+COMMENT="fix lists in list2"
 #
 GLOBVERS='0.7'
 VER=''
