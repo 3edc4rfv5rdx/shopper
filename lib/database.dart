@@ -299,6 +299,16 @@ class DatabaseHelper {
     );
   }
 
+  Future<int> clearPurchasedFlags(int placeId) async {
+    final db = await database;
+    return await db.update(
+      'lists',
+      {'is_purchased': 0},
+      where: 'place_id = ? AND is_purchased = 1',
+      whereArgs: [placeId],
+    );
+  }
+
   // ========== SETTINGS CRUD ==========
 
   Future<void> setSetting(String key, String value) async {

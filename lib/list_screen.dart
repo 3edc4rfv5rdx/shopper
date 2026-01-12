@@ -125,6 +125,22 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> clearPurchasedFlags() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      lw('Clear purchased'),
+      lw('Mark all purchased items as unpurchased?'),
+    );
+
+    if (confirmed) {
+      await db.clearPurchasedFlags(widget.place.id!);
+      loadListItems();
+      if (mounted) {
+        showMessage(context, lw('Purchased flags have been cleared'), type: MessageType.success);
+      }
+    }
+  }
+
   Future<void> openMoveItems() async {
     if (listItems.isEmpty) {
       showMessage(context, lw('No items yet. Add one using the + button.'), type: MessageType.warning);
@@ -456,22 +472,68 @@ class _ListScreenState extends State<ListScreen> {
         title: Text(widget.place.name),
         actions: [
           if (listItems.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.keyboard_double_arrow_right),
-              onPressed: openMoveItems,
-              tooltip: lw('Move items'),
-            ),
-          if (listItems.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: shareList,
-              tooltip: lw('Share List'),
-            ),
-          if (purchased.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_sweep),
-              onPressed: deletePurchased,
-              tooltip: lw('Clear purchased'),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                switch (value) {
+                  case 'move':
+                    openMoveItems();
+                    break;
+                  case 'share':
+                    shareList();
+                    break;
+                  case 'delete_purchased':
+                    deletePurchased();
+                    break;
+                  case 'clear_flags':
+                    clearPurchasedFlags();
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'move',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.keyboard_double_arrow_right),
+                      const SizedBox(width: 12),
+                      Text(lw('Move items')),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'share',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.share),
+                      const SizedBox(width: 12),
+                      Text(lw('Share List')),
+                    ],
+                  ),
+                ),
+                if (purchased.isNotEmpty)
+                  PopupMenuItem(
+                    value: 'delete_purchased',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.delete_sweep),
+                        const SizedBox(width: 12),
+                        Text(lw('Delete purchased')),
+                      ],
+                    ),
+                  ),
+                if (purchased.isNotEmpty)
+                  PopupMenuItem(
+                    value: 'clear_flags',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.flag_outlined),
+                        const SizedBox(width: 12),
+                        Text(lw('Clear purchased')),
+                      ],
+                    ),
+                  ),
+              ],
             ),
         ],
       ),
