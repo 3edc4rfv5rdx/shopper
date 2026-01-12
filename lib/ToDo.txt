@@ -1,6 +1,5 @@
 ===TODO:
 + make menu instead of buttons in lists (+ button "clear purchased")
-??? o convert item to list
 + one universal add/edit list/dict dialog
 + place links (reference to other lists using quantity="-1" and unit="-{placeId}")
 ? "receipts" (complex items, separate list, example - salads with ingredients)
