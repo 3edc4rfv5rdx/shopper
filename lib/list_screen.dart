@@ -287,11 +287,10 @@ class _ListScreenState extends State<ListScreen> {
 
       if (isNestedLink) {
         // Recursively expand nested link
-        final nextIndent = indent.isEmpty ? '  ' : '$indent  ';
+        final nextIndent = '$indent  ';
         await _expandPlaceLink(buffer, item, nextIndent, visitedPlaces, choice);
       } else {
-        final itemIndent = indent.isEmpty ? '' : '$indent  ';
-        buffer.write('$itemIndent> ${item.displayName}');
+        buffer.write('$indent> ${item.displayName}');
 
         // Add quantity/unit
         if (item.quantity != null &&
@@ -311,8 +310,7 @@ class _ListScreenState extends State<ListScreen> {
 
     // Add divider between unpurchased and purchased items if there are both
     if (choice == 'all' && purchased.isNotEmpty && unpurchased.isNotEmpty) {
-      final itemIndent = indent.isEmpty ? '' : '$indent  ';
-      buffer.writeln('$itemIndent-------');
+      buffer.writeln('$indent-------');
     }
 
     // Write purchased items if choice is 'all'
@@ -321,11 +319,10 @@ class _ListScreenState extends State<ListScreen> {
         final isNestedLink = item.quantity == '-1';
 
         if (isNestedLink) {
-          final nextIndent = indent.isEmpty ? '  ' : '$indent  ';
+          final nextIndent = '$indent  ';
           await _expandPlaceLink(buffer, item, nextIndent, visitedPlaces, choice);
         } else {
-          final itemIndent = indent.isEmpty ? '' : '$indent  ';
-          buffer.write('${itemIndent}x ${item.displayName}');
+          buffer.write('${indent}x ${item.displayName}');
 
           if (item.quantity != null &&
               item.quantity!.trim().isNotEmpty &&
