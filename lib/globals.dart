@@ -9,7 +9,7 @@ import 'items.dart';
 import 'place.dart';
 
 const String progVersion = '0.7.260112';
-const int buildNumber = 19;
+const int buildNumber = 20;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 

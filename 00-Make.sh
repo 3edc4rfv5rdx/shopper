@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="fix lists in list3"
+COMMENT="make menu from buttons"
 #
 GLOBVERS='0.7'
 VER=''
