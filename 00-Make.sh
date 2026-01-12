@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="list in list and one add/edit editor"
+COMMENT="fix lists in list"
 #
 GLOBVERS='0.7'
 VER=''
