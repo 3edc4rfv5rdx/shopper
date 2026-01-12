@@ -287,9 +287,11 @@ class _ListScreenState extends State<ListScreen> {
 
       if (isNestedLink) {
         // Recursively expand nested link
-        await _expandPlaceLink(buffer, item, '$indent  ', visitedPlaces, choice);
+        final nextIndent = indent.isEmpty ? '  ' : '$indent  ';
+        await _expandPlaceLink(buffer, item, nextIndent, visitedPlaces, choice);
       } else {
-        buffer.write('$indent  > ${item.displayName}');
+        final itemIndent = indent.isEmpty ? '' : '$indent  ';
+        buffer.write('$itemIndent> ${item.displayName}');
 
         // Add quantity/unit
         if (item.quantity != null &&
@@ -307,15 +309,23 @@ class _ListScreenState extends State<ListScreen> {
       }
     }
 
+    // Add divider between unpurchased and purchased items if there are both
+    if (choice == 'all' && purchased.isNotEmpty && unpurchased.isNotEmpty) {
+      final itemIndent = indent.isEmpty ? '' : '$indent  ';
+      buffer.writeln('$itemIndent-------');
+    }
+
     // Write purchased items if choice is 'all'
     if (choice == 'all' && purchased.isNotEmpty) {
       for (final item in purchased) {
         final isNestedLink = item.quantity == '-1';
 
         if (isNestedLink) {
-          await _expandPlaceLink(buffer, item, '$indent  ', visitedPlaces, choice);
+          final nextIndent = indent.isEmpty ? '  ' : '$indent  ';
+          await _expandPlaceLink(buffer, item, nextIndent, visitedPlaces, choice);
         } else {
-          buffer.write('$indent  x ${item.displayName}');
+          final itemIndent = indent.isEmpty ? '' : '$indent  ';
+          buffer.write('${itemIndent}x ${item.displayName}');
 
           if (item.quantity != null &&
               item.quantity!.trim().isNotEmpty &&
@@ -387,9 +397,13 @@ class _ListScreenState extends State<ListScreen> {
       }
     }
 
+    // Add divider and completed items only if sharing all items
+    if (choice == 'all' && purchased.isNotEmpty && unpurchased.isNotEmpty) {
+      buffer.writeln('-------'); // Divider between sections
+    }
+
     // Add completed items only if sharing all items
     if (choice == 'all' && purchased.isNotEmpty) {
-      buffer.writeln('-------'); // Divider between sections
       for (final item in purchased) {
         final isPlaceLink = item.quantity == '-1';
 
@@ -559,10 +573,6 @@ class _ListScreenState extends State<ListScreen> {
                                     ),
                                   ],
                                 ),
-                                subtitle: isPlaceLink
-                                    ? Text(lw('Linked list'),
-                                        style: const TextStyle(fontSize: fsNormal, fontStyle: FontStyle.italic))
-                                    : null,
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [

@@ -1,4 +1,6 @@
 ===TODO:
+o make menu instead of buttons in lists (+ button "clear purchased flags")
+??? o convert item to list
 + one universal add/edit list/dict dialog
 + place links (reference to other lists using quantity="-1" and unit="-{placeId}")
 ? "receipts" (complex items, separate list, example - salads with ingredients)
@@ -29,6 +31,8 @@
 + add key
 
 ===ToFIX:
++ tree structure broken in lists
++ remove "Linked list" subtitle
 + when sharing lists - expand place links recursively (show nested list contents)
 + display items in one line in dictionary too ("Milk /L")
 + remove space between quantity and unit (Milk 5L) in lists
