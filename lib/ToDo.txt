@@ -30,6 +30,7 @@
 + add key
 
 ===ToFIX:
+o в меню списков шрифт сделать чуть крупнее
 + tree structure broken in lists
 + remove "Linked list" subtitle
 + when sharing lists - expand place links recursively (show nested list contents)
