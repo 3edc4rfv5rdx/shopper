@@ -275,11 +275,15 @@ class _ListScreenState extends State<ListScreen> {
 
     // Get items from linked place
     final linkedItems = await db.getListItems(placeId);
-    final unpurchased = linkedItems.where((item) => !item.isPurchased).toList();
-    final purchased = linkedItems.where((item) => item.isPurchased).toList();
+    // Place links are always treated as unpurchased since they're just references
+    final unpurchased = linkedItems.where((item) => !item.isPurchased || item.quantity == '-1').toList();
+    final purchased = linkedItems.where((item) => item.isPurchased && item.quantity != '-1').toList();
 
     // Write place name
     buffer.writeln('$indent* =${linkedPlace.name}:');
+
+    // Items inside this place should have additional indent
+    final itemIndent = '$indent  ';
 
     // Write unpurchased items
     for (final item in unpurchased) {
@@ -287,10 +291,10 @@ class _ListScreenState extends State<ListScreen> {
 
       if (isNestedLink) {
         // Recursively expand nested link
-        final nextIndent = '$indent  ';
+        final nextIndent = '$itemIndent  ';
         await _expandPlaceLink(buffer, item, nextIndent, visitedPlaces, choice);
       } else {
-        buffer.write('$indent> ${item.displayName}');
+        buffer.write('$itemIndent> ${item.displayName}');
 
         // Add quantity/unit
         if (item.quantity != null &&
@@ -310,7 +314,7 @@ class _ListScreenState extends State<ListScreen> {
 
     // Add divider between unpurchased and purchased items if there are both
     if (choice == 'all' && purchased.isNotEmpty && unpurchased.isNotEmpty) {
-      buffer.writeln('$indent-------');
+      buffer.writeln('$itemIndent-------');
     }
 
     // Write purchased items if choice is 'all'
@@ -319,10 +323,10 @@ class _ListScreenState extends State<ListScreen> {
         final isNestedLink = item.quantity == '-1';
 
         if (isNestedLink) {
-          final nextIndent = '$indent  ';
+          final nextIndent = '$itemIndent  ';
           await _expandPlaceLink(buffer, item, nextIndent, visitedPlaces, choice);
         } else {
-          buffer.write('${indent}x ${item.displayName}');
+          buffer.write('${itemIndent}x ${item.displayName}');
 
           if (item.quantity != null &&
               item.quantity!.trim().isNotEmpty &&
@@ -350,15 +354,15 @@ class _ListScreenState extends State<ListScreen> {
     if (choice == null) return; // User canceled
 
     // Separate items by purchase status
-    final unpurchased = listItems.where((item) => !item.isPurchased).toList();
-    final purchased = listItems.where((item) => item.isPurchased).toList();
+    // Place links (quantity="-1") are always treated as unpurchased since they're just references
+    final unpurchased = listItems.where((item) => !item.isPurchased || item.quantity == '-1').toList();
+    final purchased = listItems.where((item) => item.isPurchased && item.quantity != '-1').toList();
 
     // Format the list as plain text
     final StringBuffer buffer = StringBuffer();
 
     // Add place name as header
     buffer.writeln('* =${widget.place.name}:');
-    buffer.writeln(); // Empty line after header
 
     // Track visited places to prevent infinite loops
     final visitedPlaces = <int>{};
@@ -371,8 +375,8 @@ class _ListScreenState extends State<ListScreen> {
       final isPlaceLink = item.quantity == '-1';
 
       if (isPlaceLink) {
-        // Expand place link recursively
-        await _expandPlaceLink(buffer, item, '', visitedPlaces, choice);
+        // Expand place link recursively with 2 spaces indent
+        await _expandPlaceLink(buffer, item, '  ', visitedPlaces, choice);
       } else {
         buffer.write('> ${item.displayName}');
 
@@ -405,8 +409,8 @@ class _ListScreenState extends State<ListScreen> {
         final isPlaceLink = item.quantity == '-1';
 
         if (isPlaceLink) {
-          // Expand place link recursively (with x prefix)
-          await _expandPlaceLink(buffer, item, '', visitedPlaces, choice);
+          // Expand place link recursively with 2 spaces indent
+          await _expandPlaceLink(buffer, item, '  ', visitedPlaces, choice);
         } else {
           buffer.write('x ${item.displayName}');
 
