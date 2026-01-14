@@ -76,6 +76,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     );
 
     if (result == true) {
+      // ItemDialog already handles auto-sort if enabled
       loadItems();
     }
   }

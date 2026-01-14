@@ -20,10 +20,12 @@ class _ListScreenState extends State<ListScreen> {
   final db = DatabaseHelper.instance;
   List<ListItem> listItems = [];
   bool isLoading = true;
+  late Place currentPlace;
 
   @override
   void initState() {
     super.initState();
+    currentPlace = widget.place;
     loadListItems();
   }
 
@@ -197,6 +199,49 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> editComment() async {
+    final commentController = TextEditingController(text: currentPlace.comment);
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lw('Comment')),
+        content: TextField(
+          controller: commentController,
+          decoration: InputDecoration(
+            labelText: lw('Comment'),
+            hintText: lw('Optional note about this list'),
+          ),
+          maxLines: null,
+          minLines: 5,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(lw('Cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(lw('OK')),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      final updatedPlace = currentPlace.copyWith(
+        comment: commentController.text.isEmpty ? null : commentController.text,
+      );
+      await db.updatePlace(updatedPlace);
+
+      if (mounted) {
+        setState(() {
+          currentPlace = updatedPlace;
+        });
+      }
+    }
+  }
+
   Future<void> openMoveItems() async {
     if (listItems.isEmpty) {
       showMessage(context, lw('No items yet. Add one using the + button.'), type: MessageType.warning);
@@ -303,6 +348,15 @@ class _ListScreenState extends State<ListScreen> {
       sortOrder: allItems.length,
     );
     final itemId = await db.insertItem(newItem);
+
+    // Check if auto-sort is enabled
+    final autoSortSetting = await db.getSetting('auto_sort_dict');
+    if (autoSortSetting == 'true') {
+      // Reload all items and sort them alphabetically
+      final allItemsReloaded = await db.getItems();
+      allItemsReloaded.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      await db.updateItemsOrder(allItemsReloaded);
+    }
 
     // Update list item to reference the new item
     final updated = listItem.copyWith(
@@ -434,7 +488,7 @@ class _ListScreenState extends State<ListScreen> {
     final StringBuffer buffer = StringBuffer();
 
     // Add place name as header
-    buffer.writeln('* =${widget.place.name}:');
+    buffer.writeln('* =${currentPlace.name}:');
 
     // Track visited places to prevent infinite loops
     final visitedPlaces = <int>{};
@@ -507,7 +561,7 @@ class _ListScreenState extends State<ListScreen> {
 
     // Check if there are items to share
     final text = buffer.toString().trim();
-    if (text == '* =${widget.place.name}:') {
+    if (text == '* =${currentPlace.name}:') {
       if (mounted) {
         showMessage(context, lw('No items to share'), type: MessageType.warning);
       }
@@ -515,7 +569,7 @@ class _ListScreenState extends State<ListScreen> {
     }
 
     // Share the text
-    await Share.share(text, subject: widget.place.name);
+    await Share.share(text, subject: currentPlace.name);
   }
 
   @override
@@ -525,7 +579,7 @@ class _ListScreenState extends State<ListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.place.name),
+        title: Text(currentPlace.name),
         actions: [
           if (listItems.isNotEmpty)
             PopupMenuButton<String>(
@@ -539,6 +593,9 @@ class _ListScreenState extends State<ListScreen> {
                     break;
                   case 'share':
                     shareList();
+                    break;
+                  case 'comment':
+                    editComment();
                     break;
                   case 'delete_purchased':
                     deletePurchased();
@@ -566,6 +623,16 @@ class _ListScreenState extends State<ListScreen> {
                       const Icon(Icons.share),
                       const SizedBox(width: 12),
                       Text(lw('Share List')),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'comment',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.comment),
+                      const SizedBox(width: 12),
+                      Text(lw('Comment')),
                     ],
                   ),
                 ),
@@ -786,6 +853,33 @@ class _ListScreenState extends State<ListScreen> {
                             ),
                           );
                         },
+                      ),
+                    ],
+                    if (currentPlace.comment != null && currentPlace.comment!.isNotEmpty) ...[
+                      const Divider(thickness: 2, height: 24, color: Colors.black),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              lw('Comment'),
+                              style: TextStyle(
+                                fontSize: fsMedium,
+                                fontWeight: fwBold,
+                                color: clText,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              currentPlace.comment!,
+                              style: TextStyle(
+                                fontSize: fsNormal,
+                                color: clText,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ],

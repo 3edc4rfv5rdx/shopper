@@ -26,7 +26,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -38,7 +38,8 @@ class DatabaseHelper {
       CREATE TABLE places (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        sort_order INTEGER
+        sort_order INTEGER,
+        comment TEXT
       )
     ''');
 
@@ -81,6 +82,10 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       // Add sort_order column to items table
       await db.execute('ALTER TABLE items ADD COLUMN sort_order INTEGER');
+    }
+    if (oldVersion < 3) {
+      // Add comment column to places table
+      await db.execute('ALTER TABLE places ADD COLUMN comment TEXT');
     }
   }
 

@@ -2,11 +2,13 @@ class Place {
   final int? id;
   final String name;
   final int sortOrder;
+  final String? comment;
 
   Place({
     this.id,
     required this.name,
     required this.sortOrder,
+    this.comment,
   });
 
   Map<String, dynamic> toMap() {
@@ -14,6 +16,7 @@ class Place {
       'id': id,
       'name': name,
       'sort_order': sortOrder,
+      'comment': comment,
     };
   }
 
@@ -22,6 +25,7 @@ class Place {
       id: map['id'] as int?,
       name: map['name'] as String,
       sortOrder: map['sort_order'] as int,
+      comment: map['comment'] as String?,
     );
   }
 
@@ -29,11 +33,13 @@ class Place {
     int? id,
     String? name,
     int? sortOrder,
+    String? comment,
   }) {
     return Place(
       id: id ?? this.id,
       name: name ?? this.name,
       sortOrder: sortOrder ?? this.sortOrder,
+      comment: comment ?? this.comment,
     );
   }
 }

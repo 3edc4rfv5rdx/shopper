@@ -13,6 +13,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final db = DatabaseHelper.instance;
   bool confirmExit = true;
+  bool autoSortDict = false;
 
   @override
   void initState() {
@@ -21,9 +22,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final value = await db.getSetting('confirm_exit');
+    final exitValue = await db.getSetting('confirm_exit');
+    final sortValue = await db.getSetting('auto_sort_dict');
     setState(() {
-      confirmExit = value != 'false'; // Default to true if not set
+      confirmExit = exitValue != 'false'; // Default to true if not set
+      autoSortDict = sortValue == 'true'; // Default to false if not set
     });
   }
 
@@ -31,6 +34,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await db.setSetting('confirm_exit', value.toString());
     setState(() {
       confirmExit = value;
+    });
+  }
+
+  Future<void> _toggleAutoSortDict(bool value) async {
+    await db.setSetting('auto_sort_dict', value.toString());
+    setState(() {
+      autoSortDict = value;
     });
   }
 
@@ -287,6 +297,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             onTap: () => _toggleConfirmExit(!confirmExit),
+          ),
+          ListTile(
+            leading: const Icon(Icons.sort_by_alpha),
+            title: Text(lw('Auto-sort dictionary')),
+            subtitle: Text(autoSortDict ? lw('Sort alphabetically on item add') : lw('Manual sorting only')),
+            trailing: Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                value: autoSortDict,
+                onChanged: _toggleAutoSortDict,
+              ),
+            ),
+            onTap: () => _toggleAutoSortDict(!autoSortDict),
           ),
           ListTile(
             leading: const Icon(Icons.backup),

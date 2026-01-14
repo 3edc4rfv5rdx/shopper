@@ -770,6 +770,15 @@ class _ItemDialogState extends State<ItemDialog> {
 
       await db.insertItem(newItem);
 
+      // Check if auto-sort is enabled
+      final autoSortSetting = await db.getSetting('auto_sort_dict');
+      if (autoSortSetting == 'true') {
+        // Reload all items and sort them alphabetically
+        final allItems = await db.getItems();
+        allItems.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        await db.updateItemsOrder(allItems);
+      }
+
       if (mounted) {
         showMessage(context, lw('Item added to dictionary'), type: MessageType.success);
       }
