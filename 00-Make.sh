@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="make menu from buttons"
+COMMENT="item to list, comments, auto-sort"
 #
 GLOBVERS='0.7'
 VER=''
