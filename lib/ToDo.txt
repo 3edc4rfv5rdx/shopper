@@ -1,8 +1,12 @@
 ===TODO:
+> setting: sort dictionary immediately on input
+> comment for list
+> remove from lists/menu/list
 + make menu instead of buttons in lists (+ button "clear purchased")
 + one universal add/edit list/dict dialog
++ convert item to list
++ new menu color
 + place links (reference to other lists using quantity="-1" and unit="-{placeId}")
-? "receipts" (complex items, separate list, example - salads with ingredients)
 + move/copy items between places (lists)
 + make error messages at bottom red and success messages green
 + add clear button to search field in dictionary (<=x)
@@ -30,7 +34,7 @@
 + add key
 
 ===ToFIX:
-o в меню списков шрифт сделать чуть крупнее
+o make font slightly larger in lists menu
 + tree structure broken in lists
 + remove "Linked list" subtitle
 + when sharing lists - expand place links recursively (show nested list contents)

@@ -88,7 +88,54 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> convertItemToList(ListItem item) async {
+    // Get all places to determine sort order
+    final allPlaces = await db.getPlaces();
+
+    // Create new Place with the item's name
+    final newPlace = Place(
+      name: item.displayName,
+      sortOrder: allPlaces.length,
+    );
+
+    final newPlaceId = await db.insertPlace(newPlace);
+
+    // Create a new ListItem that is a place link
+    final placeLink = ListItem(
+      placeId: widget.place.id!,
+      itemId: null,
+      name: item.displayName,
+      unit: '-$newPlaceId', // Place link format
+      quantity: '-1', // Indicates this is a place link
+      isPurchased: false,
+      sortOrder: item.sortOrder, // Keep the same position
+    );
+
+    // Delete the old item and insert the place link
+    await db.deleteListItem(item.id!);
+    await db.insertListItem(placeLink);
+
+    // Reload list
+    loadListItems();
+
+    // Navigate to the new list
+    if (mounted) {
+      final createdPlace = await db.getPlace(newPlaceId);
+      if (createdPlace != null) {
+        await Navigator.pushNamed(
+          context,
+          '/list',
+          arguments: createdPlace,
+        );
+        // Reload after returning from the new list
+        loadListItems();
+      }
+    }
+  }
+
   void showItemContextMenu(ListItem item) {
+    final isPlaceLink = item.quantity == '-1';
+
     showTopMenu(
       context: context,
       items: [
@@ -100,6 +147,15 @@ class _ListScreenState extends State<ListScreen> {
             editItem(item);
           },
         ),
+        if (!isPlaceLink)
+          ListTile(
+            leading: const Icon(Icons.folder_copy),
+            title: Text(lw('Convert to list')),
+            onTap: () {
+              Navigator.pop(context);
+              convertItemToList(item);
+            },
+          ),
         ListTile(
           leading: const Icon(Icons.delete),
           title: Text(lw('Delete')),
@@ -474,6 +530,8 @@ class _ListScreenState extends State<ListScreen> {
           if (listItems.isNotEmpty)
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
+              color: clMenu,
+              surfaceTintColor: Colors.transparent,
               onSelected: (value) {
                 switch (value) {
                   case 'move':
