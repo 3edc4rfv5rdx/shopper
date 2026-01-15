@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="item to list, comments, auto-sort"
+COMMENT="test input dialog/search"
 #
 GLOBVERS='0.7'
 VER=''

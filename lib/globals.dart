@@ -8,8 +8,8 @@ import 'list.dart';
 import 'items.dart';
 import 'place.dart';
 
-const String progVersion = '0.7.260114';
-const int buildNumber = 21;
+const String progVersion = '0.7.260115';
+const int buildNumber = 22;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 
@@ -367,8 +367,8 @@ Future<T?> showTopMenu<T>({
 // ========== UNIFIED ITEM DIALOG ==========
 
 // List spacing constants
-const double _itemVerticalSpacing = 8.0;
-const double _dialogFieldSpacing = 16.0;
+const double _itemVerticalSpacing = 4.0;
+const double _dialogFieldSpacing = 8.0;
 
 // Dialog modes
 enum ItemDialogMode { add, edit }
@@ -788,8 +788,7 @@ class _ItemDialogState extends State<ItemDialog> {
   Widget _buildSearchResults() {
     if (searchResults.isEmpty) return const SizedBox.shrink();
 
-    final maxHeight = widget.dialogContext == ItemDialogContext.dictionary ? 150.0 : 200.0;
-    final isClickable = widget.dialogContext == ItemDialogContext.list;
+    final maxHeight = widget.dialogContext == ItemDialogContext.dictionary ? 120.0 : 150.0;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -797,31 +796,42 @@ class _ItemDialogState extends State<ItemDialog> {
         border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: searchResults.length,
-        itemBuilder: (context, index) {
-          final item = searchResults[index] as Item;
+      child: Scrollbar(
+        thumbVisibility: true,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: searchResults.length,
+          itemBuilder: (context, index) {
+            final item = searchResults[index] as Item;
+            final displayText = item.unit != null
+                ? '${item.name} /${item.unit}'
+                : item.name;
 
-          if (widget.dialogContext == ItemDialogContext.dictionary) {
-            // Warning-only style
-            return ListTile(
-              title: Text(item.name),
-              subtitle: item.unit != null ? Text(item.unit!) : null,
-              dense: true,
-              tileColor: Colors.orange.shade50,
-              leading: const Icon(Icons.warning, color: Colors.orange, size: 20),
-            );
-          } else {
-            // Clickable style
-            return ListTile(
-              title: Text(item.name),
-              subtitle: item.unit != null ? Text(item.unit!) : null,
-              dense: true,
-              onTap: isClickable ? () => selectItem(item) : null,
-            );
-          }
-        },
+            if (widget.dialogContext == ItemDialogContext.dictionary) {
+              // Warning-only style
+              return Container(
+                color: Colors.orange.shade50,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Colors.orange, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(displayText, style: const TextStyle(fontSize: 14))),
+                  ],
+                ),
+              );
+            } else {
+              // Clickable style
+              return InkWell(
+                onTap: () => selectItem(item),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text(displayText, style: const TextStyle(fontSize: 14)),
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }
