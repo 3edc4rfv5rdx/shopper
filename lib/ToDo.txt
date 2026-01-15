@@ -1,6 +1,6 @@
 ===TODO:
 + comment for list
-> remove from lists/menu/list
++ remove from lists/menu/list
 + convert item to list
 + setting: sort dictionary immediately on input
 + make menu instead of buttons in lists (+ button "clear purchased")
