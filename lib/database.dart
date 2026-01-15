@@ -156,6 +156,16 @@ class DatabaseHelper {
     return result.first['count'] as int;
   }
 
+  Future<int> getTotalItemsCount(int placeId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT COUNT(*) as count
+      FROM lists
+      WHERE place_id = ?
+    ''', [placeId]);
+    return result.first['count'] as int;
+  }
+
   // ========== ITEMS CRUD (dictionary) ==========
 
   Future<int> insertItem(Item item) async {

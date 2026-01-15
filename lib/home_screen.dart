@@ -15,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final db = DatabaseHelper.instance;
   List<Place> places = [];
   Set<int> placesWithUnpurchased = {};
+  Set<int> placesAllPurchased = {};
   bool isLoading = true;
 
   @override
@@ -27,18 +28,24 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => isLoading = true);
     final data = await db.getPlaces();
 
-    // Load unpurchased counts for all places
+    // Load item counts for all places
     final Set<int> hasUnpurchased = {};
+    final Set<int> allPurchased = {};
     for (final place in data) {
-      final count = await db.getUnpurchasedItemsCount(place.id!);
-      if (count > 0) {
+      final unpurchasedCount = await db.getUnpurchasedItemsCount(place.id!);
+      final totalCount = await db.getTotalItemsCount(place.id!);
+      if (unpurchasedCount > 0) {
         hasUnpurchased.add(place.id!);
+      } else if (totalCount > 0) {
+        // Has items but all are purchased
+        allPurchased.add(place.id!);
       }
     }
 
     setState(() {
       places = data;
       placesWithUnpurchased = hasUnpurchased;
+      placesAllPurchased = allPurchased;
       isLoading = false;
     });
   }
@@ -210,6 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final place = places[index];
                     final hasUnpurchased = placesWithUnpurchased.contains(place.id);
+                    final allPurchased = placesAllPurchased.contains(place.id);
                     return Dismissible(
                       key: ValueKey(place.id),
                       background: Container(
@@ -250,6 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontWeight: hasUnpurchased ? fwBold : fwNormal,
                             fontSize: hasUnpurchased ? fsMedium : fsNormal,
+                            decoration: allPurchased ? TextDecoration.lineThrough : null,
                           ),
                         ),
                         leading: const Icon(Icons.store),
