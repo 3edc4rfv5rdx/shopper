@@ -33,10 +33,10 @@
 + add key
 
 ===ToFIX:
-o в обоих диалогах "удалить купленные" и "очистить купленные" одинаковый заголовок - "очистить купленные"
++ both "delete purchased" and "clear purchased" dialogs had same title - fixed
 + input/search list
 + new menu color
-+ make font slightly larger in lists menu
++ make font slightly larger in list menu
 + tree structure broken in lists
 + remove "Linked list" subtitle
 + when sharing lists - expand place links recursively (show nested list contents)

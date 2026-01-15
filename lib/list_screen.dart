@@ -173,7 +173,7 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> deletePurchased() async {
     final confirmed = await showConfirmDialog(
       context,
-      lw('Clear Purchased'),
+      lw('Delete purchased'),
       lw('Delete all purchased items from this list?'),
     );
 
