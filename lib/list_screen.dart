@@ -612,7 +612,7 @@ class _ListScreenState extends State<ListScreen> {
                     children: [
                       const Icon(Icons.keyboard_double_arrow_right),
                       const SizedBox(width: 12),
-                      Text(lw('Move items')),
+                      Text(lw('Move items'), style: TextStyle(fontSize: fsMedium)),
                     ],
                   ),
                 ),
@@ -622,7 +622,7 @@ class _ListScreenState extends State<ListScreen> {
                     children: [
                       const Icon(Icons.share),
                       const SizedBox(width: 12),
-                      Text(lw('Share List')),
+                      Text(lw('Share List'), style: TextStyle(fontSize: fsMedium)),
                     ],
                   ),
                 ),
@@ -632,7 +632,7 @@ class _ListScreenState extends State<ListScreen> {
                     children: [
                       const Icon(Icons.comment),
                       const SizedBox(width: 12),
-                      Text(lw('Comment')),
+                      Text(lw('Comment'), style: TextStyle(fontSize: fsMedium)),
                     ],
                   ),
                 ),
@@ -643,7 +643,7 @@ class _ListScreenState extends State<ListScreen> {
                       children: [
                         const Icon(Icons.delete_sweep),
                         const SizedBox(width: 12),
-                        Text(lw('Delete purchased')),
+                        Text(lw('Delete purchased'), style: TextStyle(fontSize: fsMedium)),
                       ],
                     ),
                   ),
@@ -654,7 +654,7 @@ class _ListScreenState extends State<ListScreen> {
                       children: [
                         const Icon(Icons.flag_outlined),
                         const SizedBox(width: 12),
-                        Text(lw('Clear purchased')),
+                        Text(lw('Clear purchased'), style: TextStyle(fontSize: fsMedium)),
                       ],
                     ),
                   ),

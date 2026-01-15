@@ -33,9 +33,10 @@
 + add key
 
 ===ToFIX:
+o в обоих диалогах "удалить купленные" и "очистить купленные" одинаковый заголовок - "очистить купленные"
 + input/search list
 + new menu color
-o make font slightly larger in lists menu
++ make font slightly larger in lists menu
 + tree structure broken in lists
 + remove "Linked list" subtitle
 + when sharing lists - expand place links recursively (show nested list contents)
