@@ -33,6 +33,7 @@
 + add key
 
 ===ToFIX:
++ input/search list
 + new menu color
 o make font slightly larger in lists menu
 + tree structure broken in lists
