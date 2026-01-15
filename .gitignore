@@ -128,7 +128,7 @@ app.*.symbols
 /.idea/modules.xml
 /.idea/studiobot.xml
 /.idea/vcs.xml
-/.metadata
+
 /test/widget_test.dart
 /linux/flutter/CMakeLists.txt
 /linux/runner/CMakeLists.txt

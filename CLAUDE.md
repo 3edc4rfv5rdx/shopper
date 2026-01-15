@@ -79,10 +79,27 @@ if (mounted) {
 showMessage(context, 'text', type: MessageType.success/warning/error/info);
 ```
 
+## Scripts
+
+### 00-Make.sh
+Build script - creates APK and sets git tag with new build number.
+
+### 01-PushTag.sh
+Push to GitHub with version tracking:
+1. Checks working tree is clean
+2. Pushes commits to origin
+3. Gets latest tag (e.g. `v0.7.260115+26`)
+4. Adds version marker to ToDo.txt after each section header: `# v0.7.260115+26 (2025-01-15 12:42:00)`
+5. Commits ToDo.txt changes
+6. Pushes the tag
+
+Has `DRY=""` variable for dry-run testing.
+
 ## Build Commands
 ```bash
-flutter build apk --release
-flutter run
+./00-Make.sh          # Build APK + create tag
+./01-PushTag.sh       # Push to GitHub + update ToDo.txt
+flutter run           # Run in debug mode
 ```
 
 ## Version Info
