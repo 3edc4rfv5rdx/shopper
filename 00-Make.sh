@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="test input dialog/search"
+COMMENT="many small improvements"
 #
 GLOBVERS='0.7'
 VER=''
