@@ -121,17 +121,15 @@ class _ListScreenState extends State<ListScreen> {
     loadListItems();
 
     // Navigate to the new list
-    if (mounted) {
-      final createdPlace = await db.getPlace(newPlaceId);
-      if (createdPlace != null) {
-        await Navigator.pushNamed(
-          context,
-          '/list',
-          arguments: createdPlace,
-        );
-        // Reload after returning from the new list
-        loadListItems();
-      }
+    final createdPlace = await db.getPlace(newPlaceId);
+    if (createdPlace != null && mounted) {
+      await Navigator.pushNamed(
+        context,
+        '/list',
+        arguments: createdPlace,
+      );
+      // Reload after returning from the new list
+      loadListItems();
     }
   }
 
