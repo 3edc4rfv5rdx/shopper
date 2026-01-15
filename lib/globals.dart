@@ -9,7 +9,7 @@ import 'items.dart';
 import 'place.dart';
 
 const String progVersion = '0.7.260115';
-const int buildNumber = 22;
+const int buildNumber = 23;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 
@@ -788,7 +788,7 @@ class _ItemDialogState extends State<ItemDialog> {
   Widget _buildSearchResults() {
     if (searchResults.isEmpty) return const SizedBox.shrink();
 
-    final maxHeight = widget.dialogContext == ItemDialogContext.dictionary ? 120.0 : 150.0;
+    final maxHeight = widget.dialogContext == ItemDialogContext.dictionary ? 100.0 : 120.0;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -926,9 +926,11 @@ class _ItemDialogState extends State<ItemDialog> {
                   hintText: widget.dialogContext == ItemDialogContext.list
                       ? lw('Search or enter item name')
                       : lw('e.g. Milk, Bread'),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   suffixIcon: nameController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear),
+                          icon: const Icon(Icons.clear, size: 20),
                           onPressed: () {
                             setState(() {
                               nameController.clear();
