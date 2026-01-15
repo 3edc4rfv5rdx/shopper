@@ -9,7 +9,7 @@ import 'items.dart';
 import 'place.dart';
 
 const String progVersion = '0.7.260115';
-const int buildNumber = 23;
+const int buildNumber = 24;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 
@@ -788,7 +788,7 @@ class _ItemDialogState extends State<ItemDialog> {
   Widget _buildSearchResults() {
     if (searchResults.isEmpty) return const SizedBox.shrink();
 
-    final maxHeight = widget.dialogContext == ItemDialogContext.dictionary ? 100.0 : 120.0;
+    final maxHeight = widget.dialogContext == ItemDialogContext.dictionary ? 80.0 : 100.0;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
