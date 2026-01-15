@@ -9,7 +9,7 @@ import 'items.dart';
 import 'place.dart';
 
 const String progVersion = '0.7.260115';
-const int buildNumber = 24;
+const int buildNumber = 25;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 
@@ -913,6 +913,8 @@ class _ItemDialogState extends State<ItemDialog> {
 
     return AlertDialog(
       title: Text(title),
+      contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
