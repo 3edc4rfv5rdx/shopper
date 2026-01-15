@@ -475,9 +475,12 @@ class _ListScreenState extends State<ListScreen> {
 
   Future<void> shareList() async {
     // Show dialog to choose what to share
-    final choice = await showShareOptionsDialog(context);
+    final result = await showShareOptionsDialog(context);
 
-    if (choice == null) return; // User canceled
+    if (result == null) return; // User canceled
+
+    final choice = result['option'] as String;
+    final includeComment = result['includeComment'] as bool;
 
     // Separate items by purchase status
     // Place links (quantity="-1") are always treated as unpurchased since they're just references
@@ -557,6 +560,12 @@ class _ListScreenState extends State<ListScreen> {
           buffer.writeln();
         }
       }
+    }
+
+    // Add comment if requested and exists
+    if (includeComment && currentPlace.comment != null && currentPlace.comment!.isNotEmpty) {
+      buffer.writeln('-------');
+      buffer.writeln(currentPlace.comment);
     }
 
     // Check if there are items to share

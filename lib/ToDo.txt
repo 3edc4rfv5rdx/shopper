@@ -1,4 +1,5 @@
 ===TODO:
++ in "share list" dialog add checkbox "with comment" and include comment in shared text
 + comment for list
 + remove from lists/menu/list
 + convert item to list

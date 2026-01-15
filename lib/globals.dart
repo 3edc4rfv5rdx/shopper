@@ -268,10 +268,12 @@ Future<bool> showConfirmDialog(
 }
 
 // Show share options dialog
-Future<String?> showShareOptionsDialog(BuildContext context) async {
+// Returns Map with 'option' (String) and 'includeComment' (bool)
+Future<Map<String, dynamic>?> showShareOptionsDialog(BuildContext context) async {
   String selectedOption = 'unpurchased'; // Default selection
+  bool includeComment = false;
 
-  return await showDialog<String>(
+  return await showDialog<Map<String, dynamic>>(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) => AlertDialog(
@@ -305,6 +307,16 @@ Future<String?> showShareOptionsDialog(BuildContext context) async {
               ),
               tileColor: selectedOption == 'all' ? clSel : null,
             ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              title: Text(lw('With comment')),
+              value: includeComment,
+              onChanged: (value) => setState(() => includeComment = value ?? false),
+              activeColor: clUpBar,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              visualDensity: VisualDensity.compact,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
           ],
         ),
         actions: [
@@ -313,7 +325,10 @@ Future<String?> showShareOptionsDialog(BuildContext context) async {
             child: Text(lw('Cancel')),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, selectedOption),
+            onPressed: () => Navigator.pop(context, {
+              'option': selectedOption,
+              'includeComment': includeComment,
+            }),
             child: Text(lw('OK')),
           ),
         ],
