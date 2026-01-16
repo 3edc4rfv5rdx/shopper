@@ -19,9 +19,6 @@ fi
 
 echo "OK: Working tree is clean."
 
-echo "=== Pushing current branch ($DRY) ==="
-git push $DRY "$REMOTE"
-
 echo "=== Detecting latest tag ==="
 LAST_TAG=$(git tag --list 'v*' | sort -V | tail -n 1)
 
@@ -46,7 +43,7 @@ fi
 TMP_FILE="$(mktemp)"
 
 awk -v tag="$TAG_LINE" '
-/^===TODO:/ || /^===ToFIX:/ || /^===ERRORS:/ {
+/^===TODO:/ || /^===TOFIX:/ || /^===ERRORS:/ {
     print $0
     getline nextline
 
@@ -72,6 +69,9 @@ else
     git add "$TODO_FILE"
     git commit -m "Update todo for $LAST_TAG ($NOW)"
 fi
+
+echo "=== Pushing current branch ($DRY) ==="
+git push $DRY "$REMOTE"
 
 echo "=== Pushing tag ($DRY) ==="
 git push $DRY "$REMOTE" "$LAST_TAG"
