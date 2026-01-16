@@ -357,6 +357,32 @@ class DatabaseHelper {
     );
   }
 
+  // ========== PIN LOCK ==========
+
+  String _pinKey(int placeId) => '$placeId-pin';
+
+  Future<bool> isPlaceLocked(int placeId) async {
+    final pin = await getSetting(_pinKey(placeId));
+    return pin != null && pin.isNotEmpty;
+  }
+
+  Future<String?> getPlacePin(int placeId) async {
+    return await getSetting(_pinKey(placeId));
+  }
+
+  Future<void> setPlacePin(int placeId, String pin) async {
+    await setSetting(_pinKey(placeId), pin);
+  }
+
+  Future<void> removePlacePin(int placeId) async {
+    final db = await database;
+    await db.delete(
+      'settings',
+      where: 'key = ?',
+      whereArgs: [_pinKey(placeId)],
+    );
+  }
+
   // ========== UTILITY ==========
 
   Future<void> vacuum() async {

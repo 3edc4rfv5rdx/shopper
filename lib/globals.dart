@@ -343,6 +343,139 @@ String capitalizeFirst(String text) {
   return text[0].toUpperCase() + text.substring(1);
 }
 
+// Show PIN setup dialog - returns PIN or null if cancelled
+Future<String?> showSetPinDialog(BuildContext context) async {
+  final pinController = TextEditingController();
+  final confirmController = TextEditingController();
+
+  return await showDialog<String>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        String? error;
+
+        void validate() {
+          if (pinController.text.length < 4) {
+            error = lw('PIN must be at least 4 digits');
+          } else if (pinController.text != confirmController.text) {
+            error = lw('PINs do not match');
+          } else {
+            error = null;
+          }
+          setState(() {});
+        }
+
+        return AlertDialog(
+          title: Text(lw('Set PIN')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: pinController,
+                decoration: InputDecoration(
+                  labelText: lw('Enter PIN'),
+                  isDense: true,
+                ),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                autofocus: true,
+                onChanged: (_) => validate(),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmController,
+                decoration: InputDecoration(
+                  labelText: lw('Confirm PIN'),
+                  isDense: true,
+                ),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                onChanged: (_) => validate(),
+              ),
+              if (error != null) ...[
+                const SizedBox(height: 8),
+                Text(error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(lw('Cancel')),
+            ),
+            TextButton(
+              onPressed: error == null && pinController.text.length >= 4
+                  ? () => Navigator.pop(context, pinController.text)
+                  : null,
+              child: Text(lw('OK')),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+// Show PIN entry dialog - returns true if correct, false if cancelled
+Future<bool> showEnterPinDialog(BuildContext context, String correctPin) async {
+  final pinController = TextEditingController();
+
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        String? error;
+
+        return AlertDialog(
+          title: Text(lw('Enter PIN')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: pinController,
+                decoration: InputDecoration(
+                  labelText: lw('PIN'),
+                  isDense: true,
+                ),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                autofocus: true,
+                onChanged: (_) {
+                  if (error != null) {
+                    setState(() => error = null);
+                  }
+                },
+              ),
+              if (error != null) ...[
+                const SizedBox(height: 8),
+                Text(error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(lw('Cancel')),
+            ),
+            TextButton(
+              onPressed: () {
+                if (pinController.text == correctPin) {
+                  Navigator.pop(context, true);
+                } else {
+                  setState(() => error = lw('Wrong PIN'));
+                }
+              },
+              child: Text(lw('OK')),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  return result ?? false;
+}
+
 // Show top menu (replaces bottom sheet with top-aligned menu)
 Future<T?> showTopMenu<T>({
   required BuildContext context,

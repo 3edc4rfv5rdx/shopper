@@ -1,4 +1,5 @@
 ===TODO:
++ PIN lock for individual lists (lock/unlock in menu, PIN stored in settings)
 # v0.7.260115+26 (2026-01-15 14:41:40)
 + strikethrough places where all items are purchased
 + in "share list" dialog add checkbox "with comment" and include comment in shared text

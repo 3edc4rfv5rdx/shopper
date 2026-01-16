@@ -16,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Place> places = [];
   Set<int> placesWithUnpurchased = {};
   Set<int> placesAllPurchased = {};
+  Set<int> lockedPlaces = {};
   bool isLoading = true;
 
   @override
@@ -28,17 +29,22 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => isLoading = true);
     final data = await db.getPlaces();
 
-    // Load item counts for all places
+    // Load item counts and lock status for all places
     final Set<int> hasUnpurchased = {};
     final Set<int> allPurchased = {};
+    final Set<int> locked = {};
     for (final place in data) {
       final unpurchasedCount = await db.getUnpurchasedItemsCount(place.id!);
       final totalCount = await db.getTotalItemsCount(place.id!);
+      final isLocked = await db.isPlaceLocked(place.id!);
       if (unpurchasedCount > 0) {
         hasUnpurchased.add(place.id!);
       } else if (totalCount > 0) {
         // Has items but all are purchased
         allPurchased.add(place.id!);
+      }
+      if (isLocked) {
+        locked.add(place.id!);
       }
     }
 
@@ -46,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
       places = data;
       placesWithUnpurchased = hasUnpurchased;
       placesAllPurchased = allPurchased;
+      lockedPlaces = locked;
       isLoading = false;
     });
   }
@@ -131,7 +138,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void showPlaceContextMenu(Place place) {
+  Future<void> showPlaceContextMenu(Place place) async {
+    final isLocked = await db.isPlaceLocked(place.id!);
+
+    if (!mounted) return;
+
     showTopMenu(
       context: context,
       items: [
@@ -151,8 +162,46 @@ class _HomeScreenState extends State<HomeScreen> {
             deletePlace(place);
           },
         ),
+        ListTile(
+          leading: Icon(isLocked ? Icons.lock_open : Icons.lock),
+          title: Text(isLocked ? lw('Unlock') : lw('Lock')),
+          onTap: () {
+            Navigator.pop(context);
+            if (isLocked) {
+              unlockPlace(place);
+            } else {
+              lockPlace(place);
+            }
+          },
+        ),
       ],
     );
+  }
+
+  Future<void> lockPlace(Place place) async {
+    final pin = await showSetPinDialog(context);
+    if (pin != null && mounted) {
+      await db.setPlacePin(place.id!, pin);
+      loadPlaces();
+      if (mounted) {
+        showMessage(context, lw('List locked'), type: MessageType.success);
+      }
+    }
+  }
+
+  Future<void> unlockPlace(Place place) async {
+    final pin = await db.getPlacePin(place.id!);
+    if (pin == null) return;
+
+    if (!mounted) return;
+    final correct = await showEnterPinDialog(context, pin);
+    if (correct && mounted) {
+      await db.removePlacePin(place.id!);
+      loadPlaces();
+      if (mounted) {
+        showMessage(context, lw('List unlocked'), type: MessageType.success);
+      }
+    }
   }
 
   Future<void> exitApp() async {
@@ -221,6 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final place = places[index];
                     final hasUnpurchased = placesWithUnpurchased.contains(place.id);
                     final allPurchased = placesAllPurchased.contains(place.id);
+                    final isLocked = lockedPlaces.contains(place.id);
                     return Dismissible(
                       key: ValueKey(place.id),
                       background: Container(
@@ -264,12 +314,21 @@ class _HomeScreenState extends State<HomeScreen> {
                             decoration: allPurchased ? TextDecoration.lineThrough : null,
                           ),
                         ),
-                        leading: const Icon(Icons.store),
+                        leading: Icon(isLocked ? Icons.lock : Icons.store),
                         trailing: ReorderableDragStartListener(
                           index: index,
                           child: const Icon(Icons.drag_handle),
                         ),
                         onTap: () async {
+                          // Check if locked
+                          if (isLocked) {
+                            final pin = await db.getPlacePin(place.id!);
+                            if (pin != null && mounted) {
+                              final correct = await showEnterPinDialog(context, pin);
+                              if (!correct) return;
+                            }
+                          }
+                          if (!mounted) return;
                           await Navigator.pushNamed(
                             context,
                             '/list',
