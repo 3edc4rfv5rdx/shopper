@@ -5,9 +5,9 @@ COMMENT="many small improvements"
 #
 GLOBVERS='0.7'
 # '0.7.260115'
-VER='0.7.260115'
+VER=''
 # '73'
-VER_CODE='26'
+VER_CODE=''
 #
 #
 PROJ_NAME="shopper"
