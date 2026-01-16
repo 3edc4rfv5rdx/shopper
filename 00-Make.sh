@@ -299,7 +299,7 @@ echo "=========================================="
 mkdir -p "$PROJ_ZIP_DIR"
 
 # Execute each step
-#update_version
+update_version
 create_archive
 # Disable debug, store value in global variable
 #disable_debug
