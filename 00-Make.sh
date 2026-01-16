@@ -4,8 +4,10 @@
 COMMENT="many small improvements"
 #
 GLOBVERS='0.7'
-VER=''
-VER_CODE=''
+# '0.7.260115'
+VER='0.7.260115'
+# '73'
+VER_CODE='26'
 #
 #
 PROJ_NAME="shopper"
@@ -136,7 +138,12 @@ create_archive() {
     # Add specific files
     [ -f "$PUB_FILE" ] && echo "$PUB_FILE" >> "$FILE_LIST"
     [ -f ".gitignore" ] && echo ".gitignore" >> "$FILE_LIST"
-    echo "$SELF_NAME" >> "$FILE_LIST"
+#    echo "$SELF_NAME" >> "$FILE_LIST"
+    echo "00-Make.sh" >> "$FILE_LIST"
+    echo "01-PushTag.sh" >> "$FILE_LIST"
+    echo "02-RelUpload.sh" >> "$FILE_LIST"
+    echo "CLAUDE.md" >> "$FILE_LIST"
+    echo "README.md" >> "$FILE_LIST"
     # Create archive using the file list
     (cd "$PROJ_PATH" && zip -9 -@ "$ZIP_NAME" < "$FILE_LIST")
     # Remove temporary file list
@@ -168,7 +175,6 @@ disable_debug() {
 
 restore_debug() {
     echo "===== RESTORING DEBUG MODE ====="
-
     # Restore original debug value
     sed -i "s/bool xvDebug\s*=\s*[^;]*;/bool xvDebug = $OLD_DEBUG_VALUE;/g" "$GLOB_FILE"
     if [ $? -eq 0 ]; then
@@ -232,15 +238,15 @@ build_app() {
 
 clean_output() {
     echo "===== CLEANING OLD APK FILES ====="
-    
+
     OUT_DIR="$PROJ_PATH/build/app/outputs"
-    
+
     # Clean debug APKs
     if [ -d "$OUT_DIR/apk/debug" ]; then
         rm -f "$OUT_DIR/apk/debug/"*.apk
         echo "✓ Cleaned debug APKs"
     fi
-    
+
     # Clean release APKs
     if [ -d "$OUT_DIR/apk/release" ]; then
         rm -f "$OUT_DIR/apk/release/"*.apk
@@ -252,33 +258,27 @@ clean_output() {
         rm -f "$OUT_DIR/flutter-apk/"*v7a*.*
         rm -f "$OUT_DIR/flutter-apk/"*x86*.*
         rm -f "$OUT_DIR/flutter-apk/"*debug*.*
-        rm -f "$OUT_DIR/flutter-apk/"*.sha1
+#        rm -f "$OUT_DIR/flutter-apk/"*.sha1
         echo "✓ Cleaned architecture-specific APKs"
     fi
 }
 
 copy_final_apk() {
     echo "===== COPYING FINAL APK ====="
-
     # Найти конкретный файл для текущей версии вместо всех файлов
     SRC=$(ls $APK_PATH/app-arm64-v8a-release-$VER-$VER_CODE.apk 2>/dev/null)
-
     if [ -z "$SRC" ]; then
         echo "✗ No arm64 APK found to copy for version $VER-$VER_CODE"
         return 1
     fi
-
     # Extract version from filename
     VERS=$VER_CODE
-
     # Copy with new name
     DEST="$PROJ_PATH/${PROJ_NAME^}-$VERS.apkx"
     cp -f "$SRC" "$DEST"
-
-    # Also copy to archive directory
-    APK_ARCHIVE="$PROJ_ZIP_DIR/${PROJ_NAME^}-$VER-$VER_CODE-$DATE.apk"
+    # Copy to archive directory
+    APK_ARCHIVE="$PROJ_ZIP_DIR/${PROJ_NAME^}-$VER-$VER_CODE-arm64-v8a-$DATE.apk"
     cp -f "$SRC" "$APK_ARCHIVE"
-
     echo "✓ Copied final APK to: $DEST"
     echo "✓ Archived APK to: $APK_ARCHIVE"
 }
@@ -299,14 +299,14 @@ echo "=========================================="
 mkdir -p "$PROJ_ZIP_DIR"
 
 # Execute each step
-update_version
+#update_version
 create_archive
 # Disable debug, store value in global variable
-disable_debug
+#disable_debug
 # Build the app with debug disabled
 build_app
 # Restore debug to original value
-restore_debug
+#restore_debug
 # Continue with remaining steps
 clean_output
 copy_final_apk
