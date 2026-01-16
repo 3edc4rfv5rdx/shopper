@@ -38,8 +38,9 @@ Location: `lib/ToDo.txt`
 **Rules:**
 1. Russian text → translate to English, keep in same position
 2. When task (>, o) is done → mark as `+`
-3. Never reorder lines
-4. Sections: `===TODO:`, `===ToFIX:`, `===ERRORS:`
+3. Never reorder existing lines
+4. **New tasks → add immediately after section header** (`===TODO:`, `===TOFIX:`, `===ERRORS:`)
+5. Sections: `===TODO:`, `===TOFIX:`, `===ERRORS:`
 
 ## Localization
 - File: `assets/locales.json`
