@@ -199,7 +199,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ? const Center(child: CircularProgressIndicator())
           : places.isEmpty
               ? Center(
-                  child: Text(lw('No places yet. Add one using the + button.')),
+                  child: Text(
+                    lw('No places yet. Add one using the + button.'),
+                    textAlign: TextAlign.center,
+                  ),
                 )
               : ReorderableListView.builder(
                   buildDefaultDragHandles: false,

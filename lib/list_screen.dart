@@ -673,7 +673,10 @@ class _ListScreenState extends State<ListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : listItems.isEmpty
               ? Center(
-                  child: Text(lw('No items yet. Add one using the + button.')),
+                  child: Text(
+                    lw('No items yet. Add one using the + button.'),
+                    textAlign: TextAlign.center,
+                  ),
                 )
               : ListView(
                   children: [

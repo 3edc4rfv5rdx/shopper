@@ -36,6 +36,7 @@
 + add key
 
 ===TOFIX:
++ center "no items yet..." text in empty lists
 # v0.7.260115+26 (2026-01-15 14:41:40)
 + both "delete purchased" and "clear purchased" dialogs had same title - fixed
 + input/search list
