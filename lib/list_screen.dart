@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'database.dart';
 import 'place.dart';
 import 'list.dart';
@@ -358,11 +359,26 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       shopMode = !shopMode;
     });
+    // Keep screen on in shop mode
+    if (shopMode) {
+      WakelockPlus.enable();
+    } else {
+      WakelockPlus.disable();
+    }
     showMessage(
       context,
       shopMode ? lw('Shop mode ON') : lw('Shop mode OFF'),
       type: MessageType.info,
     );
+  }
+
+  @override
+  void dispose() {
+    // Disable wakelock when leaving screen
+    if (shopMode) {
+      WakelockPlus.disable();
+    }
+    super.dispose();
   }
 
   Future<void> editComment() async {
@@ -764,6 +780,10 @@ class _ListScreenState extends State<ListScreen> {
                 const SizedBox(width: 8),
               ],
               Flexible(child: Text(currentPlace.name)),
+              if (shopMode) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.lightbulb, size: 20, color: Colors.yellow),
+              ],
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 ===TODO:
-+ shop mode (large font 35, large checkboxes) - long press on title or FAB to toggle
+o screen always on in shop mode (wakelock)
+o shop mode (large font 35, large checkboxes, cart+bulb icons) - long press on title or FAB to toggle
 + include photos in backup/restore
 + photo for list item (@ prefix, camera/gallery, fullscreen view, move to gallery on delete)
 # v0.7.260116+27 (2026-01-16 13:55:45)
