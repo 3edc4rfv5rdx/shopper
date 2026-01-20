@@ -32,7 +32,7 @@ const FontWeight fwBold = FontWeight.bold;
 
 // ========== PHOTO UTILITIES ==========
 
-Future<Directory> _getPhotosDir() async {
+Future<Directory> getPhotosDir() async {
   final appDir = await getApplicationDocumentsDirectory();
   final photosDir = Directory('${appDir.path}/photos');
   if (!await photosDir.exists()) {
@@ -42,7 +42,7 @@ Future<Directory> _getPhotosDir() async {
 }
 
 Future<String> getPhotoPath(int listItemId) async {
-  final photosDir = await _getPhotosDir();
+  final photosDir = await getPhotosDir();
   return '${photosDir.path}/$listItemId.jpg';
 }
 

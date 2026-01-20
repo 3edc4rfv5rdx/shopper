@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'place.dart';
 import 'items.dart';
 import 'list.dart';
+import 'globals.dart' show getPhotosDir;
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -463,6 +464,17 @@ class DatabaseHelper {
       encoder.addFile(File('${tempDir.path}/items.csv'), 'items.csv');
       encoder.addFile(File('${tempDir.path}/lists.csv'), 'lists.csv');
       encoder.addFile(File('${tempDir.path}/settings.csv'), 'settings.csv');
+
+      // Add photos to archive
+      final photosDir = await getPhotosDir();
+      if (await photosDir.exists()) {
+        final photoFiles = photosDir.listSync().whereType<File>();
+        for (final photo in photoFiles) {
+          final fileName = basename(photo.path);
+          encoder.addFile(photo, 'photos/$fileName');
+        }
+      }
+
       encoder.close();
 
       return zipPath;
@@ -483,14 +495,26 @@ class DatabaseHelper {
       final bytes = await File(zipPath).readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
 
+      // Get photos directory for later
+      final photosDir = await getPhotosDir();
+
       for (final file in archive) {
         if (file.isFile) {
           final data = file.content as List<int>;
-          // Use basename to get just the filename without path
-          final filename = basename(file.name);
-          final outFile = File('${tempDir.path}/$filename');
-          await outFile.create(recursive: true);
-          await outFile.writeAsBytes(data);
+          final fileName = basename(file.name);
+
+          // Check if it's a photo file (in photos/ folder)
+          if (file.name.startsWith('photos/')) {
+            // Will restore photos after clearing old data
+            final outFile = File('${tempDir.path}/photos/$fileName');
+            await outFile.create(recursive: true);
+            await outFile.writeAsBytes(data);
+          } else {
+            // CSV files go to temp root
+            final outFile = File('${tempDir.path}/$fileName');
+            await outFile.create(recursive: true);
+            await outFile.writeAsBytes(data);
+          }
         }
       }
 
@@ -498,6 +522,14 @@ class DatabaseHelper {
       await db.delete('lists');
       await db.delete('items');
       await db.delete('places');
+
+      // Clear existing photos
+      if (await photosDir.exists()) {
+        final oldPhotos = photosDir.listSync().whereType<File>();
+        for (final photo in oldPhotos) {
+          await photo.delete();
+        }
+      }
 
       // Helper function to parse integer from CSV
       int? parseIntOrNull(dynamic value) {
@@ -583,6 +615,16 @@ class DatabaseHelper {
       }
 
       // Note: We don't restore settings to preserve user preferences
+
+      // Restore photos
+      final tempPhotosDir = Directory('${tempDir.path}/photos');
+      if (await tempPhotosDir.exists()) {
+        final photoFiles = tempPhotosDir.listSync().whereType<File>();
+        for (final photo in photoFiles) {
+          final fileName = basename(photo.path);
+          await photo.copy('${photosDir.path}/$fileName');
+        }
+      }
 
     } finally {
       // Clean up temporary directory

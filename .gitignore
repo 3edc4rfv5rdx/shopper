@@ -173,3 +173,7 @@ app.*.symbols
 /android/app/src/main/res/mipmap-xxxhdpi/launcher_icon.png
 /android/app/src/main/res/values/colors.xml
 /xxx/00-Make.sh.orig
+/xxx/02-RelUpload.sh.1
+/xxx/02-RelUpload.sh.2
+/xxx/02-RelUpload.sh.3
+/xxx/02-RelUpload.sh.test
