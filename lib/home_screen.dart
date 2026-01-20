@@ -133,8 +133,31 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirmed) {
+      // Check if any items have photos
+      final items = await db.getListItems(place.id!);
+      List<int> itemsWithPhotos = [];
+      for (final item in items) {
+        if (await hasPhoto(item.id!)) {
+          itemsWithPhotos.add(item.id!);
+        }
+      }
+
+      // If there are photos, ask user what to do
+      if (itemsWithPhotos.isNotEmpty && mounted) {
+        final photoAction = await showDeleteItemWithPhotoDialog(context);
+        if (photoAction == null) return; // User cancelled
+
+        for (final itemId in itemsWithPhotos) {
+          if (photoAction == 'move') {
+            await movePhotoToGallery(itemId);
+          } else {
+            await deletePhoto(itemId);
+          }
+        }
+      }
+
       await db.deletePlace(place.id!);
-      loadPlaces();
+      if (mounted) loadPlaces();
     }
   }
 

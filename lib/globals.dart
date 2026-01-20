@@ -3,6 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:gal/gal.dart';
 import 'database.dart';
 import 'list.dart';
 import 'items.dart';
@@ -25,6 +29,60 @@ const double fsTitle = 24;
 const FontWeight fwNormal = FontWeight.normal;
 const FontWeight fwMedium = FontWeight.w500;
 const FontWeight fwBold = FontWeight.bold;
+
+// ========== PHOTO UTILITIES ==========
+
+Future<Directory> _getPhotosDir() async {
+  final appDir = await getApplicationDocumentsDirectory();
+  final photosDir = Directory('${appDir.path}/photos');
+  if (!await photosDir.exists()) {
+    await photosDir.create(recursive: true);
+  }
+  return photosDir;
+}
+
+Future<String> getPhotoPath(int listItemId) async {
+  final photosDir = await _getPhotosDir();
+  return '${photosDir.path}/$listItemId.jpg';
+}
+
+Future<bool> hasPhoto(int listItemId) async {
+  final path = await getPhotoPath(listItemId);
+  return File(path).exists();
+}
+
+Future<void> deletePhoto(int listItemId) async {
+  final path = await getPhotoPath(listItemId);
+  final file = File(path);
+  if (await file.exists()) {
+    await file.delete();
+  }
+}
+
+Future<bool> pickAndSavePhoto(int listItemId, ImageSource source) async {
+  final picker = ImagePicker();
+  final picked = await picker.pickImage(source: source, imageQuality: 85);
+  if (picked == null) return false;
+
+  final path = await getPhotoPath(listItemId);
+  await File(picked.path).copy(path);
+  return true;
+}
+
+Future<bool> movePhotoToGallery(int listItemId) async {
+  final path = await getPhotoPath(listItemId);
+  final file = File(path);
+  if (!await file.exists()) return false;
+
+  try {
+    // Save to gallery using Gal package
+    await Gal.putImage(path);
+    await file.delete();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 // ========== COLOR THEMES ==========
 
@@ -474,6 +532,53 @@ Future<bool> showEnterPinDialog(BuildContext context, String correctPin) async {
   );
 
   return result ?? false;
+}
+
+// Show delete item with photo dialog - returns 'move', 'delete', or null
+Future<String?> showDeleteItemWithPhotoDialog(BuildContext context) async {
+  String selectedOption = 'move'; // Default to safer option
+
+  return await showDialog<String>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text(lw('Delete item with photo')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: Text(lw('Move to gallery')),
+              value: 'move',
+              groupValue: selectedOption,
+              onChanged: (value) => setState(() => selectedOption = value!),
+              activeColor: clUpBar,
+              contentPadding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+            ),
+            RadioListTile<String>(
+              title: Text(lw('Delete photo')),
+              value: 'delete',
+              groupValue: selectedOption,
+              onChanged: (value) => setState(() => selectedOption = value!),
+              activeColor: clUpBar,
+              contentPadding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(lw('Cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, selectedOption),
+            child: Text(lw('OK')),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 // Show top menu (replaces bottom sheet with top-aligned menu)

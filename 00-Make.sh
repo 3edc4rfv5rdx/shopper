@@ -258,7 +258,7 @@ clean_output() {
         rm -f "$OUT_DIR/flutter-apk/"*v7a*.*
         rm -f "$OUT_DIR/flutter-apk/"*x86*.*
         rm -f "$OUT_DIR/flutter-apk/"*debug*.*
-#        rm -f "$OUT_DIR/flutter-apk/"*.sha1
+        rm -f "$OUT_DIR/flutter-apk/"*.sha1
         echo "✓ Cleaned architecture-specific APKs"
     fi
 }

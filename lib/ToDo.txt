@@ -1,4 +1,5 @@
 ===TODO:
++ photo for list item (@ prefix, camera/gallery, fullscreen view, move to gallery on delete)
 # v0.7.260116+27 (2026-01-16 13:55:45)
 + PIN lock for individual lists (lock/unlock in menu, PIN stored in settings)
 # v0.7.260115+26 (2026-01-15 14:41:40)
@@ -67,3 +68,10 @@
 + duplicates are added to dictionary
 + records don't display after restore, rebuild?
 + in dict: if empty, not translated empty message
+
+======= Maybe =======
+# фото
+# виджет
+# геолокация
+# история покупок
+# режим "в магазине"

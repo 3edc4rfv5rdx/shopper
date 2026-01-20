@@ -109,3 +109,7 @@ Located in `globals.dart`:
 const String progVersion = 'x.x.xxxxxx';
 const int buildNumber = xx;
 ```
+
+## Workflow
+- **User builds and tests APK** — do not run `flutter build apk` or `./00-Make.sh`
+- Claude writes code, user handles building and testing

@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import 'database.dart';
 import 'place.dart';
 import 'list.dart';
@@ -19,6 +21,7 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   final db = DatabaseHelper.instance;
   List<ListItem> listItems = [];
+  Set<int> itemsWithPhoto = {};
   bool isLoading = true;
   late Place currentPlace;
 
@@ -32,8 +35,18 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> loadListItems() async {
     setState(() => isLoading = true);
     final data = await db.getListItems(widget.place.id!);
+
+    // Check which items have photos
+    final Set<int> withPhoto = {};
+    for (final item in data) {
+      if (item.id != null && await hasPhoto(item.id!)) {
+        withPhoto.add(item.id!);
+      }
+    }
+
     setState(() {
       listItems = data;
+      itemsWithPhoto = withPhoto;
       isLoading = false;
     });
   }
@@ -77,16 +90,106 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-  Future<void> deleteItem(ListItem item) async {
+  Future<void> showPhoto(ListItem item) async {
+    if (item.id == null) return;
+    final path = await getPhotoPath(item.id!);
+    final file = File(path);
+    if (!await file.exists() || !mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: EdgeInsets.zero,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: InteractiveViewer(
+            child: Image.file(file),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> addOrChangePhoto(ListItem item) async {
+    if (item.id == null) return;
+
+    // Show source selection dialog
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lw('Select source')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(lw('Camera')),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(lw('Gallery')),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final saved = await pickAndSavePhoto(item.id!, source);
+    if (saved && mounted) {
+      loadListItems();
+      showMessage(context, lw('Photo added'), type: MessageType.success);
+    }
+  }
+
+  Future<void> removePhoto(ListItem item) async {
+    if (item.id == null) return;
+
     final confirmed = await showConfirmDialog(
       context,
-      lw('Delete Item'),
-      '${lw('Are you sure you want to delete')} "${item.displayName}"?',
+      lw('Remove photo'),
+      lw('Are you sure you want to remove the photo?'),
     );
 
     if (confirmed) {
+      await deletePhoto(item.id!);
+      loadListItems();
+      if (mounted) {
+        showMessage(context, lw('Photo removed'), type: MessageType.success);
+      }
+    }
+  }
+
+  Future<void> deleteItem(ListItem item) async {
+    final hasItemPhoto = item.id != null && await hasPhoto(item.id!);
+
+    if (hasItemPhoto && mounted) {
+      // Show dialog with photo options
+      final result = await showDeleteItemWithPhotoDialog(context);
+      if (result == null) return;
+
+      if (result == 'move') {
+        await movePhotoToGallery(item.id!);
+      } else {
+        await deletePhoto(item.id!);
+      }
       await db.deleteListItem(item.id!);
       loadListItems();
+    } else {
+      final confirmed = await showConfirmDialog(
+        context,
+        lw('Delete Item'),
+        '${lw('Are you sure you want to delete')} "${item.displayName}"?',
+      );
+
+      if (confirmed) {
+        await db.deleteListItem(item.id!);
+        loadListItems();
+      }
     }
   }
 
@@ -133,8 +236,11 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-  void showItemContextMenu(ListItem item) {
+  Future<void> showItemContextMenu(ListItem item) async {
     final isPlaceLink = item.quantity == '-1';
+    final hasItemPhoto = item.id != null && await hasPhoto(item.id!);
+
+    if (!mounted) return;
 
     showTopMenu(
       context: context,
@@ -156,6 +262,24 @@ class _ListScreenState extends State<ListScreen> {
               convertItemToList(item);
             },
           ),
+        if (!isPlaceLink)
+          ListTile(
+            leading: Icon(hasItemPhoto ? Icons.photo_library : Icons.add_a_photo),
+            title: Text(hasItemPhoto ? lw('Change photo') : lw('Add photo')),
+            onTap: () {
+              Navigator.pop(context);
+              addOrChangePhoto(item);
+            },
+          ),
+        if (hasItemPhoto)
+          ListTile(
+            leading: const Icon(Icons.delete_outline),
+            title: Text(lw('Remove photo')),
+            onTap: () {
+              Navigator.pop(context);
+              removePhoto(item);
+            },
+          ),
         ListTile(
           leading: const Icon(Icons.delete),
           title: Text(lw('Delete')),
@@ -169,15 +293,47 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<void> deletePurchased() async {
-    final confirmed = await showConfirmDialog(
-      context,
-      lw('Delete purchased'),
-      lw('Delete all purchased items from this list?'),
-    );
+    // Get purchased items
+    final purchased = listItems.where((item) => item.isPurchased && item.quantity != '-1').toList();
+    if (purchased.isEmpty) return;
 
-    if (confirmed) {
+    // Check if any have photos
+    final itemsWithPhotos = <ListItem>[];
+    for (final item in purchased) {
+      if (item.id != null && await hasPhoto(item.id!)) {
+        itemsWithPhotos.add(item);
+      }
+    }
+
+    if (!mounted) return;
+
+    if (itemsWithPhotos.isNotEmpty) {
+      // Show dialog with photo options
+      final result = await showDeleteItemWithPhotoDialog(context);
+      if (result == null) return;
+
+      // Handle photos
+      for (final item in itemsWithPhotos) {
+        if (result == 'move') {
+          await movePhotoToGallery(item.id!);
+        } else {
+          await deletePhoto(item.id!);
+        }
+      }
+
       await db.deletePurchasedItems(widget.place.id!);
       loadListItems();
+    } else {
+      final confirmed = await showConfirmDialog(
+        context,
+        lw('Delete purchased'),
+        lw('Delete all purchased items from this list?'),
+      );
+
+      if (confirmed) {
+        await db.deletePurchasedItems(widget.place.id!);
+        loadListItems();
+      }
     }
   }
 
@@ -735,6 +891,7 @@ class _ListScreenState extends State<ListScreen> {
                             },
                             child: () {
                               final isPlaceLink = item.quantity == '-1';
+                              final hasItemPhoto = item.id != null && itemsWithPhoto.contains(item.id);
                               return ListTile(
                                 key: ValueKey('tile_${item.id}'),
                                 visualDensity: VisualDensity.compact,
@@ -749,23 +906,28 @@ class _ListScreenState extends State<ListScreen> {
                                     if (isPlaceLink)
                                       const Icon(Icons.subdirectory_arrow_right, size: 16),
                                     Expanded(
-                                      child: Text(
-                                        () {
-                                          final parts = <String>[item.displayName];
-                                          if (item.quantity != null &&
-                                              item.quantity!.trim().isNotEmpty &&
-                                              !item.quantity!.startsWith('-')) {
-                                            // Add quantity with unit (no space, skip negatives)
-                                            final qtyUnit = item.quantity!.trim() +
-                                                (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')
-                                                    ? item.displayUnit : '');
-                                            parts.add(qtyUnit);
-                                          }
-                                          return parts.join(' ');
-                                        }(),
-                                        style: TextStyle(
-                                          fontSize: fsLarge,
-                                          fontWeight: isPlaceLink ? FontWeight.bold : FontWeight.normal,
+                                      child: GestureDetector(
+                                        onTap: hasItemPhoto ? () => showPhoto(item) : null,
+                                        child: Text(
+                                          () {
+                                            final photoPrefix = hasItemPhoto ? '@ ' : '';
+                                            final parts = <String>[photoPrefix + item.displayName];
+                                            if (item.quantity != null &&
+                                                item.quantity!.trim().isNotEmpty &&
+                                                !item.quantity!.startsWith('-')) {
+                                              // Add quantity with unit (no space, skip negatives)
+                                              final qtyUnit = item.quantity!.trim() +
+                                                  (item.displayUnit.isNotEmpty && !item.displayUnit.startsWith('-')
+                                                      ? item.displayUnit : '');
+                                              parts.add(qtyUnit);
+                                            }
+                                            return parts.join(' ');
+                                          }(),
+                                          style: TextStyle(
+                                            fontSize: fsLarge,
+                                            fontWeight: isPlaceLink ? FontWeight.bold : FontWeight.normal,
+                                            color: hasItemPhoto ? Colors.blue : null,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -803,6 +965,7 @@ class _ListScreenState extends State<ListScreen> {
                         itemCount: purchased.length,
                         itemBuilder: (context, index) {
                           final item = purchased[index];
+                          final hasItemPhoto = item.id != null && itemsWithPhoto.contains(item.id);
                           return Dismissible(
                             key: ValueKey(item.id),
                             background: Container(
@@ -843,20 +1006,25 @@ class _ListScreenState extends State<ListScreen> {
                                 value: item.isPurchased,
                                 onChanged: (_) => togglePurchased(item),
                               ),
-                              title: Text(
-                                () {
-                                  final parts = <String>[item.displayName];
-                                  if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
-                                    // Add quantity with unit (no space between them)
-                                    final qtyUnit = item.quantity!.trim() +
-                                        (item.displayUnit.isNotEmpty ? item.displayUnit : '');
-                                    parts.add(qtyUnit);
-                                  }
-                                  return parts.join(' ');
-                                }(),
-                                style: const TextStyle(
-                                  fontSize: fsLarge,
-                                  decoration: TextDecoration.lineThrough,
+                              title: GestureDetector(
+                                onTap: hasItemPhoto ? () => showPhoto(item) : null,
+                                child: Text(
+                                  () {
+                                    final photoPrefix = hasItemPhoto ? '@ ' : '';
+                                    final parts = <String>[photoPrefix + item.displayName];
+                                    if (item.quantity != null && item.quantity!.trim().isNotEmpty) {
+                                      // Add quantity with unit (no space between them)
+                                      final qtyUnit = item.quantity!.trim() +
+                                          (item.displayUnit.isNotEmpty ? item.displayUnit : '');
+                                      parts.add(qtyUnit);
+                                    }
+                                    return parts.join(' ');
+                                  }(),
+                                  style: TextStyle(
+                                    fontSize: fsLarge,
+                                    decoration: TextDecoration.lineThrough,
+                                    color: hasItemPhoto ? Colors.blue : null,
+                                  ),
                                 ),
                               ),
                               onLongPress: () => showItemContextMenu(item),
