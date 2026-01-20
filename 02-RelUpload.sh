@@ -3,7 +3,7 @@ set -e
 
 APK_DIR="/home/e/AndroidStudioProjects/shopper/build/app/outputs/flutter-apk"
 PROJECT="shopper"
-TODO_FILE="ToDo.txt"
+TODO_FILE="lib/ToDo.txt"
 CHANGELOG_FILE="/tmp/release_notes_$$.md"
 
 echo "=== Detecting latest tag ==="
@@ -32,26 +32,15 @@ echo "Version: $VERSION"
 echo "Build:   $BUILD"
 
 # ------------------------------------------------------------
-# Detect previous tag
-# ------------------------------------------------------------
-PREV_TAG=$(git tag --list 'v*' | sort -V | tail -n 2 | head -n 1)
-
-if [[ "$PREV_TAG" == "$TAG" ]]; then
-    PREV_TAG=""
-fi
-
-echo "Previous tag: ${PREV_TAG:-<none>}"
-
-# ------------------------------------------------------------
 # Function: build_changelog
+# Stops at ANY version tag (# v...) after current tag
 # ------------------------------------------------------------
 build_changelog() {
     local todo_file="$1"
     local cur_tag="$2"
-    local prev_tag="$3"
-    local out_file="$4"
+    local out_file="$3"
 
-    awk -v cur="# $cur_tag" -v prev="# $prev_tag" '
+    awk -v cur="# $cur_tag" '
     BEGIN {
         group=""
         capture=0
@@ -71,15 +60,14 @@ build_changelog() {
         next
     }
 
-    # Stop capture at previous tag inside group
-    group != "" && prev != "" && index($0, prev) == 1 {
+    # Stop capture at any other version tag (# v...)
+    group != "" && capture && /^# v[0-9]/ {
         capture=0
         next
     }
 
     # Capture items
     capture && /^[+]/ {
-
         # Print group header once
         if (!printed[group]) {
             print ""
@@ -98,7 +86,7 @@ build_changelog() {
 # Build changelog
 # ------------------------------------------------------------
 echo "=== Building changelog from $TODO_FILE ==="
-build_changelog "$TODO_FILE" "$TAG" "$PREV_TAG" "$CHANGELOG_FILE"
+build_changelog "$TODO_FILE" "$TAG" "$CHANGELOG_FILE"
 
 echo "Generated changelog:"
 echo "--------------------------------------------------"

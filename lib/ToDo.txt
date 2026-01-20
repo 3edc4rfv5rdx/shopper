@@ -44,6 +44,7 @@
 
 ===TOFIX:
 # v0.8.260120+29 (2026-01-20 15:59:07)
++ 02-RelUpload.sh: changelog now stops at any version tag in ToDo.txt, not git prev tag
 # v0.7.260116+27 (2026-01-16 13:55:45)
 + center "no items yet..." text in empty lists
 # v0.7.260115+26 (2026-01-15 14:41:40)
