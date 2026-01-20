@@ -24,6 +24,7 @@ class _ListScreenState extends State<ListScreen> {
   Set<int> itemsWithPhoto = {};
   bool isLoading = true;
   late Place currentPlace;
+  bool shopMode = false; // "In store" mode - larger fonts and checkboxes
 
   @override
   void initState() {
@@ -351,6 +352,17 @@ class _ListScreenState extends State<ListScreen> {
         showMessage(context, lw('Purchased flags have been cleared'), type: MessageType.success);
       }
     }
+  }
+
+  void toggleShopMode() {
+    setState(() {
+      shopMode = !shopMode;
+    });
+    showMessage(
+      context,
+      shopMode ? lw('Shop mode ON') : lw('Shop mode OFF'),
+      type: MessageType.info,
+    );
   }
 
   Future<void> editComment() async {
@@ -742,7 +754,19 @@ class _ListScreenState extends State<ListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(currentPlace.name),
+        title: GestureDetector(
+          onLongPress: toggleShopMode,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (shopMode) ...[
+                const Icon(Icons.shopping_cart, size: 20),
+                const SizedBox(width: 8),
+              ],
+              Flexible(child: Text(currentPlace.name)),
+            ],
+          ),
+        ),
         actions: [
           if (listItems.isNotEmpty)
             PopupMenuButton<String>(
@@ -894,17 +918,20 @@ class _ListScreenState extends State<ListScreen> {
                               final hasItemPhoto = item.id != null && itemsWithPhoto.contains(item.id);
                               return ListTile(
                                 key: ValueKey('tile_${item.id}'),
-                                visualDensity: VisualDensity.compact,
+                                visualDensity: shopMode ? VisualDensity.comfortable : VisualDensity.compact,
                                 leading: isPlaceLink
-                                    ? const Icon(Icons.folder, color: Colors.blue)
-                                    : Checkbox(
-                                        value: item.isPurchased,
-                                        onChanged: (_) => togglePurchased(item),
+                                    ? Icon(Icons.folder, color: Colors.blue, size: shopMode ? 32 : 24)
+                                    : Transform.scale(
+                                        scale: shopMode ? 1.5 : 1.0,
+                                        child: Checkbox(
+                                          value: item.isPurchased,
+                                          onChanged: (_) => togglePurchased(item),
+                                        ),
                                       ),
                                 title: Row(
                                   children: [
                                     if (isPlaceLink)
-                                      const Icon(Icons.subdirectory_arrow_right, size: 16),
+                                      Icon(Icons.subdirectory_arrow_right, size: shopMode ? 24 : 16),
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: hasItemPhoto ? () => showPhoto(item) : null,
@@ -924,7 +951,7 @@ class _ListScreenState extends State<ListScreen> {
                                             return parts.join(' ');
                                           }(),
                                           style: TextStyle(
-                                            fontSize: fsLarge,
+                                            fontSize: shopMode ? 35.0 : fsLarge,
                                             fontWeight: isPlaceLink ? FontWeight.bold : FontWeight.normal,
                                             color: hasItemPhoto ? Colors.blue : null,
                                           ),
@@ -1001,10 +1028,13 @@ class _ListScreenState extends State<ListScreen> {
                             },
                             child: ListTile(
                               key: ValueKey('tile_${item.id}'),
-                              visualDensity: VisualDensity.compact,
-                              leading: Checkbox(
-                                value: item.isPurchased,
-                                onChanged: (_) => togglePurchased(item),
+                              visualDensity: shopMode ? VisualDensity.comfortable : VisualDensity.compact,
+                              leading: Transform.scale(
+                                scale: shopMode ? 1.5 : 1.0,
+                                child: Checkbox(
+                                  value: item.isPurchased,
+                                  onChanged: (_) => togglePurchased(item),
+                                ),
                               ),
                               title: GestureDetector(
                                 onTap: hasItemPhoto ? () => showPhoto(item) : null,
@@ -1021,7 +1051,7 @@ class _ListScreenState extends State<ListScreen> {
                                     return parts.join(' ');
                                   }(),
                                   style: TextStyle(
-                                    fontSize: fsLarge,
+                                    fontSize: shopMode ? 35.0 : fsLarge,
                                     decoration: TextDecoration.lineThrough,
                                     color: hasItemPhoto ? Colors.blue : null,
                                   ),
@@ -1062,9 +1092,12 @@ class _ListScreenState extends State<ListScreen> {
                     ],
                   ],
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addItem,
-        child: const Icon(Icons.add),
+      floatingActionButton: GestureDetector(
+        onLongPress: toggleShopMode,
+        child: FloatingActionButton(
+          onPressed: addItem,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
