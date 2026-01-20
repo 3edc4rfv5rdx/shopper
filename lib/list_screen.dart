@@ -782,7 +782,7 @@ class _ListScreenState extends State<ListScreen> {
               Flexible(child: Text(currentPlace.name)),
               if (shopMode) ...[
                 const SizedBox(width: 8),
-                const Icon(Icons.lightbulb, size: 20, color: Colors.yellow),
+                const Icon(Icons.wb_sunny, size: 20),
               ],
             ],
           ),
@@ -971,7 +971,7 @@ class _ListScreenState extends State<ListScreen> {
                                             return parts.join(' ');
                                           }(),
                                           style: TextStyle(
-                                            fontSize: shopMode ? 35.0 : fsLarge,
+                                            fontSize: shopMode ? 33.0 : fsLarge,
                                             fontWeight: isPlaceLink ? FontWeight.bold : FontWeight.normal,
                                             color: hasItemPhoto ? Colors.blue : null,
                                           ),
@@ -1071,7 +1071,7 @@ class _ListScreenState extends State<ListScreen> {
                                     return parts.join(' ');
                                   }(),
                                   style: TextStyle(
-                                    fontSize: shopMode ? 35.0 : fsLarge,
+                                    fontSize: shopMode ? 33.0 : fsLarge,
                                     decoration: TextDecoration.lineThrough,
                                     color: hasItemPhoto ? Colors.blue : null,
                                   ),
