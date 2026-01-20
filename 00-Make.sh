@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-COMMENT="many small improvements"
+COMMENT="add photos, shop mode"
 #
-GLOBVERS='0.7'
+GLOBVERS='0.8'
 # '0.7.260115'
 VER=''
 # '73'
