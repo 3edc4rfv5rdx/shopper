@@ -26,12 +26,21 @@ class _ListScreenState extends State<ListScreen> {
   bool isLoading = true;
   late Place currentPlace;
   bool shopMode = false; // "In store" mode - larger fonts and checkboxes
+  bool shopModeWakelock = true; // Keep screen on in shop mode
 
   @override
   void initState() {
     super.initState();
     currentPlace = widget.place;
     loadListItems();
+    _loadWakelockSetting();
+  }
+
+  Future<void> _loadWakelockSetting() async {
+    final value = await db.getSetting('shop_mode_wakelock');
+    setState(() {
+      shopModeWakelock = value != 'false'; // Default to true
+    });
   }
 
   Future<void> loadListItems() async {
@@ -359,11 +368,13 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       shopMode = !shopMode;
     });
-    // Keep screen on in shop mode
-    if (shopMode) {
-      WakelockPlus.enable();
-    } else {
-      WakelockPlus.disable();
+    // Keep screen on in shop mode (if enabled in settings)
+    if (shopModeWakelock) {
+      if (shopMode) {
+        WakelockPlus.enable();
+      } else {
+        WakelockPlus.disable();
+      }
     }
     showMessage(
       context,
@@ -375,7 +386,7 @@ class _ListScreenState extends State<ListScreen> {
   @override
   void dispose() {
     // Disable wakelock when leaving screen
-    if (shopMode) {
+    if (shopMode && shopModeWakelock) {
       WakelockPlus.disable();
     }
     super.dispose();

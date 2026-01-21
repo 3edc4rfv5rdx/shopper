@@ -11,7 +11,7 @@ My version of a shopping list for Android.
 - Comments for lists
 - Moved strings up/down in place/list
 - Color themes
-- Localization (English, Russian, Ukrainian)
+- Localization (now English, Ukrainian, Russian)
 - Swipe gestures (edit/delete)
 - Backup/restore (database, CSV)
 

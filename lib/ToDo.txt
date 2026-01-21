@@ -1,5 +1,5 @@
 ===TODO:
-o добавить удержание свечения экрана в настройки
++ add wakelock setting to settings (keep screen on in shop mode)
 # v0.8.260120+29 (2026-01-20 15:59:07)
 + screen always on in shop mode (wakelock)
 + shop mode (font 33, large checkboxes, cart+sun icons) - long press on title or FAB to toggle
@@ -30,7 +30,6 @@ o добавить удержание свечения экрана в наст�
 + change size between strings (dict only)
 + add font size
 + moved strings up/down in lists
-+ moved strings up/down in place/list
 + add menu to place/list on long tap to edit, delete
 + add menu to dict on long tap to edit, delete, remove trash icon
 + add edit (right) and delete (left) gestures
@@ -78,6 +77,5 @@ o добавить удержание свечения экрана в наст�
 + in dict: if empty, not translated empty message
 
 ======= Maybe =======
-# виджет
 # геолокация
 # история покупок

@@ -14,6 +14,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final db = DatabaseHelper.instance;
   bool confirmExit = true;
   bool autoSortDict = false;
+  bool shopModeWakelock = true;
 
   @override
   void initState() {
@@ -24,9 +25,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final exitValue = await db.getSetting('confirm_exit');
     final sortValue = await db.getSetting('auto_sort_dict');
+    final wakelockValue = await db.getSetting('shop_mode_wakelock');
     setState(() {
       confirmExit = exitValue != 'false'; // Default to true if not set
       autoSortDict = sortValue == 'true'; // Default to false if not set
+      shopModeWakelock = wakelockValue != 'false'; // Default to true if not set
     });
   }
 
@@ -41,6 +44,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await db.setSetting('auto_sort_dict', value.toString());
     setState(() {
       autoSortDict = value;
+    });
+  }
+
+  Future<void> _toggleShopModeWakelock(bool value) async {
+    await db.setSetting('shop_mode_wakelock', value.toString());
+    setState(() {
+      shopModeWakelock = value;
     });
   }
 
@@ -310,6 +320,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             onTap: () => _toggleAutoSortDict(!autoSortDict),
+          ),
+          ListTile(
+            leading: const Icon(Icons.light_mode),
+            title: Text(lw('Keep screen on in shop mode')),
+            subtitle: Text(shopModeWakelock ? lw('Screen stays on') : lw('Normal screen timeout')),
+            trailing: Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                value: shopModeWakelock,
+                onChanged: _toggleShopModeWakelock,
+              ),
+            ),
+            onTap: () => _toggleShopModeWakelock(!shopModeWakelock),
           ),
           ListTile(
             leading: const Icon(Icons.backup),
