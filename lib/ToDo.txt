@@ -1,4 +1,5 @@
 ===TODO:
+o добавить удержание свечения экрана в настройки
 # v0.8.260120+29 (2026-01-20 15:59:07)
 + screen always on in shop mode (wakelock)
 + shop mode (font 33, large checkboxes, cart+sun icons) - long press on title or FAB to toggle
