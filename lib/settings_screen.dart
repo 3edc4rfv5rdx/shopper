@@ -176,25 +176,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) =>
           AlertDialog(
             title: Text(lw('Language')),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: langNames.entries.map((entry) {
-                final isSelected = currentLocale == entry.key;
-                return RadioListTile<String>(
-                  title: Text(entry.value),
-                  value: entry.key,
-                  groupValue: currentLocale,
-                  onChanged: (value) => Navigator.pop(context, value),
-                  activeColor: clUpBar,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 0),
-                  visualDensity: VisualDensity.compact,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  tileColor: isSelected ? clSel : null,
-                );
-              }).toList(),
+            content: RadioGroup<String>(
+              groupValue: currentLocale,
+              onChanged: (value) => Navigator.pop(context, value),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: langNames.entries.map((entry) {
+                  final isSelected = currentLocale == entry.key;
+                  return RadioListTile<String>(
+                    title: Text(entry.value),
+                    value: entry.key,
+                    toggleable: true,
+                    activeColor: clUpBar,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 0),
+                    visualDensity: VisualDensity.compact,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    tileColor: isSelected ? clSel : null,
+                  );
+                }).toList(),
+              ),
             ),
             actions: [
               TextButton(
@@ -223,25 +226,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) =>
           AlertDialog(
             title: Text(lw('Color Theme')),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: loadedThemes.keys.map((themeName) {
-                final isSelected = currentTheme == themeName;
-                return RadioListTile<String>(
-                  title: Text(lw(themeName)),
-                  value: themeName,
-                  groupValue: currentTheme,
-                  onChanged: (value) => Navigator.pop(context, value),
-                  activeColor: clUpBar,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 0),
-                  visualDensity: VisualDensity.compact,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  tileColor: isSelected ? clSel : null,
-                );
-              }).toList(),
+            content: RadioGroup<String>(
+              groupValue: currentTheme,
+              onChanged: (value) => Navigator.pop(context, value),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: loadedThemes.keys.map((themeName) {
+                  final isSelected = currentTheme == themeName;
+                  return RadioListTile<String>(
+                    title: Text(lw(themeName)),
+                    value: themeName,
+                    toggleable: true,
+                    activeColor: clUpBar,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 0),
+                    visualDensity: VisualDensity.compact,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    tileColor: isSelected ? clSel : null,
+                  );
+                }).toList(),
+              ),
             ),
             actions: [
               TextButton(
