@@ -171,41 +171,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showLanguageDialog() async {
+    String? selected = currentLocale;
     final selectedLang = await showDialog<String>(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(lw('Language')),
-            content: RadioGroup<String>(
-              groupValue: currentLocale,
-              onChanged: (value) => Navigator.pop(context, value),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: langNames.entries.map((entry) {
-                  final isSelected = currentLocale == entry.key;
-                  return RadioListTile<String>(
-                    title: Text(entry.value),
-                    value: entry.key,
-                    toggleable: true,
-                    activeColor: clUpBar,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 0),
-                    visualDensity: VisualDensity.compact,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    tileColor: isSelected ? clSel : null,
-                  );
-                }).toList(),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(lw('Cancel')),
-              ),
-            ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(lw('Language')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: langNames.entries.map((entry) {
+              final isSelected = selected == entry.key;
+              return ListTile(
+                title: Text(entry.value),
+                leading: Radio<String>(
+                  value: entry.key,
+                  groupValue: selected,
+                  onChanged: (value) {
+                    setDialogState(() => selected = value);
+                    Navigator.pop(context, value);
+                  },
+                  activeColor: clUpBar,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                tileColor: isSelected ? clSel : null,
+                onTap: () {
+                  setDialogState(() => selected = entry.key);
+                  Navigator.pop(context, entry.key);
+                },
+              );
+            }).toList(),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(lw('Cancel')),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (selectedLang != null && selectedLang != currentLocale) {
@@ -221,41 +228,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showThemeDialog() async {
+    String? selected = currentTheme;
     final selectedTheme = await showDialog<String>(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(lw('Color Theme')),
-            content: RadioGroup<String>(
-              groupValue: currentTheme,
-              onChanged: (value) => Navigator.pop(context, value),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: loadedThemes.keys.map((themeName) {
-                  final isSelected = currentTheme == themeName;
-                  return RadioListTile<String>(
-                    title: Text(lw(themeName)),
-                    value: themeName,
-                    toggleable: true,
-                    activeColor: clUpBar,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 0),
-                    visualDensity: VisualDensity.compact,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    tileColor: isSelected ? clSel : null,
-                  );
-                }).toList(),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(lw('Cancel')),
-              ),
-            ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(lw('Color Theme')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: loadedThemes.keys.map((themeName) {
+              final isSelected = selected == themeName;
+              return ListTile(
+                title: Text(lw(themeName)),
+                leading: Radio<String>(
+                  value: themeName,
+                  groupValue: selected,
+                  onChanged: (value) {
+                    setDialogState(() => selected = value);
+                    Navigator.pop(context, value);
+                  },
+                  activeColor: clUpBar,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                tileColor: isSelected ? clSel : null,
+                onTap: () {
+                  setDialogState(() => selected = themeName);
+                  Navigator.pop(context, themeName);
+                },
+              );
+            }).toList(),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(lw('Cancel')),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (selectedTheme != null && selectedTheme != currentTheme) {

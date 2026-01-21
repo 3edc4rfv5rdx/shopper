@@ -346,9 +346,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Check if locked
                           if (isLocked) {
                             final pin = await db.getPlacePin(place.id!);
-                            if (pin != null && mounted) {
+                            if (!mounted) return;
+                            if (pin != null) {
                               final correct = await showEnterPinDialog(context, pin);
-                              if (!correct) return;
+                              if (!mounted || !correct) return;
                             }
                           }
                           if (!mounted) return;
@@ -357,6 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             '/list',
                             arguments: place,
                           );
+                          if (!mounted) return;
                           loadPlaces();
                         },
                         onLongPress: () => showPlaceContextMenu(place),

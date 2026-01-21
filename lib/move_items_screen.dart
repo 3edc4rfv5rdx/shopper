@@ -238,7 +238,7 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             DropdownButtonFormField<Place>(
-                              value: destinationPlace,
+                              initialValue: destinationPlace,
                               style: const TextStyle(fontSize: fsLarge, color: Colors.black),
                               isDense: true,
                               decoration: InputDecoration(
