@@ -12,8 +12,8 @@ import 'list.dart';
 import 'items.dart';
 import 'place.dart';
 
-const String progVersion = '0.8.260120';
-const int buildNumber = 29;
+const String progVersion = '0.8.260121';
+const int buildNumber = 30;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
 

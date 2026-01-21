@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="add photos, shop mode"
+COMMENT="remove warnings etc"
 #
 GLOBVERS='0.8'
 # '0.7.260115'
