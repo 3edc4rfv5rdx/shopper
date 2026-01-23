@@ -126,6 +126,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> deletePlace(Place place) async {
+    // Check if PIN-locked
+    final isLocked = await db.isPlaceLocked(place.id!);
+    if (isLocked) {
+      final pin = await db.getPlacePin(place.id!);
+      if (!mounted) return;
+      if (pin != null) {
+        final correct = await showEnterPinDialog(context, pin);
+        if (!mounted || !correct) return;
+      }
+    }
+
+    if (!mounted) return;
     final confirmed = await showConfirmDialog(
       context,
       lw('Delete Place'),
@@ -312,20 +324,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (direction == DismissDirection.startToEnd) {
                           // Swipe right - edit
                           editPlace(place);
-                          return false;
                         } else {
-                          // Swipe left - delete with confirmation
-                          return await showConfirmDialog(
-                            context,
-                            lw('Delete Place'),
-                            '${lw('Are you sure you want to delete')} "${place.name}"?',
-                          );
+                          // Swipe left - delete (handles PIN check, photos, etc.)
+                          deletePlace(place);
                         }
-                      },
-                      onDismissed: (direction) {
-                        // Only called if confirmDismiss returns true (delete confirmed)
-                        db.deletePlace(place.id!);
-                        loadPlaces();
+                        return false; // Don't dismiss, deletePlace handles UI update
                       },
                       child: ListTile(
                         key: ValueKey('tile_${place.id}'),

@@ -1,0 +1,13 @@
+=== DONE ===
+
+--- 2026-01-23 ---
++ delete PIN-locked places only after entering PIN
+
+Changes in `home_screen.dart`:
+1. Function `deletePlace` (line 128-138): added PIN check before delete confirmation dialog
+2. Swipe left (Dismissible): now calls `deletePlace` instead of separate logic - ensures:
+   - PIN check for locked lists
+   - Correct photo handling on delete
+
+Now when trying to delete a PIN-locked list (via menu or swipe), PIN dialog appears first, and only after correct input - delete confirmation dialog.
+

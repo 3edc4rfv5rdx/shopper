@@ -19,6 +19,8 @@ lib/
   place.dart             - Place model
   list.dart              - ListItem model
   items.dart             - Item model (dictionary)
+  ToDo.txt               - Task list
+  Done.txt               - Completed tasks log
 
 assets/
   locales.json           - Translations (en, ru, ua)
@@ -41,6 +43,15 @@ Location: `lib/ToDo.txt`
 3. Never reorder existing lines
 4. **New tasks → add immediately after section header** (`===TODO:`, `===TOFIX:`, `===ERRORS:`)
 5. Sections: `===TODO:`, `===TOFIX:`, `===ERRORS:`
+
+## Done.txt Rules
+Location: `lib/Done.txt`
+
+**After completing a task, add entry to Done.txt:**
+- Date header: `--- YYYY-MM-DD ---` (add new date header if different from last)
+- Task line: `+ task description` (translated to English)
+- Summary: brief description of changes made (files, what was done)
+- **New entries go at the top** (after `=== DONE ===` header)
 
 ## Localization
 - File: `assets/locales.json`
