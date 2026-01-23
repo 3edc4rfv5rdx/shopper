@@ -1,4 +1,5 @@
 ===TODO:
+# v0.8.260123+31 (2026-01-23 09:08:33)
 + delete PIN-locked places only after entering PIN
 # v0.8.260121+30 (2026-01-21 09:05:39)
 + add wakelock setting to settings (keep screen on in shop mode)
@@ -45,6 +46,7 @@
 + add key
 
 ===TOFIX:
+# v0.8.260123+31 (2026-01-23 09:08:33)
 # v0.8.260121+30 (2026-01-21 09:05:39)
 # v0.8.260120+29 (2026-01-20 15:59:07)
 + 02-RelUpload.sh: changelog now stops at any version tag in ToDo.txt, not git prev tag
@@ -67,6 +69,7 @@
 + purchased items cannot be edited?
 
 ===ERRORS:
+# v0.8.260123+31 (2026-01-23 09:08:33)
 # v0.8.260121+30 (2026-01-21 09:05:39)
 # v0.8.260120+29 (2026-01-20 15:59:07)
 # v0.7.260116+27 (2026-01-16 13:55:45)
