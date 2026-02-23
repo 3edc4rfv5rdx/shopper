@@ -1,6 +1,13 @@
 === DONE ===
 
 --- 2026-02-23 ---
++ release APK size optimization: enabled compressed native libs (~50% smaller APK)
+
+Changes in `android/app/build.gradle.kts`:
+1. Enabled `packaging.jniLibs.useLegacyPackaging = true` for release APK packaging.
+2. Native `.so` files are compressed again in APK, which significantly reduced output size.
+
+--- 2026-02-23 ---
 + quality fixes batch: foreign keys, move/copy duplicates, atomic restore, nullable copyWith, swipe photo cleanup, backup comments, onboarding theme sync, globals split/rename
 
 Changes in `database.dart`, `move_items_screen.dart`, `place.dart`, `items.dart`, `list.dart`, `list_screen.dart`, `welcome_screen.dart`, `globals.dart`, `globals-*.dart`, `ToDo.txt`:
