@@ -204,6 +204,19 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  Future<void> _deleteItemBySwipe(ListItem item) async {
+    if (item.id == null) return;
+
+    if (await hasPhoto(item.id!)) {
+      await deletePhoto(item.id!);
+    }
+
+    await db.deleteListItem(item.id!);
+    if (mounted) {
+      loadListItems();
+    }
+  }
+
   Future<void> convertItemToList(ListItem item) async {
     // Get all places to determine sort order
     final allPlaces = await db.getPlaces();
@@ -939,10 +952,9 @@ class _ListScreenState extends State<ListScreen> {
                                 );
                               }
                             },
-                            onDismissed: (direction) {
-                              // Only called if confirmDismiss returns true (delete confirmed)
-                              db.deleteListItem(item.id!);
-                              loadListItems();
+                            onDismissed: (_) {
+                              // Only called if confirmDismiss returns true (delete confirmed).
+                              _deleteItemBySwipe(item);
                             },
                             child: () {
                               final isPlaceLink = item.quantity == '-1';
@@ -1052,10 +1064,9 @@ class _ListScreenState extends State<ListScreen> {
                                 );
                               }
                             },
-                            onDismissed: (direction) {
-                              // Only called if confirmDismiss returns true (delete confirmed)
-                              db.deleteListItem(item.id!);
-                              loadListItems();
+                            onDismissed: (_) {
+                              // Only called if confirmDismiss returns true (delete confirmed).
+                              _deleteItemBySwipe(item);
                             },
                             child: ListTile(
                               key: ValueKey('tile_${item.id}'),
