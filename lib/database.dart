@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:archive/archive_io.dart';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
@@ -566,40 +567,60 @@ class DatabaseHelper {
         await txn.delete('items');
         await txn.delete('places');
 
+        final importedPlaceIds = <int>{};
+        final importedItemIds = <int>{};
+        int recoveredPlacesCount = 0;
+        int clearedBrokenItemRefs = 0;
+        int skippedMalformedListRows = 0;
+
+        dynamic cell(List<dynamic> row, int index) =>
+            index < row.length ? row[index] : null;
+
         // Import places
         if (placesList.length > 1) {
           for (int i = 1; i < placesList.length; i++) {
             final row = placesList[i];
+            final placeId = parseIntOrNull(cell(row, 0));
+            if (placeId == null) {
+              continue;
+            }
+
+            final placeName = (cell(row, 1)?.toString().trim().isNotEmpty ?? false)
+                ? cell(row, 1).toString()
+                : 'Recovered place #$placeId';
+
             await txn.insert('places', {
-              'id': parseIntOrNull(row[0])!,
-              'name': row[1].toString(),
-              'sort_order': parseIntOrNull(row[2]) ?? 0,
-              'comment': row.length > 3 ? parseStringOrNull(row[3]) : null,
-            });
+              'id': placeId,
+              'name': placeName,
+              'sort_order': parseIntOrNull(cell(row, 2)) ?? 0,
+              'comment': parseStringOrNull(cell(row, 3)),
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+            importedPlaceIds.add(placeId);
           }
         }
 
         // Import items
-        final importedNames = <String>{}; // Track imported names (case-insensitive)
         if (itemsList.length > 1) {
           for (int i = 1; i < itemsList.length; i++) {
             final row = itemsList[i];
-            final itemName = row[1].toString();
-            final itemNameLower = itemName.toLowerCase();
-
-            // Skip duplicates (case-insensitive)
-            if (importedNames.contains(itemNameLower)) {
+            final itemId = parseIntOrNull(cell(row, 0));
+            if (itemId == null) {
               continue;
             }
 
-            await txn.insert('items', {
-              'id': parseIntOrNull(row[0])!,
-              'name': itemName,
-              'unit': parseStringOrNull(row[2]),
-              'sort_order': parseIntOrNull(row[3]) ?? 0,
-            });
+            final itemName = (cell(row, 1)?.toString().trim().isNotEmpty ?? false)
+                ? cell(row, 1).toString()
+                : 'Recovered item #$itemId';
 
-            importedNames.add(itemNameLower);
+            await txn.insert('items', {
+              'id': itemId,
+              'name': itemName,
+              'unit': parseStringOrNull(cell(row, 2)),
+              'sort_order': parseIntOrNull(cell(row, 3)) ?? 0,
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+            importedItemIds.add(itemId);
           }
         }
 
@@ -607,17 +628,54 @@ class DatabaseHelper {
         if (listsList.length > 1) {
           for (int i = 1; i < listsList.length; i++) {
             final row = listsList[i];
+            final listId = parseIntOrNull(cell(row, 0));
+            final placeId = parseIntOrNull(cell(row, 1));
+
+            if (placeId == null) {
+              skippedMalformedListRows++;
+              continue;
+            }
+
+            // Recover missing place references instead of failing full restore.
+            if (!importedPlaceIds.contains(placeId)) {
+              await txn.insert('places', {
+                'id': placeId,
+                'name': 'Recovered place #$placeId',
+                'sort_order': importedPlaceIds.length,
+                'comment': null,
+              }, conflictAlgorithm: ConflictAlgorithm.ignore);
+              importedPlaceIds.add(placeId);
+              recoveredPlacesCount++;
+            }
+
+            var itemId = parseIntOrNull(cell(row, 2));
+            if (itemId != null && !importedItemIds.contains(itemId)) {
+              itemId = null;
+              clearedBrokenItemRefs++;
+            }
+
             await txn.insert('lists', {
-              'id': parseIntOrNull(row[0])!,
-              'place_id': parseIntOrNull(row[1])!,
-              'item_id': parseIntOrNull(row[2]),
-              'name': parseStringOrNull(row[3]),
-              'unit': parseStringOrNull(row[4]),
-              'quantity': parseStringOrNull(row[5]),
-              'is_purchased': parseIntOrNull(row[6]) ?? 0,
-              'sort_order': parseIntOrNull(row[7]) ?? 0,
-            });
+              if (listId != null) 'id': listId,
+              'place_id': placeId,
+              'item_id': itemId,
+              'name': parseStringOrNull(cell(row, 3)),
+              'unit': parseStringOrNull(cell(row, 4)),
+              'quantity': parseStringOrNull(cell(row, 5)),
+              'is_purchased': parseIntOrNull(cell(row, 6)) ?? 0,
+              'sort_order': parseIntOrNull(cell(row, 7)) ?? 0,
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
           }
+        }
+
+        if (recoveredPlacesCount > 0 ||
+            clearedBrokenItemRefs > 0 ||
+            skippedMalformedListRows > 0) {
+          // Non-fatal restore diagnostics for damaged/legacy backups.
+          debugPrint(
+            'Restore diagnostics: recovered places=$recoveredPlacesCount, '
+            'cleared broken item refs=$clearedBrokenItemRefs, '
+            'skipped malformed list rows=$skippedMalformedListRows',
+          );
         }
       });
 
