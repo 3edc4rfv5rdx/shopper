@@ -1,3 +1,5 @@
+const _unset = Object();
+
 class Place {
   final int? id;
   final String name;
@@ -33,13 +35,13 @@ class Place {
     int? id,
     String? name,
     int? sortOrder,
-    String? comment,
+    Object? comment = _unset,
   }) {
     return Place(
       id: id ?? this.id,
       name: name ?? this.name,
       sortOrder: sortOrder ?? this.sortOrder,
-      comment: comment ?? this.comment,
+      comment: identical(comment, _unset) ? this.comment : comment as String?,
     );
   }
 }

@@ -1,3 +1,5 @@
+const _unset = Object();
+
 class ListItem {
   final int? id;
   final int placeId;
@@ -68,26 +70,26 @@ class ListItem {
   ListItem copyWith({
     int? id,
     int? placeId,
-    int? itemId,
-    String? name,
-    String? unit,
-    String? quantity,
+    Object? itemId = _unset,
+    Object? name = _unset,
+    Object? unit = _unset,
+    Object? quantity = _unset,
     bool? isPurchased,
     int? sortOrder,
-    String? itemName,
-    String? itemUnit,
+    Object? itemName = _unset,
+    Object? itemUnit = _unset,
   }) {
     return ListItem(
       id: id ?? this.id,
       placeId: placeId ?? this.placeId,
-      itemId: itemId ?? this.itemId,
-      name: name ?? this.name,
-      unit: unit ?? this.unit,
-      quantity: quantity ?? this.quantity,
+      itemId: identical(itemId, _unset) ? this.itemId : itemId as int?,
+      name: identical(name, _unset) ? this.name : name as String?,
+      unit: identical(unit, _unset) ? this.unit : unit as String?,
+      quantity: identical(quantity, _unset) ? this.quantity : quantity as String?,
       isPurchased: isPurchased ?? this.isPurchased,
       sortOrder: sortOrder ?? this.sortOrder,
-      itemName: itemName ?? this.itemName,
-      itemUnit: itemUnit ?? this.itemUnit,
+      itemName: identical(itemName, _unset) ? this.itemName : itemName as String?,
+      itemUnit: identical(itemUnit, _unset) ? this.itemUnit : itemUnit as String?,
     );
   }
 }

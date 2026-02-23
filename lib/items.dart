@@ -1,3 +1,5 @@
+const _unset = Object();
+
 class Item {
   final int? id;
   final String name;
@@ -32,13 +34,13 @@ class Item {
   Item copyWith({
     int? id,
     String? name,
-    String? unit,
+    Object? unit = _unset,
     int? sortOrder,
   }) {
     return Item(
       id: id ?? this.id,
       name: name ?? this.name,
-      unit: unit ?? this.unit,
+      unit: identical(unit, _unset) ? this.unit : unit as String?,
       sortOrder: sortOrder ?? this.sortOrder,
     );
   }
