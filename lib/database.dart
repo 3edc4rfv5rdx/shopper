@@ -429,8 +429,13 @@ class DatabaseHelper {
       // Export places
       final places = await db.query('places', orderBy: 'sort_order ASC');
       final placesCSV = const ListToCsvConverter().convert([
-        ['id', 'name', 'sort_order'],
-        ...places.map((row) => [row['id'], row['name'], row['sort_order'] ?? ''])
+        ['id', 'name', 'sort_order', 'comment'],
+        ...places.map((row) => [
+              row['id'],
+              row['name'],
+              row['sort_order'] ?? '',
+              row['comment'] ?? '',
+            ])
       ]);
       await File('${tempDir.path}/places.csv').writeAsString(placesCSV);
 
@@ -569,6 +574,7 @@ class DatabaseHelper {
               'id': parseIntOrNull(row[0])!,
               'name': row[1].toString(),
               'sort_order': parseIntOrNull(row[2]) ?? 0,
+              'comment': row.length > 3 ? parseStringOrNull(row[3]) : null,
             });
           }
         }
