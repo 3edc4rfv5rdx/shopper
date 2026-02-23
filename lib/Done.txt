@@ -1,5 +1,14 @@
 === DONE ===
 
+--- 2026-02-23 ---
++ quality fixes batch: foreign keys, move/copy duplicates, atomic restore, nullable copyWith, swipe photo cleanup, backup comments, onboarding theme sync, globals split/rename
+
+Changes in `database.dart`, `move_items_screen.dart`, `place.dart`, `items.dart`, `list.dart`, `list_screen.dart`, `welcome_screen.dart`, `globals.dart`, `globals-*.dart`, `ToDo.txt`:
+1. Enabled SQLite foreign key enforcement and made restore transactional with required-file validation.
+2. Fixed duplicate detection for manual items in move/copy and fixed nullable field clearing in model `copyWith`.
+3. Fixed swipe-delete to remove attached photos, preserved place comments in backup/restore, and aligned onboarding theme keys with configured themes.
+4. Split `globals.dart` into focused `globals-*` modules and updated task/error notes in `ToDo.txt`.
+
 --- 2026-01-23 ---
 + delete PIN-locked places only after entering PIN
 
@@ -10,4 +19,3 @@ Changes in `home_screen.dart`:
    - Correct photo handling on delete
 
 Now when trying to delete a PIN-locked list (via menu or swipe), PIN dialog appears first, and only after correct input - delete confirmation dialog.
-

@@ -6,8 +6,8 @@ import 'database.dart';
 import 'items.dart';
 import 'list.dart';
 import 'place.dart';
-import 'global-theme-localization.dart';
-import 'global-ui-helpers.dart';
+import 'globals-theme-localization.dart';
+import 'globals-ui-helpers.dart';
 
 // ========== UNIFIED ITEM DIALOG ==========
 

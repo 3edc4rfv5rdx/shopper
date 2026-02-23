@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'global-theme-localization.dart';
+import 'globals-theme-localization.dart';
 
 // Message types for colored notifications
 enum MessageType {
