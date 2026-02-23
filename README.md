@@ -2,6 +2,7 @@ My version of a shopping list for Android.
 
 ## Features
 - Multiple shopping lists (stores/places)
+- One-level folders for lists with enter-folder navigation
 - Fast item entry with dictionary autocomplete
 - Reusable nested lists (link one list inside another)
 - Mark purchased items, clear or delete purchased in one tap
