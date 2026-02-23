@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-COMMENT="remove warnings etc"
+COMMENT="new build"
 #
 GLOBVERS='0.8'
 # '0.7.260115'
