@@ -576,7 +576,8 @@ class DatabaseHelper {
         int recoveredPlacesCount = 0;
         int clearedBrokenItemRefs = 0;
         int skippedMalformedListRows = 0;
-        int restoredPinsCount = 0;
+        int restoredSettingsCount = 0;
+        int skippedMalformedSettingsRows = 0;
 
         dynamic cell(List<dynamic> row, int index) =>
             index < row.length ? row[index] : null;
@@ -672,44 +673,43 @@ class DatabaseHelper {
           }
         }
 
-        // Restore PIN locks from settings.csv while keeping other preferences unchanged.
+        // Restore all settings from backup (full app state restore).
         if (settingsList.length > 1) {
+          await txn.delete('settings');
           for (int i = 1; i < settingsList.length; i++) {
             final row = settingsList[i];
             final key = parseStringOrNull(cell(row, 0));
-            final value = parseStringOrNull(cell(row, 1));
-            if (key == null || value == null || key.isEmpty) continue;
+            if (key == null || key.isEmpty) {
+              skippedMalformedSettingsRows++;
+              continue;
+            }
 
-            final match = RegExp(r'^(\d+)-pin$').firstMatch(key);
-            if (match == null) continue;
-
-            final placeId = int.tryParse(match.group(1)!);
-            if (placeId == null || !importedPlaceIds.contains(placeId)) continue;
+            final value = cell(row, 1)?.toString() ?? '';
 
             await txn.insert(
               'settings',
               {'key': key, 'value': value},
               conflictAlgorithm: ConflictAlgorithm.replace,
             );
-            restoredPinsCount++;
+            restoredSettingsCount++;
           }
         }
 
         if (recoveredPlacesCount > 0 ||
             clearedBrokenItemRefs > 0 ||
             skippedMalformedListRows > 0 ||
-            restoredPinsCount > 0) {
+            restoredSettingsCount > 0 ||
+            skippedMalformedSettingsRows > 0) {
           // Non-fatal restore diagnostics for damaged/legacy backups.
           debugPrint(
             'Restore diagnostics: recovered places=$recoveredPlacesCount, '
             'cleared broken item refs=$clearedBrokenItemRefs, '
             'skipped malformed list rows=$skippedMalformedListRows, '
-            'restored pins=$restoredPinsCount',
+            'restored settings=$restoredSettingsCount, '
+            'skipped malformed settings rows=$skippedMalformedSettingsRows',
           );
         }
       });
-
-      // Note: We restore PIN keys only; other settings are preserved.
 
       // Clear existing photos
       if (await photosDir.exists()) {
