@@ -511,6 +511,17 @@ class _ListScreenState extends State<ListScreen> {
       return;
     }
 
+    // Respect PIN lock on linked lists.
+    final isLocked = await db.isPlaceLocked(placeId);
+    if (isLocked) {
+      final pin = await db.getPlacePin(placeId);
+      if (!mounted) return;
+      if (pin != null) {
+        final correct = await showEnterPinDialog(context, pin);
+        if (!mounted || !correct) return;
+      }
+    }
+
     if (mounted) {
       await Navigator.pushNamed(
         context,
