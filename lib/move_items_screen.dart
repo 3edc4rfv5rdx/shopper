@@ -57,6 +57,31 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
     return selectedItemIds.isNotEmpty && destinationPlace != null;
   }
 
+  bool _isDuplicateInDestination(ListItem sourceItem, ListItem destinationItem) {
+    final sourceIsPlaceLink = sourceItem.quantity == '-1';
+    final destinationIsPlaceLink = destinationItem.quantity == '-1';
+
+    if (sourceIsPlaceLink || destinationIsPlaceLink) {
+      return sourceIsPlaceLink &&
+          destinationIsPlaceLink &&
+          sourceItem.unit == destinationItem.unit;
+    }
+
+    if (sourceItem.itemId != null && destinationItem.itemId != null) {
+      return sourceItem.itemId == destinationItem.itemId;
+    }
+
+    if (sourceItem.itemId != null || destinationItem.itemId != null) {
+      return false;
+    }
+
+    String norm(String? value) => (value ?? '').trim().toLowerCase();
+
+    return norm(sourceItem.displayName) == norm(destinationItem.displayName) &&
+        norm(sourceItem.quantity) == norm(destinationItem.quantity) &&
+        norm(sourceItem.displayUnit) == norm(destinationItem.displayUnit);
+  }
+
   Future<void> moveOrCopyItems() async {
     if (!canProceed()) {
       if (destinationPlace == null) {
@@ -77,17 +102,10 @@ class _MoveItemsScreenState extends State<MoveItemsScreen> {
     // Check for duplicates
     int skippedCount = 0;
     for (var item in selectedItems) {
-      final isPlaceLink = item.quantity == '-1';
-
       // Check if item already exists in destination
-      final isDuplicate = destItems.any((destItem) {
-        // For place links, check by unit (Place ID)
-        if (isPlaceLink && destItem.quantity == '-1') {
-          return destItem.unit == item.unit;
-        }
-        // For regular items, check by itemId
-        return destItem.itemId == item.itemId;
-      });
+      final isDuplicate = destItems.any(
+        (destItem) => _isDuplicateInDestination(item, destItem),
+      );
 
       if (isDuplicate) {
         // Skip duplicates for both Move and Copy
