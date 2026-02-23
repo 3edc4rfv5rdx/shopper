@@ -522,19 +522,6 @@ class DatabaseHelper {
         }
       }
 
-      // Clear existing data (except settings)
-      await db.delete('lists');
-      await db.delete('items');
-      await db.delete('places');
-
-      // Clear existing photos
-      if (await photosDir.exists()) {
-        final oldPhotos = photosDir.listSync().whereType<File>();
-        for (final photo in oldPhotos) {
-          await photo.delete();
-        }
-      }
-
       // Helper function to parse integer from CSV
       int? parseIntOrNull(dynamic value) {
         if (value == null) return null;
@@ -552,28 +539,42 @@ class DatabaseHelper {
         return str;
       }
 
-      // Import places
-      if (await File('${tempDir.path}/places.csv').exists()) {
-        final placesCSV = await File('${tempDir.path}/places.csv').readAsString();
-        final placesList = const CsvToListConverter().convert(placesCSV);
+      final requiredCsv = ['places.csv', 'items.csv', 'lists.csv'];
+      for (final fileName in requiredCsv) {
+        final file = File('${tempDir.path}/$fileName');
+        if (!await file.exists()) {
+          throw FormatException('Backup archive is missing $fileName');
+        }
+      }
+
+      final placesCSV = await File('${tempDir.path}/places.csv').readAsString();
+      final itemsCSV = await File('${tempDir.path}/items.csv').readAsString();
+      final listsCSV = await File('${tempDir.path}/lists.csv').readAsString();
+
+      final placesList = const CsvToListConverter().convert(placesCSV);
+      final itemsList = const CsvToListConverter().convert(itemsCSV);
+      final listsList = const CsvToListConverter().convert(listsCSV);
+
+      await db.transaction((txn) async {
+        // Clear existing data (except settings)
+        await txn.delete('lists');
+        await txn.delete('items');
+        await txn.delete('places');
+
+        // Import places
         if (placesList.length > 1) {
           for (int i = 1; i < placesList.length; i++) {
             final row = placesList[i];
-            await db.insert('places', {
+            await txn.insert('places', {
               'id': parseIntOrNull(row[0])!,
               'name': row[1].toString(),
               'sort_order': parseIntOrNull(row[2]) ?? 0,
             });
           }
         }
-      }
 
-      // Import items
-      if (await File('${tempDir.path}/items.csv').exists()) {
-        final itemsCSV = await File('${tempDir.path}/items.csv').readAsString();
-        final itemsList = const CsvToListConverter().convert(itemsCSV);
+        // Import items
         final importedNames = <String>{}; // Track imported names (case-insensitive)
-
         if (itemsList.length > 1) {
           for (int i = 1; i < itemsList.length; i++) {
             final row = itemsList[i];
@@ -585,7 +586,7 @@ class DatabaseHelper {
               continue;
             }
 
-            await db.insert('items', {
+            await txn.insert('items', {
               'id': parseIntOrNull(row[0])!,
               'name': itemName,
               'unit': parseStringOrNull(row[2]),
@@ -595,16 +596,12 @@ class DatabaseHelper {
             importedNames.add(itemNameLower);
           }
         }
-      }
 
-      // Import lists
-      if (await File('${tempDir.path}/lists.csv').exists()) {
-        final listsCSV = await File('${tempDir.path}/lists.csv').readAsString();
-        final listsList = const CsvToListConverter().convert(listsCSV);
+        // Import lists
         if (listsList.length > 1) {
           for (int i = 1; i < listsList.length; i++) {
             final row = listsList[i];
-            await db.insert('lists', {
+            await txn.insert('lists', {
               'id': parseIntOrNull(row[0])!,
               'place_id': parseIntOrNull(row[1])!,
               'item_id': parseIntOrNull(row[2]),
@@ -616,9 +613,17 @@ class DatabaseHelper {
             });
           }
         }
-      }
+      });
 
       // Note: We don't restore settings to preserve user preferences
+
+      // Clear existing photos
+      if (await photosDir.exists()) {
+        final oldPhotos = photosDir.listSync().whereType<File>();
+        for (final photo in oldPhotos) {
+          await photo.delete();
+        }
+      }
 
       // Restore photos
       final tempPhotosDir = Directory('${tempDir.path}/photos');
