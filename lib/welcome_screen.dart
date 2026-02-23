@@ -14,13 +14,17 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   final db = DatabaseHelper.instance;
   String selectedLanguage = 'en';
-  String selectedTheme = 'system';
+  String selectedTheme = 'Light';
 
-  Map<String, String> get themes => {
-    'light': lw('Light'),
-    'dark': lw('Dark'),
-    'system': lw('System'),
-  };
+  Map<String, String> get themes =>
+      Map.fromEntries(loadedThemes.keys.map((name) => MapEntry(name, lw(name))));
+
+  @override
+  void initState() {
+    super.initState();
+    selectedLanguage = currentLocale;
+    selectedTheme = currentTheme;
+  }
 
   Future<void> saveAndContinue() async {
     await db.setSetting('language', selectedLanguage);
@@ -29,6 +33,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     // Load localizations for selected language
     await readLocale(selectedLanguage);
+    applyTheme(selectedTheme);
 
     if (mounted) {
       Navigator.pushReplacement(
