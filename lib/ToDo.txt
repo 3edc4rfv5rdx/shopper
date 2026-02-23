@@ -1,4 +1,5 @@
 ===TODO:
++ add one-level folder grouping for lists (folders at bottom with nested lists)
 # v0.8.260123+31 (2026-01-23 09:08:33)
 + delete PIN-locked places only after entering PIN
 # v0.8.260121+30 (2026-01-21 09:05:39)

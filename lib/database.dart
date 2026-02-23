@@ -28,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onConfigure: (db) async {
         // Enforce FOREIGN KEY constraints (disabled by default in SQLite).
         await db.execute('PRAGMA foreign_keys = ON');
@@ -45,7 +45,9 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         sort_order INTEGER,
-        comment TEXT
+        comment TEXT,
+        parent_id INTEGER,
+        is_folder INTEGER DEFAULT 0
       )
     ''');
 
@@ -92,6 +94,11 @@ class DatabaseHelper {
     if (oldVersion < 3) {
       // Add comment column to places table
       await db.execute('ALTER TABLE places ADD COLUMN comment TEXT');
+    }
+    if (oldVersion < 4) {
+      // Add folder support columns
+      await db.execute('ALTER TABLE places ADD COLUMN parent_id INTEGER');
+      await db.execute('ALTER TABLE places ADD COLUMN is_folder INTEGER DEFAULT 0');
     }
   }
 
@@ -150,6 +157,26 @@ class DatabaseHelper {
       );
     }
     await batch.commit(noResult: true);
+  }
+
+  Future<int> updatePlaceParent(int placeId, int? parentId) async {
+    final db = await database;
+    return await db.update(
+      'places',
+      {'parent_id': parentId},
+      where: 'id = ?',
+      whereArgs: [placeId],
+    );
+  }
+
+  Future<int> clearFolderChildren(int folderId) async {
+    final db = await database;
+    return await db.update(
+      'places',
+      {'parent_id': null},
+      where: 'parent_id = ?',
+      whereArgs: [folderId],
+    );
   }
 
   Future<int> getUnpurchasedItemsCount(int placeId) async {
@@ -430,12 +457,14 @@ class DatabaseHelper {
       // Export places
       final places = await db.query('places', orderBy: 'sort_order ASC');
       final placesCSV = const ListToCsvConverter().convert([
-        ['id', 'name', 'sort_order', 'comment'],
+        ['id', 'name', 'sort_order', 'comment', 'parent_id', 'is_folder'],
         ...places.map((row) => [
               row['id'],
               row['name'],
               row['sort_order'] ?? '',
               row['comment'] ?? '',
+              row['parent_id'] ?? '',
+              row['is_folder'] ?? 0,
             ])
       ]);
       await File('${tempDir.path}/places.csv').writeAsString(placesCSV);
@@ -604,6 +633,8 @@ class DatabaseHelper {
               'name': placeName,
               'sort_order': parseIntOrNull(cell(row, 2)) ?? 0,
               'comment': parseStringOrNull(cell(row, 3)),
+              'parent_id': parseIntOrNull(cell(row, 4)),
+              'is_folder': parseIntOrNull(cell(row, 5)) ?? 0,
             }, conflictAlgorithm: ConflictAlgorithm.replace);
 
             importedPlaceIds.add(placeId);
@@ -653,6 +684,8 @@ class DatabaseHelper {
                 'name': 'Recovered place #$placeId',
                 'sort_order': importedPlaceIds.length,
                 'comment': null,
+                'parent_id': null,
+                'is_folder': 0,
               }, conflictAlgorithm: ConflictAlgorithm.ignore);
               importedPlaceIds.add(placeId);
               recoveredPlacesCount++;

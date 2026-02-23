@@ -25,26 +25,41 @@ class _HomeScreenState extends State<HomeScreen> {
     loadPlaces();
   }
 
+  List<Place> get _folders =>
+      places.where((p) => p.isFolder).toList()..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
+  List<Place> get _rootLists =>
+      places.where((p) => !p.isFolder && p.parentId == null).toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
+  List<Place> _childrenOf(int folderId) =>
+      places.where((p) => !p.isFolder && p.parentId == folderId).toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
   Future<void> loadPlaces() async {
     setState(() => isLoading = true);
     final data = await db.getPlaces();
 
-    // Load item counts and lock status for all places
     final Set<int> hasUnpurchased = {};
     final Set<int> allPurchased = {};
     final Set<int> locked = {};
+
     for (final place in data) {
-      final unpurchasedCount = await db.getUnpurchasedItemsCount(place.id!);
-      final totalCount = await db.getTotalItemsCount(place.id!);
-      final isLocked = await db.isPlaceLocked(place.id!);
-      if (unpurchasedCount > 0) {
-        hasUnpurchased.add(place.id!);
-      } else if (totalCount > 0) {
-        // Has items but all are purchased
-        allPurchased.add(place.id!);
-      }
-      if (isLocked) {
-        locked.add(place.id!);
+      if (place.id == null) continue;
+
+      if (!place.isFolder) {
+        final unpurchasedCount = await db.getUnpurchasedItemsCount(place.id!);
+        final totalCount = await db.getTotalItemsCount(place.id!);
+        if (unpurchasedCount > 0) {
+          hasUnpurchased.add(place.id!);
+        } else if (totalCount > 0) {
+          allPurchased.add(place.id!);
+        }
+
+        final isLocked = await db.isPlaceLocked(place.id!);
+        if (isLocked) {
+          locked.add(place.id!);
+        }
       }
     }
 
@@ -57,17 +72,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> addPlace() async {
+  Future<void> _addPlaceLike({required bool asFolder}) async {
     final nameController = TextEditingController();
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(lw('Add Place')),
+        title: Text(asFolder ? lw('Add Folder') : lw('Add Place')),
         content: TextField(
           controller: nameController,
           decoration: InputDecoration(
-            labelText: lw('Place name'),
-            hintText: lw('e.g. Supermarket, Market, etc.'),
+            labelText: asFolder ? lw('Folder name') : lw('Place name'),
+            hintText: asFolder
+                ? lw('e.g. Weekly, Markets, Household')
+                : lw('e.g. Supermarket, Market, etc.'),
           ),
           autofocus: true,
         ),
@@ -84,25 +101,31 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (result == true && nameController.text.isNotEmpty) {
+    if (result == true && nameController.text.trim().isNotEmpty) {
       final newPlace = Place(
-        name: nameController.text,
+        name: nameController.text.trim(),
         sortOrder: places.length,
+        isFolder: asFolder,
       );
       await db.insertPlace(newPlace);
-      loadPlaces();
+      if (mounted) loadPlaces();
     }
   }
+
+  Future<void> addPlace() async => _addPlaceLike(asFolder: false);
+  Future<void> addFolder() async => _addPlaceLike(asFolder: true);
 
   Future<void> editPlace(Place place) async {
     final nameController = TextEditingController(text: place.name);
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(lw('Edit Place')),
+        title: Text(place.isFolder ? lw('Edit Folder') : lw('Edit Place')),
         content: TextField(
           controller: nameController,
-          decoration: InputDecoration(labelText: lw('Place name')),
+          decoration: InputDecoration(
+            labelText: place.isFolder ? lw('Folder name') : lw('Place name'),
+          ),
           autofocus: true,
         ),
         actions: [
@@ -118,63 +141,120 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (result == true && nameController.text.isNotEmpty) {
-      final updatedPlace = place.copyWith(name: nameController.text);
+    if (result == true && nameController.text.trim().isNotEmpty) {
+      final updatedPlace = place.copyWith(name: nameController.text.trim());
       await db.updatePlace(updatedPlace);
+      if (mounted) loadPlaces();
+    }
+  }
+
+  Future<void> movePlaceToFolder(Place place) async {
+    final folders = _folders;
+    if (folders.isEmpty) {
+      showMessage(context, lw('No folders yet. Create one first.'), type: MessageType.warning);
+      return;
+    }
+
+    final target = await showDialog<Place>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lw('Select folder')),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: folders.length,
+            itemBuilder: (context, index) {
+              final folder = folders[index];
+              return ListTile(
+                leading: const Icon(Icons.folder),
+                title: Text(folder.name),
+                onTap: () => Navigator.pop(context, folder),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(lw('Cancel')),
+          ),
+        ],
+      ),
+    );
+
+    if (target == null) return;
+    await db.updatePlaceParent(place.id!, target.id);
+    if (mounted) {
       loadPlaces();
+      showMessage(context, lw('Moved to folder'), type: MessageType.success);
+    }
+  }
+
+  Future<void> removeFromFolder(Place place) async {
+    await db.updatePlaceParent(place.id!, null);
+    if (mounted) {
+      loadPlaces();
+      showMessage(context, lw('Removed from folder'), type: MessageType.success);
     }
   }
 
   Future<void> deletePlace(Place place) async {
-    // Check if PIN-locked
-    final isLocked = await db.isPlaceLocked(place.id!);
-    if (isLocked) {
-      final pin = await db.getPlacePin(place.id!);
-      if (!mounted) return;
-      if (pin != null) {
-        final correct = await showEnterPinDialog(context, pin);
-        if (!mounted || !correct) return;
+    if (!place.isFolder) {
+      final isLocked = await db.isPlaceLocked(place.id!);
+      if (isLocked) {
+        final pin = await db.getPlacePin(place.id!);
+        if (!mounted) return;
+        if (pin != null) {
+          final correct = await showEnterPinDialog(context, pin);
+          if (!mounted || !correct) return;
+        }
       }
     }
 
     if (!mounted) return;
     final confirmed = await showConfirmDialog(
       context,
-      lw('Delete Place'),
+      place.isFolder ? lw('Delete Folder') : lw('Delete Place'),
       '${lw('Are you sure you want to delete')} "${place.name}"?',
     );
 
-    if (confirmed) {
-      // Check if any items have photos
-      final items = await db.getListItems(place.id!);
-      List<int> itemsWithPhotos = [];
-      for (final item in items) {
-        if (await hasPhoto(item.id!)) {
-          itemsWithPhotos.add(item.id!);
-        }
-      }
+    if (!confirmed) return;
 
-      // If there are photos, ask user what to do
-      if (itemsWithPhotos.isNotEmpty && mounted) {
-        final photoAction = await showDeleteItemWithPhotoDialog(context);
-        if (photoAction == null) return; // User cancelled
-
-        for (final itemId in itemsWithPhotos) {
-          if (photoAction == 'move') {
-            await movePhotoToGallery(itemId);
-          } else {
-            await deletePhoto(itemId);
-          }
-        }
-      }
-
+    if (place.isFolder) {
+      await db.clearFolderChildren(place.id!);
       await db.deletePlace(place.id!);
       if (mounted) loadPlaces();
+      return;
     }
+
+    final items = await db.getListItems(place.id!);
+    final itemsWithPhotos = <int>[];
+    for (final item in items) {
+      if (await hasPhoto(item.id!)) {
+        itemsWithPhotos.add(item.id!);
+      }
+    }
+
+    if (itemsWithPhotos.isNotEmpty && mounted) {
+      final photoAction = await showDeleteItemWithPhotoDialog(context);
+      if (photoAction == null) return;
+
+      for (final itemId in itemsWithPhotos) {
+        if (photoAction == 'move') {
+          await movePhotoToGallery(itemId);
+        } else {
+          await deletePhoto(itemId);
+        }
+      }
+    }
+
+    await db.deletePlace(place.id!);
+    if (mounted) loadPlaces();
   }
 
   Future<void> showPlaceContextMenu(Place place) async {
-    final isLocked = await db.isPlaceLocked(place.id!);
+    final isLocked = !place.isFolder && await db.isPlaceLocked(place.id!);
 
     if (!mounted) return;
 
@@ -189,6 +269,24 @@ class _HomeScreenState extends State<HomeScreen> {
             editPlace(place);
           },
         ),
+        if (!place.isFolder)
+          ListTile(
+            leading: const Icon(Icons.folder_open),
+            title: Text(lw('Move to folder')),
+            onTap: () {
+              Navigator.pop(context);
+              movePlaceToFolder(place);
+            },
+          ),
+        if (!place.isFolder && place.parentId != null)
+          ListTile(
+            leading: const Icon(Icons.folder_off),
+            title: Text(lw('Remove from folder')),
+            onTap: () {
+              Navigator.pop(context);
+              removeFromFolder(place);
+            },
+          ),
         ListTile(
           leading: const Icon(Icons.delete),
           title: Text(lw('Delete')),
@@ -197,18 +295,19 @@ class _HomeScreenState extends State<HomeScreen> {
             deletePlace(place);
           },
         ),
-        ListTile(
-          leading: Icon(isLocked ? Icons.lock_open : Icons.lock),
-          title: Text(isLocked ? lw('Unlock') : lw('Lock')),
-          onTap: () {
-            Navigator.pop(context);
-            if (isLocked) {
-              unlockPlace(place);
-            } else {
-              lockPlace(place);
-            }
-          },
-        ),
+        if (!place.isFolder)
+          ListTile(
+            leading: Icon(isLocked ? Icons.lock_open : Icons.lock),
+            title: Text(isLocked ? lw('Unlock') : lw('Lock')),
+            onTap: () {
+              Navigator.pop(context);
+              if (isLocked) {
+                unlockPlace(place);
+              } else {
+                lockPlace(place);
+              }
+            },
+          ),
       ],
     );
   }
@@ -239,13 +338,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> openPlace(Place place) async {
+    final isLocked = lockedPlaces.contains(place.id);
+    if (isLocked) {
+      final pin = await db.getPlacePin(place.id!);
+      if (!mounted) return;
+      if (pin != null) {
+        final correct = await showEnterPinDialog(context, pin);
+        if (!mounted || !correct) return;
+      }
+    }
+
+    if (!mounted) return;
+    await Navigator.pushNamed(
+      context,
+      '/list',
+      arguments: place,
+    );
+    if (!mounted) return;
+    loadPlaces();
+  }
+
   Future<void> exitApp() async {
-    // Check if confirmation is required
     final confirmExitSetting = await db.getSetting('confirm_exit');
     if (!mounted) return;
     final requireConfirmation = confirmExitSetting != 'false';
 
-    bool confirmed = true;
+    var confirmed = true;
     if (requireConfirmation) {
       confirmed = await showConfirmDialog(
         context,
@@ -260,8 +379,72 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Widget _buildPlaceTile(Place place, {bool isChild = false}) {
+    final hasUnpurchased = placesWithUnpurchased.contains(place.id);
+    final allPurchased = placesAllPurchased.contains(place.id);
+    final isLocked = lockedPlaces.contains(place.id);
+
+    final tile = ListTile(
+      key: ValueKey('tile_${place.id}_${isChild ? 'child' : 'root'}'),
+      contentPadding: EdgeInsets.only(left: isChild ? 36 : 16, right: 8),
+      title: Text(
+        place.name,
+        style: TextStyle(
+          fontWeight: place.isFolder
+              ? fwBold
+              : (hasUnpurchased ? fwBold : fwNormal),
+          fontSize: place.isFolder
+              ? fsMedium
+              : (hasUnpurchased ? fsMedium : fsNormal),
+          decoration: allPurchased ? TextDecoration.lineThrough : null,
+        ),
+      ),
+      leading: place.isFolder
+          ? const Icon(Icons.folder)
+          : isChild
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.subdirectory_arrow_right, size: 18),
+                    Icon(isLocked ? Icons.lock : Icons.store),
+                  ],
+                )
+              : Icon(isLocked ? Icons.lock : Icons.store),
+      onTap: place.isFolder ? null : () => openPlace(place),
+      onLongPress: () => showPlaceContextMenu(place),
+    );
+
+    return Dismissible(
+      key: ValueKey('dismiss_${place.id}_${isChild ? 'child' : 'root'}'),
+      background: Container(
+        color: Colors.blue,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        child: const Icon(Icons.edit, color: Colors.white),
+      ),
+      secondaryBackground: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          editPlace(place);
+        } else {
+          deletePlace(place);
+        }
+        return false;
+      },
+      child: tile,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final rootLists = _rootLists;
+    final folders = _folders;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -288,90 +471,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     textAlign: TextAlign.center,
                   ),
                 )
-              : ReorderableListView.builder(
-                  buildDefaultDragHandles: false,
-                  itemCount: places.length,
-                  onReorder: (oldIndex, newIndex) async {
-                    setState(() {
-                      if (newIndex > oldIndex) {
-                        newIndex -= 1;
-                      }
-                      final item = places.removeAt(oldIndex);
-                      places.insert(newIndex, item);
-                    });
-                    await db.updatePlacesOrder(places);
-                  },
-                  itemBuilder: (context, index) {
-                    final place = places[index];
-                    final hasUnpurchased = placesWithUnpurchased.contains(place.id);
-                    final allPurchased = placesAllPurchased.contains(place.id);
-                    final isLocked = lockedPlaces.contains(place.id);
-                    return Dismissible(
-                      key: ValueKey(place.id),
-                      background: Container(
-                        color: Colors.blue,
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 20),
-                        child: const Icon(Icons.edit, color: Colors.white),
-                      ),
-                      secondaryBackground: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      confirmDismiss: (direction) async {
-                        if (direction == DismissDirection.startToEnd) {
-                          // Swipe right - edit
-                          editPlace(place);
-                        } else {
-                          // Swipe left - delete (handles PIN check, photos, etc.)
-                          deletePlace(place);
-                        }
-                        return false; // Don't dismiss, deletePlace handles UI update
-                      },
-                      child: ListTile(
-                        key: ValueKey('tile_${place.id}'),
-                        title: Text(
-                          place.name,
-                          style: TextStyle(
-                            fontWeight: hasUnpurchased ? fwBold : fwNormal,
-                            fontSize: hasUnpurchased ? fsMedium : fsNormal,
-                            decoration: allPurchased ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                        leading: Icon(isLocked ? Icons.lock : Icons.store),
-                        trailing: ReorderableDragStartListener(
-                          index: index,
-                          child: const Icon(Icons.drag_handle),
-                        ),
-                        onTap: () async {
-                          // Check if locked
-                          if (isLocked) {
-                            final pin = await db.getPlacePin(place.id!);
-                            if (!mounted) return;
-                            if (pin != null) {
-                              final correct = await showEnterPinDialog(context, pin);
-                              if (!mounted || !correct) return;
-                            }
-                          }
-                          if (!mounted) return;
-                          await Navigator.pushNamed(
-                            context,
-                            '/list',
-                            arguments: place,
-                          );
-                          if (!mounted) return;
-                          loadPlaces();
-                        },
-                        onLongPress: () => showPlaceContextMenu(place),
-                      ),
-                    );
-                  },
+              : ListView(
+                  children: [
+                    for (final place in rootLists) _buildPlaceTile(place),
+                    for (final folder in folders) ...[
+                      _buildPlaceTile(folder),
+                      for (final child in _childrenOf(folder.id!))
+                        _buildPlaceTile(child, isChild: true),
+                    ],
+                  ],
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addPlace,
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: 'add_folder',
+            mini: true,
+            onPressed: addFolder,
+            tooltip: lw('Add Folder'),
+            child: const Icon(Icons.create_new_folder),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'add_place',
+            onPressed: addPlace,
+            child: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
