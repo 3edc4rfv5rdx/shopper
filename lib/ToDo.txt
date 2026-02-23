@@ -56,6 +56,10 @@
 + split globals.dart into focused globals-* modules
 + enable legacy jniLibs packaging (compressed native libs, APK size reduced ~50%)
 + require PIN check when opening linked (place-link) locked lists
++ make restore resilient to broken foreign key references in legacy backups
++ restore full settings table from backup (optional in UI)
++ add restore settings checkbox and localization in restore dialog
++ always restore PIN locks even when restore settings checkbox is off
 # v0.8.260123+31 (2026-01-23 09:08:33)
 # v0.8.260121+30 (2026-01-21 09:05:39)
 # v0.8.260120+29 (2026-01-20 15:59:07)
