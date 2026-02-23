@@ -556,10 +556,14 @@ class DatabaseHelper {
       final placesCSV = await File('${tempDir.path}/places.csv').readAsString();
       final itemsCSV = await File('${tempDir.path}/items.csv').readAsString();
       final listsCSV = await File('${tempDir.path}/lists.csv').readAsString();
+      final settingsFile = File('${tempDir.path}/settings.csv');
 
       final placesList = const CsvToListConverter().convert(placesCSV);
       final itemsList = const CsvToListConverter().convert(itemsCSV);
       final listsList = const CsvToListConverter().convert(listsCSV);
+      final settingsList = await settingsFile.exists()
+          ? const CsvToListConverter().convert(await settingsFile.readAsString())
+          : <List<dynamic>>[];
 
       await db.transaction((txn) async {
         // Clear existing data (except settings)
@@ -572,6 +576,7 @@ class DatabaseHelper {
         int recoveredPlacesCount = 0;
         int clearedBrokenItemRefs = 0;
         int skippedMalformedListRows = 0;
+        int restoredPinsCount = 0;
 
         dynamic cell(List<dynamic> row, int index) =>
             index < row.length ? row[index] : null;
@@ -667,19 +672,44 @@ class DatabaseHelper {
           }
         }
 
+        // Restore PIN locks from settings.csv while keeping other preferences unchanged.
+        if (settingsList.length > 1) {
+          for (int i = 1; i < settingsList.length; i++) {
+            final row = settingsList[i];
+            final key = parseStringOrNull(cell(row, 0));
+            final value = parseStringOrNull(cell(row, 1));
+            if (key == null || value == null || key.isEmpty) continue;
+
+            final match = RegExp(r'^(\d+)-pin$').firstMatch(key);
+            if (match == null) continue;
+
+            final placeId = int.tryParse(match.group(1)!);
+            if (placeId == null || !importedPlaceIds.contains(placeId)) continue;
+
+            await txn.insert(
+              'settings',
+              {'key': key, 'value': value},
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+            restoredPinsCount++;
+          }
+        }
+
         if (recoveredPlacesCount > 0 ||
             clearedBrokenItemRefs > 0 ||
-            skippedMalformedListRows > 0) {
+            skippedMalformedListRows > 0 ||
+            restoredPinsCount > 0) {
           // Non-fatal restore diagnostics for damaged/legacy backups.
           debugPrint(
             'Restore diagnostics: recovered places=$recoveredPlacesCount, '
             'cleared broken item refs=$clearedBrokenItemRefs, '
-            'skipped malformed list rows=$skippedMalformedListRows',
+            'skipped malformed list rows=$skippedMalformedListRows, '
+            'restored pins=$restoredPinsCount',
           );
         }
       });
 
-      // Note: We don't restore settings to preserve user preferences
+      // Note: We restore PIN keys only; other settings are preserved.
 
       // Clear existing photos
       if (await photosDir.exists()) {
