@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Set<int> placesWithUnpurchased = {};
   Set<int> placesAllPurchased = {};
   Set<int> lockedPlaces = {};
+  Place? currentFolder;
   bool isLoading = true;
 
   @override
@@ -35,6 +36,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Place> _childrenOf(int folderId) =>
       places.where((p) => !p.isFolder && p.parentId == folderId).toList()
         ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
+  List<Place> get _visibleLists {
+    if (currentFolder == null) return _rootLists;
+    return _childrenOf(currentFolder!.id!);
+  }
+
+  List<Place> get _visibleFolders => currentFolder == null ? _folders : [];
 
   Future<void> loadPlaces() async {
     setState(() => isLoading = true);
@@ -106,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
         name: nameController.text.trim(),
         sortOrder: places.length,
         isFolder: asFolder,
+        parentId: asFolder ? null : currentFolder?.id,
       );
       await db.insertPlace(newPlace);
       if (mounted) loadPlaces();
@@ -359,6 +368,18 @@ class _HomeScreenState extends State<HomeScreen> {
     loadPlaces();
   }
 
+  void openFolder(Place folder) {
+    setState(() {
+      currentFolder = folder;
+    });
+  }
+
+  void exitFolderView() {
+    setState(() {
+      currentFolder = null;
+    });
+  }
+
   Future<void> exitApp() async {
     final confirmExitSetting = await db.getSetting('confirm_exit');
     if (!mounted) return;
@@ -379,14 +400,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildPlaceTile(Place place, {bool isChild = false}) {
+  Widget _buildPlaceTile(Place place) {
     final hasUnpurchased = placesWithUnpurchased.contains(place.id);
     final allPurchased = placesAllPurchased.contains(place.id);
     final isLocked = lockedPlaces.contains(place.id);
 
     final tile = ListTile(
-      key: ValueKey('tile_${place.id}_${isChild ? 'child' : 'root'}'),
-      contentPadding: EdgeInsets.only(left: isChild ? 36 : 16, right: 8),
+      key: ValueKey('tile_${place.id}_root'),
       title: Text(
         place.name,
         style: TextStyle(
@@ -401,21 +421,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       leading: place.isFolder
           ? const Icon(Icons.folder)
-          : isChild
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.subdirectory_arrow_right, size: 18),
-                    Icon(isLocked ? Icons.lock : Icons.store),
-                  ],
-                )
-              : Icon(isLocked ? Icons.lock : Icons.store),
-      onTap: place.isFolder ? null : () => openPlace(place),
+          : Icon(isLocked ? Icons.lock : Icons.store),
+      onTap: place.isFolder ? () => openFolder(place) : () => openPlace(place),
       onLongPress: () => showPlaceContextMenu(place),
     );
 
     return Dismissible(
-      key: ValueKey('dismiss_${place.id}_${isChild ? 'child' : 'root'}'),
+      key: ValueKey('dismiss_${place.id}_root'),
       background: Container(
         color: Colors.blue,
         alignment: Alignment.centerLeft,
@@ -442,17 +454,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final rootLists = _rootLists;
-    final folders = _folders;
+    final visibleLists = _visibleLists;
+    final visibleFolders = _visibleFolders;
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: exitApp,
-          tooltip: lw('Exit'),
-        ),
-        title: Text(lw('Lists')),
+        leading: currentFolder == null
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: exitApp,
+                tooltip: lw('Exit'),
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: exitFolderView,
+                tooltip: lw('Back'),
+              ),
+        title: Text(currentFolder?.name ?? lw('Lists')),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -473,25 +491,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               : ListView(
                   children: [
-                    for (final place in rootLists) _buildPlaceTile(place),
-                    for (final folder in folders) ...[
-                      _buildPlaceTile(folder),
-                      for (final child in _childrenOf(folder.id!))
-                        _buildPlaceTile(child, isChild: true),
-                    ],
+                    for (final place in visibleLists) _buildPlaceTile(place),
+                    for (final folder in visibleFolders) _buildPlaceTile(folder),
+                    if (currentFolder != null && visibleLists.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          lw('No items yet. Add one using the + button.'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                   ],
                 ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FloatingActionButton(
-            heroTag: 'add_folder',
-            mini: true,
-            onPressed: addFolder,
-            tooltip: lw('Add Folder'),
-            child: const Icon(Icons.create_new_folder),
-          ),
-          const SizedBox(height: 10),
+          if (currentFolder == null) ...[
+            FloatingActionButton(
+              heroTag: 'add_folder',
+              mini: true,
+              onPressed: addFolder,
+              tooltip: lw('Add Folder'),
+              child: const Icon(Icons.create_new_folder),
+            ),
+            const SizedBox(height: 10),
+          ],
           FloatingActionButton(
             heroTag: 'add_place',
             onPressed: addPlace,
