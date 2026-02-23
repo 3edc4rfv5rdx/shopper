@@ -581,6 +581,7 @@ class DatabaseHelper {
         int skippedMalformedListRows = 0;
         int restoredSettingsCount = 0;
         int skippedMalformedSettingsRows = 0;
+        int restoredPinsCount = 0;
 
         dynamic cell(List<dynamic> row, int index) =>
             index < row.length ? row[index] : null;
@@ -676,25 +677,58 @@ class DatabaseHelper {
           }
         }
 
-        // Optionally restore all settings from backup.
-        if (restoreSettings && settingsList.length > 1) {
-          await txn.delete('settings');
-          for (int i = 1; i < settingsList.length; i++) {
-            final row = settingsList[i];
-            final key = parseStringOrNull(cell(row, 0));
-            if (key == null || key.isEmpty) {
-              skippedMalformedSettingsRows++;
-              continue;
+        if (settingsList.length > 1) {
+          if (restoreSettings) {
+            // Full settings restore.
+            await txn.delete('settings');
+            for (int i = 1; i < settingsList.length; i++) {
+              final row = settingsList[i];
+              final key = parseStringOrNull(cell(row, 0));
+              if (key == null || key.isEmpty) {
+                skippedMalformedSettingsRows++;
+                continue;
+              }
+
+              final value = cell(row, 1)?.toString() ?? '';
+
+              await txn.insert(
+                'settings',
+                {'key': key, 'value': value},
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              restoredSettingsCount++;
+            }
+          } else {
+            // Partial restore: keep current app preferences, but always restore PIN locks.
+            for (final placeId in importedPlaceIds) {
+              await txn.delete(
+                'settings',
+                where: 'key = ?',
+                whereArgs: ['$placeId-pin'],
+              );
             }
 
-            final value = cell(row, 1)?.toString() ?? '';
+            for (int i = 1; i < settingsList.length; i++) {
+              final row = settingsList[i];
+              final key = parseStringOrNull(cell(row, 0));
+              if (key == null || key.isEmpty) {
+                continue;
+              }
 
-            await txn.insert(
-              'settings',
-              {'key': key, 'value': value},
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-            restoredSettingsCount++;
+              final match = RegExp(r'^(\d+)-pin$').firstMatch(key);
+              if (match == null) continue;
+
+              final placeId = int.tryParse(match.group(1)!);
+              if (placeId == null || !importedPlaceIds.contains(placeId)) continue;
+
+              final value = cell(row, 1)?.toString() ?? '';
+              await txn.insert(
+                'settings',
+                {'key': key, 'value': value},
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              restoredPinsCount++;
+            }
           }
         }
 
@@ -702,14 +736,16 @@ class DatabaseHelper {
             clearedBrokenItemRefs > 0 ||
             skippedMalformedListRows > 0 ||
             restoredSettingsCount > 0 ||
-            skippedMalformedSettingsRows > 0) {
+            skippedMalformedSettingsRows > 0 ||
+            restoredPinsCount > 0) {
           // Non-fatal restore diagnostics for damaged/legacy backups.
           debugPrint(
             'Restore diagnostics: recovered places=$recoveredPlacesCount, '
             'cleared broken item refs=$clearedBrokenItemRefs, '
             'skipped malformed list rows=$skippedMalformedListRows, '
             'restored settings=$restoredSettingsCount, '
-            'skipped malformed settings rows=$skippedMalformedSettingsRows',
+            'skipped malformed settings rows=$skippedMalformedSettingsRows, '
+            'restored pins=$restoredPinsCount',
           );
         }
       });

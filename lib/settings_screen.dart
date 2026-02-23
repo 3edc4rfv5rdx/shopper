@@ -95,8 +95,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: restoreSettings,
                 onChanged: (value) =>
                     setDialogState(() => restoreSettings = value ?? true),
-                title: Text(lw('Restore app settings')),
-                subtitle: Text(lw('Theme, language, switches and PIN locks')),
+                title: Text(lw('Restore settings')),
+                subtitle: Text(lw('PIN locks are always restored')),
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
