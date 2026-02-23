@@ -2,11 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-const String progVersion = '0.8.260123';
-const int buildNumber = 31;
-const String progAuthor = 'Eugen';
-bool xvDebug = true;
-
 // Forward declaration for app rebuild function
 void Function()? rebuildApp;
 
