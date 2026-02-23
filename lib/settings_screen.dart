@@ -80,17 +80,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (!mounted) return;
 
-    // Confirm restore
-    final confirmed = await showConfirmDialog(
-      context,
-      lw('Restore Database'),
-      lw('This will replace all current data. Continue?'),
+    bool restoreSettings = true;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(lw('Restore Database')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(lw('This will replace all current data. Continue?')),
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                value: restoreSettings,
+                onChanged: (value) =>
+                    setDialogState(() => restoreSettings = value ?? true),
+                title: Text(lw('Restore app settings')),
+                subtitle: Text(lw('Theme, language, switches and PIN locks')),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                activeColor: clUpBar,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(lw('Cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(lw('OK')),
+            ),
+          ],
+        ),
+      ),
     );
 
-    if (!confirmed) return;
+    if (confirmed != true) return;
 
     try {
-      await db.restoreFromCSV(result.files.single.path!);
+      await db.restoreFromCSV(
+        result.files.single.path!,
+        restoreSettings: restoreSettings,
+      );
       if (mounted) {
         showMessage(context, lw('Database restored successfully'), type: MessageType.success);
         // Rebuild app to refresh all data

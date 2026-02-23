@@ -494,7 +494,10 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> restoreFromCSV(String zipPath) async {
+  Future<void> restoreFromCSV(
+    String zipPath, {
+    bool restoreSettings = true,
+  }) async {
     final db = await database;
 
     // Create temporary directory for extraction
@@ -673,8 +676,8 @@ class DatabaseHelper {
           }
         }
 
-        // Restore all settings from backup (full app state restore).
-        if (settingsList.length > 1) {
+        // Optionally restore all settings from backup.
+        if (restoreSettings && settingsList.length > 1) {
           await txn.delete('settings');
           for (int i = 1; i < settingsList.length; i++) {
             final row = settingsList[i];
