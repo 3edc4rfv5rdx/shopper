@@ -1,18 +1,20 @@
 My version of a shopping list for Android.
 
 ## Features
-- Multiple shopping lists with nested lists (place links)
-- Item dictionary with auto-complete
-- Photo attachments for items
-- PIN lock for individual lists
-- Shop mode (large font + screen always on)
-- Share lists via SMS, messengers, etc.
+- Multiple shopping lists (stores/places)
+- Fast item entry with dictionary autocomplete
+- Reusable nested lists (link one list inside another)
+- Mark purchased items, clear or delete purchased in one tap
 - Move/copy items between lists
-- Comments for lists
-- Moved strings up/down in place/list
+- Comments for each list
+- Item photos (camera/gallery) with fullscreen view
+- Shop mode: very large text + optional keep-screen-on
+- Share list text to SMS/messengers
+- Per-list PIN lock (casual privacy)
+- Swipe gestures for quick edit/delete
 - Color themes
-- Localization (now English, Ukrainian, Russian)
-- Swipe gestures (edit/delete)
-- Backup/restore (database, CSV)
+- Localization: English, Ukrainian, Russian
+- Backup/restore including photos
 
 Built with Dart/Flutter and almost complete vibe coding with Anthropic/Claude :)
+Code quality review: GPT-5 Codex.

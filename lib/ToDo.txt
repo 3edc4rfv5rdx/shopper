@@ -46,7 +46,6 @@
 + add key
 
 ===TOFIX:
-# v0.8.260123+31 (2026-02-23 09:25:00)
 + enable SQLite foreign key enforcement (PRAGMA foreign_keys = ON)
 + fix duplicate matching for manual items in move/copy between lists
 + make restore atomic (transaction) and validate required backup CSV files
@@ -55,7 +54,6 @@
 + preserve place comments in backup/restore
 + align onboarding theme choices with configured themes
 + split globals.dart into focused globals-* modules
-+ rename global-* filenames to globals-*
 # v0.8.260123+31 (2026-01-23 09:08:33)
 # v0.8.260121+30 (2026-01-21 09:05:39)
 # v0.8.260120+29 (2026-01-20 15:59:07)
@@ -79,8 +77,6 @@
 + purchased items cannot be edited?
 
 ===ERRORS:
-# v0.8.260123+31 (2026-02-23 09:25:00)
-+ no blocking errors after fixes/refactor (flutter analyze: No issues found)
 # v0.8.260123+31 (2026-01-23 09:08:33)
 # v0.8.260121+30 (2026-01-21 09:05:39)
 # v0.8.260120+29 (2026-01-20 15:59:07)
