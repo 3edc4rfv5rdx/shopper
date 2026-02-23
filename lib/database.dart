@@ -28,6 +28,10 @@ class DatabaseHelper {
     return await openDatabase(
       path,
       version: 3,
+      onConfigure: (db) async {
+        // Enforce FOREIGN KEY constraints (disabled by default in SQLite).
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
