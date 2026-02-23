@@ -7,6 +7,6 @@ export 'globals-ui-helpers.dart';
 export 'globals-item-dialog.dart';
 
 const String progVersion = '0.8.260223';
-const int buildNumber = 34;
+const int buildNumber = 35;
 const String progAuthor = 'Eugen';
 bool xvDebug = true;
