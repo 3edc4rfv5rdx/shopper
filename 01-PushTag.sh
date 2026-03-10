@@ -2,7 +2,7 @@
 set -e
 
 REMOTE="origin"
-TODO_FILE="/home/e/AndroidStudioProjects/shopper/lib/ToDo.txt"
+TODO_FILE="/home/e/AndroidStudioProjects/shopper/ToDo.txt"
 
 # ===== dry-run switch =====
 #DRY="--dry-run"

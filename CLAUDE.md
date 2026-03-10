@@ -19,16 +19,16 @@ lib/
   place.dart             - Place model
   list.dart              - ListItem model
   items.dart             - Item model (dictionary)
-  ToDo.txt               - Task list
-  Done.txt               - Completed tasks log
-
 assets/
   locales.json           - Translations (en, ru, ua)
   colors.json            - Color themes
+
+ToDo.txt                 - Task list
+Done.txt                 - Completed tasks log
 ```
 
 ## ToDo.txt Rules
-Location: `lib/ToDo.txt`
+Location: `ToDo.txt`
 
 **Task markers:**
 - `+` = completed
@@ -45,7 +45,7 @@ Location: `lib/ToDo.txt`
 5. Sections: `===TODO:`, `===TOFIX:`, `===ERRORS:`
 
 ## Done.txt Rules
-Location: `lib/Done.txt`
+Location: `Done.txt`
 
 **After completing a task, add entry to Done.txt:**
 - Date header: `--- YYYY-MM-DD ---` (add new date header if different from last)

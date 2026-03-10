@@ -3,7 +3,7 @@ set -e
 
 APK_DIR="/home/e/AndroidStudioProjects/shopper/build/app/outputs/flutter-apk"
 PROJECT="shopper"
-TODO_FILE="lib/ToDo.txt"
+TODO_FILE="ToDo.txt"
 CHANGELOG_FILE="/tmp/release_notes_$$.md"
 
 echo "=== Detecting latest tag ==="
