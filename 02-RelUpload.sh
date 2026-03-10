@@ -147,10 +147,11 @@ echo "=== Generating SHA256 checksums ==="
 # ------------------------------------------------------------
 FILES=(
     "$SRC_APK_MAIN#$DST_APK_MAIN"
-    "$SRC_SHA_MAIN#$DST_SHA_MAIN"
     "$SRC_APK_ARM64#$DST_APK_ARM64"
-    "$SRC_SHA_ARM64#$DST_SHA_ARM64"
 )
+
+#    "$SRC_SHA_MAIN#$DST_SHA_MAIN"
+#    "$SRC_SHA_ARM64#$DST_SHA_ARM64"
 
 echo "=== Verifying generated files ==="
 
@@ -195,3 +196,5 @@ echo "=== Release upload completed successfully ==="
 # Cleanup
 # ------------------------------------------------------------
 rm -f "$CHANGELOG_FILE"
+
+sleep 2

@@ -77,3 +77,5 @@ echo "=== Pushing tag ($DRY) ==="
 git push $DRY "$REMOTE" "$LAST_TAG"
 
 echo "=== Done ==="
+
+sleep 2
