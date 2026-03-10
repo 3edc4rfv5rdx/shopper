@@ -179,3 +179,4 @@ app.*.symbols
 /xxx/02-RelUpload.sh.2
 /xxx/02-RelUpload.sh.3
 /xxx/02-RelUpload.sh.test
+/98-InstallAPK.sh
