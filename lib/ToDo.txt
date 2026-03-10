@@ -1,4 +1,5 @@
 ===TODO:
++ replace shopping-specific labels with neutral list terminology (товар→элемент, purchased→done, shop mode→large font, icons)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 + switch folders UI from tree view to enter-folder view (clean screen)
 + add one-level folder grouping for lists (folders at bottom with nested lists)

@@ -1,5 +1,14 @@
 === DONE ===
 
+--- 2026-03-10 ---
++ replace shopping-specific labels with neutral list terminology
+
+Changes in `assets/locales.json`, `lib/list_screen.dart`, `lib/home_screen.dart`, `lib/settings_screen.dart`, `lib/welcome_screen.dart`, `lib/globals-item-dialog.dart`, `lib/globals-ui-helpers.dart`, `lib/items_dictionary_screen.dart`:
+1. Replaced all "товар/товары" with "элемент/элементы" in ru/ua translations.
+2. Changed "purchased/unpurchased" to "done/active", "shop mode" to "large font" in all locales.
+3. Replaced shopping_cart, store icons with checklist, list_alt, zoom_in.
+4. Updated hint examples from "Supermarket, Market" / "Milk, Bread" to neutral ones.
+
 --- 2026-02-23 ---
 + release APK size optimization: enabled compressed native libs (~50% smaller APK)
 
