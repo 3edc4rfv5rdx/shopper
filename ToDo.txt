@@ -1,4 +1,5 @@
 ===TODO:
+# v0.8.260310+40 (2026-03-10 14:57:58)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 + replace shopping-specific labels with neutral list terminology (товар→элемент, purchased→done, shop mode→large font, icons)
 # v0.8.260223+39 (2026-02-23 13:43:51)
@@ -51,6 +52,7 @@
 + add key
 
 ===TOFIX:
+# v0.8.260310+40 (2026-03-10 14:57:58)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 + always restore PIN locks even when restore settings checkbox is off
@@ -90,6 +92,7 @@
 + purchased items cannot be edited?
 
 ===ERRORS:
+# v0.8.260310+40 (2026-03-10 14:57:58)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 # v0.8.260123+31 (2026-01-23 09:08:33)
