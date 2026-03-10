@@ -144,7 +144,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AlertDialog(
             title: Row(
               children: [
-                const Icon(Icons.shopping_cart, color: Colors.blue, size: 32),
+                const Icon(Icons.checklist, color: Colors.blue, size: 32),
                 const SizedBox(width: 12),
                 Text(lw('About')),
               ],
@@ -377,7 +377,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.light_mode),
-            title: Text(lw('Keep screen on in shop mode')),
+            title: Text(lw('Keep screen on in large font mode')),
             subtitle: Text(shopModeWakelock ? lw('Screen stays on') : lw('Normal screen timeout')),
             trailing: Transform.scale(
               scale: 0.8,

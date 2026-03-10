@@ -572,7 +572,7 @@ class _ItemDialogState extends State<ItemDialog> {
                   labelText: lw('Item name'),
                   hintText: widget.dialogContext == ItemDialogContext.list
                       ? lw('Search or enter item name')
-                      : lw('e.g. Milk, Bread'),
+                      : lw('e.g. Apples, Notebook'),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   suffixIcon: nameController.text.isNotEmpty

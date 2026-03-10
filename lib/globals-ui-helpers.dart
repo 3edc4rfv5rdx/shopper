@@ -85,7 +85,7 @@ Future<Map<String, dynamic>?> showShareOptionsDialog(BuildContext context) async
           mainAxisSize: MainAxisSize.min,
           children: [
             RadioListTile<String>(
-              title: Text(lw('Only unpurchased items')),
+              title: Text(lw('Only active items')),
               value: 'unpurchased',
               groupValue: selectedOption,
               onChanged: (value) => setState(() => selectedOption = value!),

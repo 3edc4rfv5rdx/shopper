@@ -350,8 +350,8 @@ class _ListScreenState extends State<ListScreen> {
     } else {
       final confirmed = await showConfirmDialog(
         context,
-        lw('Delete purchased'),
-        lw('Delete all purchased items from this list?'),
+        lw('Delete done'),
+        lw('Delete all done items from this list?'),
       );
 
       if (confirmed) {
@@ -364,15 +364,15 @@ class _ListScreenState extends State<ListScreen> {
   Future<void> clearPurchasedFlags() async {
     final confirmed = await showConfirmDialog(
       context,
-      lw('Clear purchased'),
-      lw('Mark all purchased items as unpurchased?'),
+      lw('Clear done'),
+      lw('Reset all done items?'),
     );
 
     if (confirmed) {
       await db.clearPurchasedFlags(widget.place.id!);
       loadListItems();
       if (mounted) {
-        showMessage(context, lw('Purchased flags have been cleared'), type: MessageType.success);
+        showMessage(context, lw('Done flags have been cleared'), type: MessageType.success);
       }
     }
   }
@@ -391,7 +391,7 @@ class _ListScreenState extends State<ListScreen> {
     }
     showMessage(
       context,
-      shopMode ? lw('Shop mode ON') : lw('Shop mode OFF'),
+      shopMode ? lw('Large font ON') : lw('Large font OFF'),
       type: MessageType.info,
     );
   }
@@ -811,7 +811,7 @@ class _ListScreenState extends State<ListScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (shopMode) ...[
-                const Icon(Icons.shopping_cart, size: 20),
+                const Icon(Icons.zoom_in, size: 20),
                 const SizedBox(width: 8),
               ],
               Flexible(child: Text(currentPlace.name)),
@@ -885,7 +885,7 @@ class _ListScreenState extends State<ListScreen> {
                       children: [
                         const Icon(Icons.delete_sweep),
                         const SizedBox(width: 12),
-                        Text(lw('Delete purchased'), style: TextStyle(fontSize: fsMedium)),
+                        Text(lw('Delete done'), style: TextStyle(fontSize: fsMedium)),
                       ],
                     ),
                   ),
@@ -896,7 +896,7 @@ class _ListScreenState extends State<ListScreen> {
                       children: [
                         const Icon(Icons.flag_outlined),
                         const SizedBox(width: 12),
-                        Text(lw('Clear purchased'), style: TextStyle(fontSize: fsMedium)),
+                        Text(lw('Clear done'), style: TextStyle(fontSize: fsMedium)),
                       ],
                     ),
                   ),

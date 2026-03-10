@@ -101,7 +101,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
     final confirmed = await showConfirmDialog(
       context,
       lw('Delete Item'),
-      lw('Are you sure you want to delete "%s" from dictionary? Items in shopping lists will be converted to manual entries.').replaceAll('%s', item.name),
+      lw('Are you sure you want to delete "%s" from dictionary? Items in lists will be converted to manual entries.').replaceAll('%s', item.name),
     );
 
     if (confirmed) {
@@ -248,7 +248,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                               return await showConfirmDialog(
                                 context,
                                 lw('Delete Item'),
-                                lw('Are you sure you want to delete "%s" from dictionary? Items in shopping lists will be converted to manual entries.').replaceAll('%s', item.name),
+                                lw('Are you sure you want to delete "%s" from dictionary? Items in lists will be converted to manual entries.').replaceAll('%s', item.name),
                               );
                             }
                           },
@@ -331,7 +331,7 @@ class _ItemsDictionaryScreenState extends State<ItemsDictionaryScreen> {
                               return await showConfirmDialog(
                                 context,
                                 lw('Delete Item'),
-                                lw('Are you sure you want to delete "%s" from dictionary? Items in shopping lists will be converted to manual entries.').replaceAll('%s', item.name),
+                                lw('Are you sure you want to delete "%s" from dictionary? Items in lists will be converted to manual entries.').replaceAll('%s', item.name),
                               );
                             }
                           },

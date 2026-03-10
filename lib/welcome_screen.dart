@@ -54,7 +54,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             children: [
               const SizedBox(height: 20),
               const Icon(
-                Icons.shopping_cart,
+                Icons.checklist,
                 size: 80,
                 color: Colors.blue,
               ),

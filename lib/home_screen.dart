@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
             labelText: asFolder ? lw('Folder name') : lw('Place name'),
             hintText: asFolder
                 ? lw('e.g. Weekly, Markets, Household')
-                : lw('e.g. Supermarket, Market, etc.'),
+                : lw('e.g. Groceries, Tasks, Ideas'),
           ),
           autofocus: true,
         ),
@@ -421,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       leading: place.isFolder
           ? const Icon(Icons.folder)
-          : Icon(isLocked ? Icons.lock : Icons.store),
+          : Icon(isLocked ? Icons.lock : Icons.list_alt),
       onTap: place.isFolder ? () => openFolder(place) : () => openPlace(place),
       onLongPress: () => showPlaceContextMenu(place),
     );
