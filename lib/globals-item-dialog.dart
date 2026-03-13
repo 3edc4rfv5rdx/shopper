@@ -348,12 +348,31 @@ class _ItemDialogState extends State<ItemDialog> {
   Future<void> _saveListItem(DatabaseHelper db) async {
     if (widget.mode == ItemDialogMode.edit) {
       final current = widget.existingItem as ListItem;
+      final trimmedName = nameController.text.trim();
+      final trimmedUnit = unitController.text.trim();
+      final hasSelected = selectedItem != null;
+      var detachFromDictionary = false;
+
+      if (!hasSelected && current.itemId != null) {
+        final currentName = current.displayName.trim();
+        if (trimmedName.isNotEmpty &&
+            trimmedName.toLowerCase() != currentName.toLowerCase()) {
+          // User changed the name without selecting a dictionary item.
+          // Treat this as an explicit switch to manual entry.
+          detachFromDictionary = true;
+        }
+      }
+
+      final resolvedItemId =
+          hasSelected ? selectedItem.id : (detachFromDictionary ? null : current.itemId);
+      final resolvedName = resolvedItemId == null ? trimmedName : null;
+      final resolvedUnit =
+          resolvedItemId == null && trimmedUnit.isNotEmpty ? trimmedUnit : null;
+
       final updated = current.copyWith(
-        itemId: selectedItem?.id,
-        name: selectedItem == null ? nameController.text.trim() : null,
-        unit: selectedItem == null && unitController.text.trim().isNotEmpty
-            ? unitController.text.trim()
-            : null,
+        itemId: resolvedItemId,
+        name: resolvedName,
+        unit: resolvedUnit,
         quantity: quantityController.text.trim().isNotEmpty
             ? quantityController.text.trim()
             : null,

@@ -54,6 +54,7 @@
 ===TOFIX:
 # v0.8.260310+40 (2026-03-10 14:57:58)
 # v0.8.260310+40 (2026-03-10 14:55:47)
++ preserve dictionary link when editing list items (fixed 2026-03-13)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 + always restore PIN locks even when restore settings checkbox is off
 + add restore settings checkbox and localization in restore dialog

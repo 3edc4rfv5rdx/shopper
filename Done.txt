@@ -1,5 +1,11 @@
 === DONE ===
 
+--- 2026-03-13 ---
++ preserve dictionary link when editing list items
+
+Changes in `lib/globals-item-dialog.dart`:
+1. Preserve `itemId` during list item edits unless the user changes the name without selecting a dictionary item, which now explicitly switches to manual entry.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 
