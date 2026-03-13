@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 // Forward declaration for app rebuild function
 void Function()? rebuildApp;
+// Home screen refresh hook (set by HomeScreen).
+void Function()? refreshHome;
 
 // Font setups
 const double fsSmall = 14;

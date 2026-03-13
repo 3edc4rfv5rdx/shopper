@@ -59,6 +59,7 @@
 + guard async setState with mounted checks in ListScreen (fixed 2026-03-13)
 + honor onboarding_completed flag for WelcomeScreen (fixed 2026-03-13)
 + use theme colors in WelcomeScreen (fixed 2026-03-13)
++ refresh Home after restore to show data immediately (fixed 2026-03-13)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 + always restore PIN locks even when restore settings checkbox is off

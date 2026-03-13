@@ -23,7 +23,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    refreshHome = () {
+      if (mounted) {
+        loadPlaces();
+      }
+    };
     loadPlaces();
+  }
+
+  @override
+  void dispose() {
+    if (refreshHome != null) {
+      refreshHome = null;
+    }
+    super.dispose();
   }
 
   List<Place> get _folders =>
@@ -71,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
+    if (!mounted) return;
     setState(() {
       places = data;
       placesWithUnpurchased = hasUnpurchased;

@@ -49,6 +49,12 @@ Changes in `lib/main.dart`:
 Changes in `lib/welcome_screen.dart`:
 1. Use theme colors for the welcome icon and primary button.
 
+--- 2026-03-13 ---
++ refresh Home after restore to show data immediately
+
+Changes in `lib/settings_screen.dart`, `lib/home_screen.dart`, `lib/globals-app-constants.dart`:
+1. Added a Home refresh hook and call it after restore, then rebuild/navigate to ensure restored data appears.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 

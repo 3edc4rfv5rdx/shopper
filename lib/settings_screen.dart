@@ -141,7 +141,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         showMessage(context, lw('Database restored successfully'), type: MessageType.success);
         // Rebuild app to refresh all data
+        await db.setSetting('onboarding_completed', 'true');
+        refreshHome?.call();
         rebuildApp?.call();
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        }
       }
     } catch (e) {
       if (mounted) {
