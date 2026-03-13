@@ -38,6 +38,7 @@ class _ListScreenState extends State<ListScreen> {
 
   Future<void> _loadWakelockSetting() async {
     final value = await db.getSetting('shop_mode_wakelock');
+    if (!mounted) return;
     setState(() {
       shopModeWakelock = value != 'false'; // Default to true
     });
@@ -55,6 +56,7 @@ class _ListScreenState extends State<ListScreen> {
       }
     }
 
+    if (!mounted) return;
     setState(() {
       listItems = data;
       itemsWithPhoto = withPhoto;

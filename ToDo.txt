@@ -56,6 +56,7 @@
 + fix sort order collisions after reordering unpurchased items (fixed 2026-03-13)
 + apply restored theme/language immediately after restore (fixed 2026-03-13)
 + offer move/delete photo choice on swipe-delete (fixed 2026-03-13)
++ guard async setState with mounted checks in ListScreen (fixed 2026-03-13)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 + always restore PIN locks even when restore settings checkbox is off

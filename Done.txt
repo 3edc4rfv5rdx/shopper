@@ -31,6 +31,12 @@ Changes in `lib/settings_screen.dart`:
 Changes in `lib/list_screen.dart`:
 1. When swipe-deleting an item with a photo, show the move/delete dialog and act accordingly.
 
+--- 2026-03-13 ---
++ guard async setState with mounted checks in ListScreen
+
+Changes in `lib/list_screen.dart`:
+1. Added `mounted` checks before `setState` after async work in list loading and wakelock settings.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 
