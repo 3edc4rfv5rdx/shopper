@@ -76,20 +76,24 @@ class _ShopperAppState extends State<ShopperApp> {
     };
   }
 
-  Future<bool> _isDatabaseExists() async {
+  Future<bool> _shouldShowWelcome() async {
     try {
       final dbPath = await getDatabasesPath();
       final path = join(dbPath, 'shopper.db');
-      return await File(path).exists();
+      final exists = await File(path).exists();
+      if (!exists) return true;
+      final db = DatabaseHelper.instance;
+      final onboarding = await db.getSetting('onboarding_completed');
+      return onboarding != 'true';
     } catch (e) {
-      return false;
+      return true;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
-      future: _isDatabaseExists(),
+      future: _shouldShowWelcome(),
       builder: (context, snapshot) {
         // Show loading while checking
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -104,7 +108,7 @@ class _ShopperAppState extends State<ShopperApp> {
         }
 
         // Determine which screen to show
-        final showWelcome = !(snapshot.data ?? false);
+        final showWelcome = snapshot.data ?? true;
 
         return MaterialApp(
           debugShowCheckedModeBanner: false,
