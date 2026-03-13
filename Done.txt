@@ -6,6 +6,13 @@
 Changes in `lib/globals-item-dialog.dart`:
 1. Preserve `itemId` during list item edits unless the user changes the name without selecting a dictionary item, which now explicitly switches to manual entry.
 
+--- 2026-03-13 ---
++ block manual -1 place-link entries (use Select Place)
+
+Changes in `lib/globals-item-dialog.dart`:
+1. Reject manual "-1" quantity input and require using "Select Place" to create linked lists.
+2. Added a guard to prevent saving a place link without a selected place.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 

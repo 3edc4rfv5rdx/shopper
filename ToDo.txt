@@ -1,5 +1,4 @@
 ===TODO:
-# v0.8.260310+40 (2026-03-10 14:57:58)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 + replace shopping-specific labels with neutral list terminology (товар→элемент, purchased→done, shop mode→large font, icons)
 # v0.8.260223+39 (2026-02-23 13:43:51)
@@ -53,7 +52,7 @@
 
 ===TOFIX:
 + preserve dictionary link when editing list items (fixed 2026-03-13)
-# v0.8.260310+40 (2026-03-10 14:57:58)
++ block manual -1 place-link entries (use Select Place) (fixed 2026-03-13)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 + always restore PIN locks even when restore settings checkbox is off
@@ -93,7 +92,6 @@
 + purchased items cannot be edited?
 
 ===ERRORS:
-# v0.8.260310+40 (2026-03-10 14:57:58)
 # v0.8.260310+40 (2026-03-10 14:55:47)
 # v0.8.260223+39 (2026-02-23 13:43:51)
 # v0.8.260123+31 (2026-01-23 09:08:33)

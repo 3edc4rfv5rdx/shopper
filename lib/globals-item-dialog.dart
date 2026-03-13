@@ -276,7 +276,21 @@ class _ItemDialogState extends State<ItemDialog> {
       return false;
     }
 
-    final isPlaceLinkNew = isPlaceLinkSelected || quantityController.text.trim() == '-1';
+    final trimmedQuantity = quantityController.text.trim();
+    final isPlaceLinkNew = isPlaceLinkSelected;
+
+    if (widget.dialogContext == ItemDialogContext.list &&
+        trimmedQuantity == '-1' &&
+        !isPlaceLinkSelected) {
+      if (context.mounted) {
+        showMessage(
+          context,
+          lw('Use "Select Place" to add a linked list'),
+          type: MessageType.warning,
+        );
+      }
+      return false;
+    }
 
     // Check for duplicates
     if (widget.dialogContext == ItemDialogContext.list) {
@@ -384,6 +398,17 @@ class _ItemDialogState extends State<ItemDialog> {
       final maxOrder = existingItems.isEmpty
           ? 0
           : existingItems.map((i) => i.sortOrder).reduce((a, b) => a > b ? a : b);
+
+      if (isPlaceLinkSelected && (savedQuantity == null || savedUnit == null)) {
+        if (mounted) {
+          showMessage(
+            context,
+            lw('Select a place for the link'),
+            type: MessageType.warning,
+          );
+        }
+        return;
+      }
 
       // Use saved values for place links, otherwise use controller values
       final quantityValue = isPlaceLinkSelected
