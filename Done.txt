@@ -43,6 +43,12 @@ Changes in `lib/list_screen.dart`:
 Changes in `lib/main.dart`:
 1. Show WelcomeScreen when onboarding is not completed, even if the database exists.
 
+--- 2026-03-13 ---
++ use theme colors in WelcomeScreen
+
+Changes in `lib/welcome_screen.dart`:
+1. Use theme colors for the welcome icon and primary button.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 

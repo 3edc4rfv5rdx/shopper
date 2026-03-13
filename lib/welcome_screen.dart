@@ -53,10 +53,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              const Icon(
+              Icon(
                 Icons.checklist,
                 size: 80,
-                color: Colors.blue,
+                color: clUpBar,
               ),
               const SizedBox(height: 16),
               Text(
@@ -139,8 +139,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ElevatedButton(
                 onPressed: saveAndContinue,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: clUpBar,
+                  foregroundColor: clText,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
