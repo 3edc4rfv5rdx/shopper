@@ -25,6 +25,12 @@ Changes in `lib/list_screen.dart`:
 Changes in `lib/settings_screen.dart`:
 1. When restoring with settings enabled, read saved language/theme and apply them before rebuilding the app.
 
+--- 2026-03-13 ---
++ offer move/delete photo choice on swipe-delete
+
+Changes in `lib/list_screen.dart`:
+1. When swipe-deleting an item with a photo, show the move/delete dialog and act accordingly.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 

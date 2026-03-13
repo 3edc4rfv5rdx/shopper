@@ -208,7 +208,14 @@ class _ListScreenState extends State<ListScreen> {
     if (item.id == null) return;
 
     if (await hasPhoto(item.id!)) {
-      await deletePhoto(item.id!);
+      if (!mounted) return;
+      final result = await showDeleteItemWithPhotoDialog(context);
+      if (result == null) return;
+      if (result == 'move') {
+        await movePhotoToGallery(item.id!);
+      } else {
+        await deletePhoto(item.id!);
+      }
     }
 
     await db.deleteListItem(item.id!);
