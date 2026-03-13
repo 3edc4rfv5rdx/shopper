@@ -928,10 +928,19 @@ class _ListScreenState extends State<ListScreen> {
                             }
                             final item = unpurchased.removeAt(oldIndex);
                             unpurchased.insert(newIndex, item);
-                            // Update main listItems to keep them in sync
-                            listItems = [...unpurchased, ...purchased];
+                            // Merge reordered unpurchased items back into the full list order,
+                            // keeping purchased items in their existing relative positions.
+                            final reordered = List<ListItem>.from(unpurchased);
+                            var reorderIndex = 0;
+                            final merged = listItems.map((current) {
+                              if (current.isPurchased) return current;
+                              final next = reordered[reorderIndex];
+                              reorderIndex += 1;
+                              return next;
+                            }).toList();
+                            listItems = merged;
                           });
-                          await db.updateListItemsOrder(unpurchased);
+                          await db.updateListItemsOrder(listItems);
                         },
                         itemBuilder: (context, index) {
                           final item = unpurchased[index];
