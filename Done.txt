@@ -19,6 +19,12 @@ Changes in `lib/globals-item-dialog.dart`:
 Changes in `lib/list_screen.dart`:
 1. Recompute sort_order for the full list after drag-reordering, while preserving purchased item positions.
 
+--- 2026-03-13 ---
++ apply restored theme/language immediately after restore
+
+Changes in `lib/settings_screen.dart`:
+1. When restoring with settings enabled, read saved language/theme and apply them before rebuilding the app.
+
 --- 2026-03-10 ---
 + replace shopping-specific labels with neutral list terminology
 

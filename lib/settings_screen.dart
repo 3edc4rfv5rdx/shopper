@@ -125,6 +125,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         result.files.single.path!,
         restoreSettings: restoreSettings,
       );
+      if (restoreSettings) {
+        final savedLang = await db.getSetting('language');
+        if (savedLang != null) {
+          await readLocale(savedLang);
+        }
+
+        final savedTheme = await db.getSetting('theme');
+        if (savedTheme != null && loadedThemes.containsKey(savedTheme)) {
+          applyTheme(savedTheme);
+        } else {
+          applyTheme('Light');
+        }
+      }
       if (mounted) {
         showMessage(context, lw('Database restored successfully'), type: MessageType.success);
         // Rebuild app to refresh all data
